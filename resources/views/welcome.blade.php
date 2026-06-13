@@ -30,7 +30,7 @@
             <a href="#fitur" class="text-xs font-semibold uppercase tracking-wider text-slate-300 hover:text-white transition-colors">Fitur</a>
             <a href="#statistik" class="text-xs font-semibold uppercase tracking-wider text-slate-300 hover:text-white transition-colors">Statistik</a>
         </nav>
-        <div>
+        <div class="flex items-center gap-3">
             @auth
                 @if(auth()->user()->role === 'admin')
                     <a href="{{ route('admin.dashboard') }}" class="btn-gold btn-sm">Dashboard Admin</a>
@@ -39,6 +39,12 @@
                 @else
                     <a href="{{ route('siswa.dashboard') }}" class="btn-gold btn-sm">Dashboard Siswa</a>
                 @endif
+                <form method="POST" action="{{ route('logout') }}" class="inline">
+                    @csrf
+                    <button type="submit" class="text-xs font-semibold text-slate-300 hover:text-white border border-slate-800 hover:bg-slate-900 rounded-lg px-3 py-2 transition-colors cursor-pointer">
+                        Keluar
+                    </button>
+                </form>
             @else
                 <a href="{{ route('login') }}" class="btn-gold btn-sm">Login Akademik</a>
             @endauth

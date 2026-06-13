@@ -18,6 +18,63 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Profile Dropdown Toggle
+    const profileBtn = document.getElementById('profile-dropdown-btn');
+    const profileMenu = document.getElementById('profile-menu');
+    const profileArrow = document.getElementById('profile-dropdown-arrow');
+
+    if (profileBtn && profileMenu) {
+        const showMenu = () => {
+            profileMenu.classList.remove('hidden');
+            // Allow browser to register class removal before starting animation
+            requestAnimationFrame(() => {
+                profileMenu.classList.remove('opacity-0', 'scale-95');
+                profileMenu.classList.add('opacity-100', 'scale-100');
+            });
+            if (profileArrow) {
+                profileArrow.classList.add('rotate-180');
+            }
+        };
+
+        const hideMenu = () => {
+            profileMenu.classList.remove('opacity-100', 'scale-100');
+            profileMenu.classList.add('opacity-0', 'scale-95');
+            if (profileArrow) {
+                profileArrow.classList.remove('rotate-180');
+            }
+            // Hide element after transition completes
+            setTimeout(() => {
+                if (profileMenu.classList.contains('opacity-0')) {
+                    profileMenu.classList.add('hidden');
+                }
+            }, 150);
+        };
+
+        profileBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const isHidden = profileMenu.classList.contains('hidden') || profileMenu.classList.contains('opacity-0');
+            if (isHidden) {
+                showMenu();
+            } else {
+                hideMenu();
+            }
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!profileMenu.classList.contains('hidden')) {
+                const isClickInside = profileBtn.contains(e.target) || profileMenu.contains(e.target);
+                if (!isClickInside) {
+                    hideMenu();
+                }
+            }
+        });
+
+        // Prevent closing dropdown when clicking inside the menu content
+        profileMenu.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
+    }
+
     // Auto-dismiss flash messages
     const flashMessages = document.querySelectorAll('[data-flash]');
     flashMessages.forEach(el => {

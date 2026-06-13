@@ -94,16 +94,48 @@
                     {{ now()->locale('id')->isoFormat('dddd, D MMMM YYYY') }}
                 </span>
 
-                {{-- Profile Link --}}
-                <a href="{{ route('profile.edit') }}" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-                    <div class="avatar-placeholder w-8 h-8 text-xs">
-                        {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                {{-- Profile Dropdown --}}
+                <div class="relative inline-block text-left" id="profile-dropdown-container">
+                    <button type="button" id="profile-dropdown-btn" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none cursor-pointer">
+                        <div class="avatar-placeholder w-8 h-8 text-xs select-none">
+                            {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                        </div>
+                        <span class="hidden md:block text-sm font-medium text-gray-700 select-none">{{ auth()->user()->name }}</span>
+                        <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" id="profile-dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+
+                    {{-- Dropdown Menu --}}
+                    <div id="profile-menu" class="hidden absolute right-0 mt-2 w-56 rounded-xl bg-white border border-gray-100 shadow-xl py-1.5 z-50 origin-top-right transition-all transform opacity-0 scale-95 duration-150">
+                        <div class="px-4 py-2.5 border-b border-gray-50">
+                            <p class="text-[10px] text-gray-400 uppercase font-semibold tracking-wider">Masuk sebagai</p>
+                            <p class="text-sm font-semibold text-gray-800 truncate mt-0.5">{{ auth()->user()->name }}</p>
+                            <span class="inline-flex items-center mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-700 capitalize">
+                                {{ auth()->user()->role }}
+                            </span>
+                        </div>
+
+                        <a href="{{ route('profile.edit') }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                            <svg class="w-4 h-4 text-gray-450" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            Profil Saya
+                        </a>
+
+                        <hr class="border-gray-100 my-1">
+
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="flex items-center gap-2.5 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors font-medium cursor-pointer">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                </svg>
+                                Keluar
+                            </button>
+                        </form>
                     </div>
-                    <span class="hidden md:block text-sm font-medium text-gray-700">{{ auth()->user()->name }}</span>
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                </a>
+                </div>
             </div>
         </header>
 
