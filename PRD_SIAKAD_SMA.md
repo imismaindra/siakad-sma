@@ -5,9 +5,9 @@
 
 | Field | Detail |
 |---|---|
-| **Versi Dokumen** | 1.0 |
+| **Versi Dokumen** | 1.1 |
 | **Tanggal** | 14 Juni 2026 |
-| **Status** | Draft — Menunggu Review |
+| **Status** | MVP Selesai — Tahap Uji Coba |
 | **Platform** | Web Application |
 | **Target Rilis Awal** | Q4 2026 (MVP) |
 
@@ -337,10 +337,10 @@ Admin login pertama kali
 
 - [ ] Import/export data via Excel (MASTER-06, 07)
 - [ ] Notifikasi email/push (NILAI-12, ABSEN-05)
-- [ ] Rekap peringkat kelas (NILAI-10)
+- [x] Rekap peringkat kelas (NILAI-10) — *Selesai*
 - [ ] Riwayat rapor semester (NILAI-11)
 - [ ] Modul pengumuman (ANNC-01 s.d. 03)
-- [ ] Dashboard analytics & laporan (DASH-04, 05)
+- [x] Dashboard analytics & laporan (DASH-04, 05) — *Selesai*
 
 ### 🌟 Fase 3 — Ekspansi (Bulan 8–12)
 > Target: Skala ke 10+ sekolah, portal orang tua
@@ -398,12 +398,12 @@ Admin login pertama kali
 > [!IMPORTANT]
 > Item-item berikut perlu keputusan sebelum pengembangan dimulai.
 
-1. **Multi-sekolah:** Apakah sistem dibangun untuk 1 sekolah spesifik, atau multi-tenant dari awal?
-2. **Format Rapor:** Apakah menggunakan template rapor Kurikulum Merdeka baku, atau dapat dikustomisasi per sekolah?
-3. **Hosting:** Apakah server di-host di cloud (VPS/AWS) atau on-premise di server sekolah?
-4. **Bahasa Deskripsi Nilai:** Apakah guru perlu mengisi deskripsi teks per siswa per mapel (seperti di Kurikulum Merdeka)?
-5. **Orang Tua:** Apakah ada kebutuhan akses portal orang tua sejak Fase 1?
-6. **Ekstrakurikuler:** Apakah nilai/catatan ekskul perlu masuk dalam rapor?
+1. **Multi-sekolah:** Single-tenant (1 sekolah pilot, i.e. SMA Nusantara).
+2. **Format Rapor:** Menggunakan template e-Rapor Kurikulum Merdeka resmi (PDF generator via DomPDF).
+3. **Hosting:** VPS/Localhost (configured via Laravel `.env`).
+4. **Bahasa Deskripsi Nilai:** Guru mengisi deskripsi capaian kompetensi per siswa per mapel.
+5. **Orang Tua:** Masuk Fase berikutnya (tidak di Fase 1).
+6. **Ekstrakurikuler:** Dipertimbangkan di Fase berikutnya (tidak masuk rapor Fase 1).
 
 ---
 
