@@ -32,8 +32,8 @@ Route::post('/logout', [AuthController::class, 'logout'])
     ->name('logout')
     ->middleware('auth');
 
-// Redirect root ke login
-Route::get('/', fn () => redirect()->route('login'));
+// Halaman depan (Landing Page)
+Route::get('/', fn () => view('welcome'))->name('home');
 
 // ============================================================
 // Profil (semua role)
