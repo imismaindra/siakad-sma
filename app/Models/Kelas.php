@@ -16,8 +16,24 @@ class Kelas extends Model
         'wali_kelas_id',
         'tingkat',
         'nomor',
+        'nama',
         'kapasitas',
     ];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        $callback = function (self $kelas) {
+            $jurusanKode = $kelas->jurusan
+                ? $kelas->jurusan->kode
+                : (\App\Models\Jurusan::find($kelas->jurusan_id)?->kode ?? 'UMUM');
+            $kelas->nama = "{$kelas->tingkat}-{$jurusanKode}-{$kelas->nomor}";
+        };
+
+        static::creating($callback);
+        static::updating($callback);
+    }
 
     // Relationships
     public function tahunAjaran(): BelongsTo

@@ -22,7 +22,7 @@ return new class extends Migration
             $table->foreignId('wali_kelas_id')->nullable()->constrained('users')->nullOnDelete();
             $table->enum('tingkat', ['X', 'XI', 'XII']);
             $table->integer('nomor'); // 1, 2, 3, dst
-            $table->string('nama')->virtualAs("CONCAT(tingkat, '-', IFNULL((SELECT kode FROM jurusans WHERE jurusans.id = jurusan_id), 'UMUM'), '-', nomor)");
+            $table->string('nama')->nullable(); // Will be set via model
             $table->integer('kapasitas')->default(36);
             $table->timestamps();
 

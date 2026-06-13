@@ -27,7 +27,7 @@ return new class extends Migration
             $table->foreignId('tahun_ajaran_id')->constrained('tahun_ajarans')->cascadeOnDelete();
             $table->timestamps();
 
-            $table->unique(['guru_id', 'mata_pelajaran_id', 'tahun_ajaran_id']);
+            $table->unique(['guru_id', 'mata_pelajaran_id', 'tahun_ajaran_id'], 'uq_guru_mapel_ta');
         });
     }
 
