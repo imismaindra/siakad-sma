@@ -73,8 +73,7 @@ class Siswa extends Model
     public function rekapAbsensi(int $tahunAjaranId): array
     {
         $data = $this->detailAbsensis()
-            ->whereHas('absensi', fn ($q) => $q->where('tahun_ajaran_id', $tahunAjaranId)
-                ->whereHas('jadwalPelajaran', fn ($jq) => $jq->where('tahun_ajaran_id', $tahunAjaranId)))
+            ->whereHas('absensi.jadwalPelajaran', fn ($q) => $q->where('tahun_ajaran_id', $tahunAjaranId))
             ->selectRaw('status, count(*) as total')
             ->groupBy('status')
             ->pluck('total', 'status')
