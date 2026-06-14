@@ -64,4 +64,34 @@ class DashboardGuruController extends Controller
             'totalSesiMengajar'
         ));
     }
+
+    /**
+     * Tampilkan jadwal mengajar guru ini.
+     */
+    public function jadwal()
+    {
+        $user = Auth::user();
+        $guru = $user->guru;
+
+        if (! $guru) {
+            abort(403, 'Profil guru tidak ditemukan.');
+        }
+
+        $tahunAktif = TahunAjaran::aktif()->first();
+
+        $jadwals = [];
+        if ($tahunAktif) {
+            $jadwals = JadwalPelajaran::with(['mataPelajaran', 'kelas.jurusan'])
+                ->where('guru_id', $guru->id)
+                ->where('tahun_ajaran_id', $tahunAktif->id)
+                ->orderByRaw("FIELD(hari, 'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu')")
+                ->orderBy('jam_mulai')
+                ->get()
+                ->groupBy('hari');
+        }
+
+        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+        return view('guru.jadwal', compact('guru', 'jadwals', 'hariList', 'tahunAktif'));
+    }
 }

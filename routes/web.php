@@ -149,7 +149,7 @@ Route::middleware(['auth', 'role:guru,admin'])
         Route::get('/dashboard', [DashboardGuruController::class, 'index'])->name('dashboard');
 
         // Jadwal
-        Route::get('/jadwal', fn () => redirect()->route('admin.jadwal.grid'))->name('jadwal');
+        Route::get('/jadwal', [DashboardGuruController::class, 'jadwal'])->name('jadwal');
 
         // Absensi
         Route::get('/absensi', [AbsensiGuruController::class, 'index'])->name('absensi.index');
