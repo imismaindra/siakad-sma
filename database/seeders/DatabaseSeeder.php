@@ -484,5 +484,8 @@ class DatabaseSeeder extends Seeder
         $this->command->info('   Guru  : budi@siakad.sch.id (MTK), ahmad@siakad.sch.id (FIS/KIM) / password');
         $this->command->info('   Siswa : andi@siakad.sch.id (X IPA 1), kevin@siakad.sch.id (XI IPA 1) / password');
         $this->command->info('   --------------------------------------------------------------');
+
+        // ── RBAC: Seed Roles & Permissions (Spatie) ──────────────
+        $this->call(RolesAndPermissionsSeeder::class);
     }
 }

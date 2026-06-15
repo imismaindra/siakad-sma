@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\NilaiAdminController;
 use App\Http\Controllers\Admin\SiswaController;
 use App\Http\Controllers\Admin\TahunAjaranController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Guru\AbsensiGuruController;
 use App\Http\Controllers\Guru\DashboardGuruController;
@@ -136,6 +137,22 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/nilai/peringkat', [NilaiAdminController::class, 'peringkat'])->name('nilai.peringkat');
         Route::get('/nilai/rapor/siswa/{siswa}', [NilaiAdminController::class, 'exportRaporSiswa'])->name('nilai.rapor.siswa');
         Route::get('/nilai/rapor/kelas', [NilaiAdminController::class, 'exportRaporKelas'])->name('nilai.rapor.kelas');
+
+        // ── RBAC: Manajemen Role & Permission (Dinamis) ──────────────
+        Route::get('/roles', [RolePermissionController::class, 'roleIndex'])->name('roles.index');
+        Route::get('/roles/create', [RolePermissionController::class, 'roleCreate'])->name('roles.create');
+        Route::post('/roles', [RolePermissionController::class, 'roleStore'])->name('roles.store');
+        Route::get('/roles/{role}/edit', [RolePermissionController::class, 'roleEdit'])->name('roles.edit');
+        Route::put('/roles/{role}', [RolePermissionController::class, 'roleUpdate'])->name('roles.update');
+        Route::delete('/roles/{role}', [RolePermissionController::class, 'roleDestroy'])->name('roles.destroy');
+
+        Route::get('/permissions', [RolePermissionController::class, 'permissionIndex'])->name('permissions.index');
+        Route::get('/permissions/create', [RolePermissionController::class, 'permissionCreate'])->name('permissions.create');
+        Route::post('/permissions', [RolePermissionController::class, 'permissionStore'])->name('permissions.store');
+        Route::delete('/permissions/{permission}', [RolePermissionController::class, 'permissionDestroy'])->name('permissions.destroy');
+
+        Route::get('/users/{user}/roles', [RolePermissionController::class, 'userRoles'])->name('user.roles');
+        Route::put('/users/{user}/roles', [RolePermissionController::class, 'userRolesUpdate'])->name('user.roles.update');
     });
 
 // ============================================================

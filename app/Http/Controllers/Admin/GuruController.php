@@ -68,11 +68,15 @@ class GuruController extends Controller
                 'password' => Hash::make($validated['password']),
                 'role' => 'guru',
             ]);
+            $user->assignRole('guru');
 
             // Handle foto
             $fotoPath = null;
             if ($request->hasFile('foto')) {
-                $fotoPath = $request->file('foto')->store('guru/foto', 'public');
+                $fotoPath = \App\Helpers\ImageHelper::uploadAndOptimize($request->file('foto'), 'guru/foto');
+                if ($fotoPath) {
+                    $user->update(['foto' => $fotoPath]);
+                }
             }
 
             // Buat guru
@@ -151,7 +155,15 @@ class GuruController extends Controller
 
             // Handle foto
             if ($request->hasFile('foto')) {
-                $validated['foto'] = $request->file('foto')->store('guru/foto', 'public');
+                $oldFoto = $guru->foto;
+                $fotoPath = \App\Helpers\ImageHelper::uploadAndOptimize($request->file('foto'), 'guru/foto');
+                if ($fotoPath) {
+                    $validated['foto'] = $fotoPath;
+                    $guru->user->update(['foto' => $fotoPath]);
+                    if ($oldFoto) {
+                        \Illuminate\Support\Facades\Storage::disk('public')->delete($oldFoto);
+                    }
+                }
             } else {
                 unset($validated['foto']);
             }

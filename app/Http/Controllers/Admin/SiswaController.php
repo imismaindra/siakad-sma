@@ -85,13 +85,17 @@ class SiswaController extends Controller
                     'password' => Hash::make($validated['password'] ?? $validated['nis']),
                     'role' => 'siswa',
                 ]);
+                $user->assignRole('siswa');
                 $userId = $user->id;
             }
 
             // Handle foto
             $fotoPath = null;
             if ($request->hasFile('foto')) {
-                $fotoPath = $request->file('foto')->store('siswa/foto', 'public');
+                $fotoPath = \App\Helpers\ImageHelper::uploadAndOptimize($request->file('foto'), 'siswa/foto');
+                if ($fotoPath && isset($user)) {
+                    $user->update(['foto' => $fotoPath]);
+                }
             }
 
             Siswa::create([
@@ -156,7 +160,17 @@ class SiswaController extends Controller
 
         DB::transaction(function () use ($validated, $request, $siswa) {
             if ($request->hasFile('foto')) {
-                $validated['foto'] = $request->file('foto')->store('siswa/foto', 'public');
+                $oldFoto = $siswa->foto;
+                $fotoPath = \App\Helpers\ImageHelper::uploadAndOptimize($request->file('foto'), 'siswa/foto');
+                if ($fotoPath) {
+                    $validated['foto'] = $fotoPath;
+                    if ($siswa->user) {
+                        $siswa->user->update(['foto' => $fotoPath]);
+                    }
+                    if ($oldFoto) {
+                        \Illuminate\Support\Facades\Storage::disk('public')->delete($oldFoto);
+                    }
+                }
             } else {
                 unset($validated['foto']);
             }

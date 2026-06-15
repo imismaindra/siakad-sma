@@ -15,6 +15,7 @@ SIAKAD SMA memfasilitasi pengelolaan data sekolah mulai dari pembagian kelas, pe
 *   **Jadwal Pelajaran**: Penyusunan jadwal pelajaran mingguan per kelas lengkap dengan pendeteksian tabrakan jadwal (*clashing conflict prevention*) untuk guru pengampu.
 *   **Absensi & Nilai**: Rekapitulasi absensi bulanan/semester serta verifikasi laporan nilai rapor siswa.
 *   **Manajemen Akun**: Kontrol pembuatan akun pengguna dan perubahan kata sandi untuk semua pengguna sistem.
+*   **Dynamic RBAC (Role-Based Access Control)**: Pembuatan & pengaturan Hak Akses (Role), pemetaan Izin Fitur (Permission), serta penugasan role ke akun pengguna secara dinamis langsung dari web.
 
 ### 👤 2. Guru
 *   **Dashboard**: Informasi jadwal mengajar pribadi hari ini, ringkasan kelas perwalian, dan kelas-kelas yang membutuhkan input absensi.
@@ -37,6 +38,7 @@ SIAKAD SMA memfasilitasi pengelolaan data sekolah mulai dari pembagian kelas, pe
 *   **Frontend Styling**: [Tailwind CSS v4](https://tailwindcss.com) (integrasi Vite) & Google Fonts (*Inter* & *Plus Jakarta Sans*)
 *   **Build Automation**: [Vite](https://vite.dev)
 *   **Database Default**: SQLite (Konfigurasi instan tanpa perlu setting server database luar, mendukung migrasi ke MySQL/Postgres)
+*   **Dynamic RBAC Engine**: [spatie/laravel-permission](https://spatie.be/docs/laravel-permission) untuk pengelolaan role & permission dinamis berbasis database.
 *   **Ekspor PDF**: Laravel PDF generator terintegrasi.
 
 ---

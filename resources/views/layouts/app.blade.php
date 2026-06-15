@@ -33,9 +33,13 @@
         {{-- User Info --}}
         <div class="mx-4 my-3 px-3 py-3 rounded-xl bg-white/8">
             <div class="flex items-center gap-3">
-                <div class="avatar-placeholder w-9 h-9 text-sm flex-shrink-0">
-                    {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
-                </div>
+                @if(auth()->user()->getFotoUrl())
+                    <img src="{{ auth()->user()->getFotoUrl() }}" alt="Foto Profile" class="w-9 h-9 rounded-full object-cover flex-shrink-0">
+                @else
+                    <div class="avatar-placeholder w-9 h-9 text-sm flex-shrink-0">
+                        {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                    </div>
+                @endif
                 <div class="min-w-0">
                     <p class="text-white text-sm font-semibold truncate">{{ auth()->user()->name }}</p>
                     <p class="text-white/50 text-xs capitalize">{{ auth()->user()->role }}</p>
@@ -97,9 +101,13 @@
                 {{-- Profile Dropdown --}}
                 <div class="relative inline-block text-left" id="profile-dropdown-container">
                     <button type="button" id="profile-dropdown-btn" class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none cursor-pointer">
-                        <div class="avatar-placeholder w-8 h-8 text-xs select-none">
-                            {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
-                        </div>
+                        @if(auth()->user()->getFotoUrl())
+                            <img src="{{ auth()->user()->getFotoUrl() }}" alt="Foto Profile" class="w-8 h-8 rounded-full object-cover flex-shrink-0 select-none">
+                        @else
+                            <div class="avatar-placeholder w-8 h-8 text-xs select-none">
+                                {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                            </div>
+                        @endif
                         <span class="hidden md:block text-sm font-medium text-gray-700 select-none">{{ auth()->user()->name }}</span>
                         <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" id="profile-dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>

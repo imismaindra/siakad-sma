@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,7 +27,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'email'    => ['required', 'email'],
             'password' => ['required', 'string'],
         ]);
 
@@ -67,15 +68,17 @@ class AuthController extends Controller
     }
 
     /**
-     * Redirect berdasarkan role pengguna.
+     * Redirect berdasarkan role pengguna menggunakan UserRole enum.
      */
     private function redirectByRole(string $role)
     {
-        return match ($role) {
-            'admin' => redirect()->route('admin.dashboard'),
-            'guru'  => redirect()->route('guru.dashboard'),
-            'siswa' => redirect()->route('siswa.dashboard'),
-            default => redirect('/'),
-        };
+        $userRole = UserRole::tryFrom($role);
+
+        if ($userRole) {
+            return redirect()->route($userRole->dashboardRoute());
+        }
+
+        return redirect('/');
     }
 }
+

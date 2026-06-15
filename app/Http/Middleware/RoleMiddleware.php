@@ -10,7 +10,10 @@ class RoleMiddleware
 {
     /**
      * Handle an incoming request.
+     *
      * Usage: Route::middleware('role:admin') or Route::middleware('role:admin,guru')
+     *
+     * Menggunakan spatie/laravel-permission untuk pengecekan role secara dinamis.
      */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
@@ -25,7 +28,8 @@ class RoleMiddleware
             ]);
         }
 
-        if (! in_array($request->user()->role, $roles)) {
+        // Gunakan spatie hasAnyRole() — dinamis dari database
+        if (! $request->user()->hasAnyRole($roles)) {
             abort(403, 'Anda tidak memiliki hak akses ke halaman ini.');
         }
 

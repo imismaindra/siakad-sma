@@ -115,6 +115,10 @@
                                     </form>
                                 @endif
 
+                                <a href="{{ route('admin.user.roles', $user) }}" class="btn-secondary btn-sm bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200">
+                                    Atur Role
+                                </a>
+
                                 <a href="{{ route('admin.user.edit', $user) }}" class="btn-secondary btn-sm">
                                     Edit
                                 </a>

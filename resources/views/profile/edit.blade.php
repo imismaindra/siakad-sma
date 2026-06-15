@@ -26,9 +26,28 @@
                     <h3 class="text-sm font-bold font-display text-slate-800 uppercase tracking-wider">Pengaturan Akun</h3>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('profile.update') }}" method="POST" class="space-y-5">
+                    <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
                         @csrf
                         @method('PUT')
+
+                        {{-- Upload Profile Photo --}}
+                        <div class="flex items-center gap-4 pb-4 border-b border-slate-100">
+                            @if(auth()->user()->getFotoUrl())
+                                <img src="{{ auth()->user()->getFotoUrl() }}" alt="Foto Profile" class="w-16 h-16 rounded-full object-cover border-2 border-slate-200 shadow-sm" id="avatar-preview">
+                            @else
+                                <div class="avatar-placeholder w-16 h-16 text-lg flex items-center justify-center bg-navy-600 text-white font-bold rounded-full border-2 border-slate-200 shadow-sm" id="avatar-preview-placeholder">
+                                    {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                                </div>
+                            @endif
+                            <div class="flex-1">
+                                <label for="foto" class="form-label mb-1">Ganti Foto Profil</label>
+                                <input type="file" id="foto" name="foto" accept="image/*" class="form-input text-xs py-1.5 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-navy-50 file:text-navy-700 hover:file:bg-navy-100">
+                                @error('foto')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                                <p class="text-[10px] text-slate-400 mt-1 italic">Format: JPG, PNG, WEBP. Maks: 2MB. Dioptimalkan otomatis.</p>
+                            </div>
+                        </div>
 
                         <div>
                             <label for="name" class="form-label">Nama Tampilan</label>
@@ -185,7 +204,12 @@
                     <div class="card-header">
                         <h3 class="text-sm font-bold font-display text-slate-800 uppercase tracking-wider">Informasi Pengguna</h3>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body space-y-4">
+                        @if(auth()->user()->getFotoUrl())
+                            <div class="flex justify-center pb-4">
+                                <img src="{{ auth()->user()->getFotoUrl() }}" alt="Foto Profile" class="w-24 h-24 rounded-full object-cover border-4 border-slate-100 shadow-md">
+                            </div>
+                        @endif
                         <div class="p-4 bg-navy-50/50 rounded-xl border border-navy-100 text-navy-800 text-xs leading-relaxed space-y-2">
                             <p class="font-bold">Hak Akses: Administrator</p>
                             <p>Akun Administrator memiliki hak akses penuh ke seluruh pengelolaan master data, konfigurasi periode akademik tahun ajaran, plot jadwal pelajaran, finalisasi nilai, manajemen user serta kontrol keaktifan sistem.</p>
