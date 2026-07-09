@@ -227,19 +227,29 @@ class NilaiGuruController extends Controller
         $siswas = Siswa::where('kelas_id', $kelas->id)->aktif()->orderBy('nama_lengkap')->get();
         $kelas->load('jurusan');
 
-        $siswaDenganNilai = $siswas->map(function ($siswa) use ($guru, $tahunAktif) {
+        $tahunAjaranId = $tahunAktif?->id;
+        $siswaDenganNilai = $siswas->map(function ($siswa) use ($guru, $tahunAjaranId) {
+            $siswa->load([
+                'ekstrakurikulers' => fn ($q) => $q->wherePivot('tahun_ajaran_id', $tahunAjaranId),
+                'prestasis' => fn ($q) => $q->where('tahun_ajaran_id', $tahunAjaranId),
+            ]);
             $siswa->nilaiRapor = Nilai::with('mataPelajaran')
                 ->where('siswa_id', $siswa->id)
                 ->where('guru_id', $guru->id)
-                ->where('tahun_ajaran_id', $tahunAktif?->id)
+                ->where('tahun_ajaran_id', $tahunAjaranId)
                 ->where('is_final', true)
                 ->get();
+            $siswa->rekapAbsensi = $siswa->rekapAbsensi($tahunAjaranId);
             return $siswa;
         });
 
-        $pdf = Pdf::loadView('pdf.rapor-kelas', compact('kelas', 'tahunAktif', 'siswaDenganNilai'))
+        $tahunAjaran = $tahunAktif;
+        $pdf = Pdf::loadView('pdf.rapor-kelas', compact('kelas', 'tahunAjaran', 'siswaDenganNilai'))
             ->setPaper('A4', 'portrait');
 
-        return $pdf->download("rapor_{$kelas->nama_kelas}.pdf");
+        $filename = "rapor_{$kelas->nama_kelas}.pdf";
+        $filename = str_replace(['/', '\\'], '-', $filename);
+
+        return $pdf->download($filename);
     }
 }

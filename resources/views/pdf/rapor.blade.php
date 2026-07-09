@@ -12,143 +12,212 @@
             padding: 0;
         }
         .page {
-            padding: 20mm 20mm 15mm 25mm;
+            padding: 15mm 20mm 10mm 20mm;
         }
         .header {
             text-align: center;
-            border-bottom: 3px double #000;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
+            border-bottom: 2px double #000;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
         }
         .header h1 {
-            font-size: 14pt;
+            font-size: 13pt;
             text-transform: uppercase;
-            margin: 0 0 4px 0;
+            margin: 0 0 2px 0;
         }
         .header h2 {
             font-size: 12pt;
-            margin: 0 0 4px 0;
+            text-transform: uppercase;
+            margin: 0 0 2px 0;
         }
         .header p {
-            margin: 2px 0;
+            margin: 1px 0;
             font-size: 10pt;
         }
-        .identitas-table {
-            width: 100%;
-            margin-bottom: 15px;
-        }
-        .identitas-table td {
-            padding: 2px 5px;
-            font-size: 10.5pt;
-        }
-        .identitas-table td:first-child {
-            width: 40%;
-        }
+
         h3.section-title {
-            font-size: 11pt;
+            font-size: 10pt;
             text-transform: uppercase;
             border-bottom: 1px solid #000;
-            padding-bottom: 3px;
-            margin: 10px 0 8px 0;
+            padding-bottom: 2px;
+            margin: 8px 0 5px 0;
         }
+        h3.section-title span {
+            font-weight: normal;
+            text-transform: none;
+        }
+
+        table.identitas-table {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        table.identitas-table td {
+            padding: 1px 4px;
+            font-size: 10pt;
+        }
+        table.identitas-table td.label {
+            width: 22%;
+        }
+        table.identitas-table td.divider {
+            width: 2%;
+        }
+        table.identitas-table td.value {
+            width: 26%;
+        }
+
         table.nilai-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
         }
         table.nilai-table th,
         table.nilai-table td {
             border: 1px solid #333;
-            padding: 4px 8px;
-            font-size: 10pt;
+            padding: 3px 6px;
+            font-size: 9pt;
         }
         table.nilai-table th {
             background-color: #e8e8e8;
             text-align: center;
             font-weight: bold;
         }
-        table.nilai-table td:nth-child(1) { width: 5%; text-align: center; }
-        table.nilai-table td:nth-child(2) { width: 35%; }
-        table.nilai-table td:nth-child(3),
-        table.nilai-table td:nth-child(4),
-        table.nilai-table td:nth-child(5),
-        table.nilai-table td:nth-child(6) { width: 10%; text-align: center; }
-        table.nilai-table td:nth-child(7) { text-align: center; font-weight: bold; }
-        table.nilai-table td:nth-child(8) { width: 12%; text-align: center; }
+        table.nilai-table td.no { width: 5%; text-align: center; }
+        table.nilai-table td.mapel { }
+        table.nilai-table td.nilai { text-align: center; }
         .lulus { color: #006400; }
         .tidak-lulus { color: #cc0000; }
-        .ttd-section {
-            margin-top: 25px;
-            display: flex;
-            justify-content: space-between;
+
+        table.ekstra-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
         }
-        .ttd-box {
-            text-align: center;
-            width: 40%;
-        }
-        .ttd-box .nama {
-            margin-top: 60px;
-            border-top: 1px solid #000;
-            padding-top: 3px;
-            font-weight: bold;
-        }
-        .footer {
-            margin-top: 20px;
+        table.ekstra-table th,
+        table.ekstra-table td {
+            border: 1px solid #333;
+            padding: 3px 6px;
             font-size: 9pt;
-            color: #555;
+        }
+        table.ekstra-table th {
+            background-color: #e8e8e8;
             text-align: center;
         }
+
         .absensi-section {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         .absensi-section table {
             border-collapse: collapse;
         }
         .absensi-section td {
-            padding: 2px 10px;
+            padding: 1px 15px 1px 4px;
             font-size: 10pt;
+        }
+
+        .catatan-box {
+            border: 1px solid #333;
+            min-height: 50px;
+            padding: 6px;
+            margin-bottom: 8px;
+        }
+        .catatan-box .label {
+            font-weight: bold;
+            font-size: 10pt;
+            margin-bottom: 4px;
+        }
+        .catatan-box .content {
+            font-size: 10pt;
+            min-height: 40px;
+        }
+
+        .ttd-section {
+            margin-top: 15px;
+            width: 100%;
+        }
+        .ttd-row {
+            display: flex;
+            justify-content: space-between;
+        }
+        .ttd-box {
+            text-align: center;
+            width: 33%;
+        }
+        .ttd-box .kota-tgl {
+            font-size: 10pt;
+            margin-bottom: 4px;
+        }
+        .ttd-box .jabatan {
+            font-size: 10pt;
+            margin-bottom: 50px;
+        }
+        .ttd-box .nama {
+            border-top: 1px solid #000;
+            padding-top: 3px;
+            font-weight: bold;
+            font-size: 10pt;
+        }
+        .ttd-box .nip {
+            font-size: 9pt;
+        }
+        .ttd-center {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .ttd-center .jabatan {
+            font-size: 10pt;
+            margin-bottom: 50px;
+        }
+        .ttd-center .nama {
+            border-top: 1px solid #000;
+            padding-top: 3px;
+            font-weight: bold;
+            font-size: 10pt;
+            display: inline-block;
+            min-width: 200px;
+        }
+        .ttd-center .nip {
+            font-size: 9pt;
+        }
+
+        .footer {
+            margin-top: 10px;
+            font-size: 8pt;
+            color: #555;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 <div class="page">
-    <!-- Header Sekolah -->
+
+    {{-- Header Sekolah --}}
     <div class="header">
-        <h1>Rapor Semester {{ $tahunAjaran->semester == '1' ? 'Ganjil' : 'Genap' }}</h1>
-        <h2>SMA — SIAKAD SMA</h2>
-        <p>Tahun Pelajaran {{ $tahunAjaran->nama }}</p>
+        <h1>Laporan Hasil Pencapaian Kompetensi Peserta Didik</h1>
+        <h2>{{ config('app.name') }}</h2>
+        <p>Tahun Pelajaran {{ $tahunAjaran->nama }} | Semester {{ $tahunAjaran->semester == '1' ? 'Ganjil' : 'Genap' }}</p>
     </div>
 
-    <!-- Identitas Siswa -->
+    {{-- Identitas Siswa --}}
     <h3 class="section-title">Identitas Siswa</h3>
     <table class="identitas-table">
         <tr>
-            <td>Nama Siswa</td>
-            <td>: <strong>{{ $siswa->nama_lengkap }}</strong></td>
-            <td>Kelas</td>
-            <td>: <strong>{{ $siswa->kelas?->nama ?? '-' }}</strong></td>
+            <td class="label">Nama Peserta Didik</td><td class="divider">:</td><td class="value"><strong>{{ $siswa->nama_lengkap }}</strong></td>
+            <td class="label">Kelas</td><td class="divider">:</td><td class="value"><strong>{{ $siswa->kelas?->nama_kelas ?? '-' }}</strong></td>
         </tr>
         <tr>
-            <td>NIS</td>
-            <td>: {{ $siswa->nis }}</td>
-            <td>Semester</td>
-            <td>: {{ $tahunAjaran->semester == '1' ? 'Ganjil' : 'Genap' }}</td>
+            <td class="label">NIS / NISN</td><td class="divider">:</td><td class="value">{{ $siswa->nis }} / {{ $siswa->nisn ?? '-' }}</td>
+            <td class="label">Semester</td><td class="divider">:</td><td class="value">{{ $tahunAjaran->semester == '1' ? 'Ganjil' : 'Genap' }}</td>
         </tr>
         <tr>
-            <td>NISN</td>
-            <td>: {{ $siswa->nisn ?? '-' }}</td>
-            <td>Wali Kelas</td>
-            <td>: {{ $siswa->kelas?->waliKelas?->name ?? '-' }}</td>
+            <td class="label">Tempat, Tanggal Lahir</td><td class="divider">:</td><td class="value">{{ $siswa->tempat_lahir ? $siswa->tempat_lahir . ', ' : '' }}{{ $siswa->tanggal_lahir?->format('d/m/Y') ?? '-' }}</td>
+            <td class="label">Wali Kelas</td><td class="divider">:</td><td class="value">{{ $siswa->kelas?->waliKelas?->guru?->nama_lengkap ?? $siswa->kelas?->waliKelas?->name ?? '-' }}</td>
         </tr>
         <tr>
-            <td>Tempat, Tgl Lahir</td>
-            <td>: {{ $siswa->tempat_lahir ? $siswa->tempat_lahir . ', ' : '' }}{{ $siswa->tanggal_lahir?->format('d/m/Y') ?? '-' }}</td>
-            <td>Tahun Pelajaran</td>
-            <td>: {{ $tahunAjaran->nama }}</td>
+            <td class="label">Alamat</td><td class="divider">:</td><td class="value" colspan="3">{{ $siswa->alamat ?? '-' }}</td>
         </tr>
     </table>
 
-    <!-- Tabel Nilai -->
+    {{-- Nilai Akademik --}}
     <h3 class="section-title">Nilai Akademik</h3>
     <table class="nilai-table">
         <thead>
@@ -166,88 +235,151 @@
         <tbody>
             @forelse($nilais as $index => $nilai)
             <tr>
-                <td>{{ $index + 1 }}</td>
-                <td>{{ $nilai->mataPelajaran->nama }}</td>
-                <td>{{ $nilai->mataPelajaran->kkm }}</td>
-                <td>{{ number_format($nilai->rata_rata_harian ?? 0, 1) }}</td>
-                <td>{{ number_format($nilai->nilai_uts ?? 0, 1) }}</td>
-                <td>{{ number_format($nilai->nilai_uas ?? 0, 1) }}</td>
-                <td class="{{ $nilai->tuntas ? 'lulus' : 'tidak-lulus' }}">
+                <td class="no">{{ $index + 1 }}</td>
+                <td class="mapel">{{ $nilai->mataPelajaran->nama }}</td>
+                <td class="nilai">{{ $nilai->mataPelajaran->kkm }}</td>
+                <td class="nilai">{{ number_format($nilai->rata_rata_harian ?? 0, 1) }}</td>
+                <td class="nilai">{{ number_format($nilai->nilai_uts ?? 0, 1) }}</td>
+                <td class="nilai">{{ number_format($nilai->nilai_uas ?? 0, 1) }}</td>
+                <td class="nilai {{ $nilai->tuntas ? 'lulus' : 'tidak-lulus' }}">
                     <strong>{{ number_format($nilai->nilai_akhir ?? 0, 1) }}</strong>
                 </td>
-                <td>{{ $nilai->predikat }}</td>
+                <td class="nilai">{{ $nilai->predikat }}</td>
             </tr>
             @if($nilai->deskripsi)
             <tr>
                 <td></td>
-                <td colspan="7" style="font-style: italic; font-size: 9pt; color: #333;">
-                    Catatan: {{ $nilai->deskripsi }}
+                <td colspan="7" style="font-style: italic; font-size: 8pt; color: #333; padding: 2px 6px;">
+                    {{ $nilai->deskripsi }}
                 </td>
             </tr>
             @endif
             @empty
             <tr>
-                <td colspan="8" style="text-align: center;">Belum ada data nilai.</td>
+                <td colspan="8" style="text-align:center;">Belum ada data nilai.</td>
             </tr>
             @endforelse
         </tbody>
         @if($nilais->isNotEmpty())
         <tfoot>
             <tr>
-                <th colspan="6" style="text-align: right;">Rata-rata Nilai Akhir</th>
-                <th>{{ number_format($nilais->avg('nilai_akhir'), 2) }}</th>
-                <th></th>
+                <th colspan="7" style="text-align:right;">Rata-rata Nilai Akhir</th>
+                <th class="nilai">{{ number_format($nilais->avg('nilai_akhir'), 2) }}</th>
             </tr>
         </tfoot>
         @endif
     </table>
 
-    <!-- Kehadiran -->
-    @php
-        $rekap = $siswa->rekapAbsensi($tahunAjaran->id);
-        $totalHadir = $rekap['hadir'];
-        $totalTidakHadir = $rekap['sakit'] + $rekap['izin'] + $rekap['alpa'];
-    @endphp
-    <h3 class="section-title">Catatan Kehadiran</h3>
+    {{-- Ekstrakurikuler --}}
+    <h3 class="section-title">Ekstrakurikuler</h3>
+    <table class="ekstra-table">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Kegiatan Ekstrakurikuler</th>
+                <th>Keterangan</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($siswa->ekstrakurikulers as $idx => $ekskul)
+            <tr>
+                <td style="text-align:center; width:5%;">{{ $idx + 1 }}</td>
+                <td>{{ $ekskul->nama }}</td>
+                <td>{{ $ekskul->pivot->keterangan ?? '-' }}</td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="3" style="text-align:center; font-style:italic;">Tidak ada data ekstrakurikuler.</td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+
+    {{-- Prestasi --}}
+    <h3 class="section-title">Prestasi</h3>
+    <table class="ekstra-table">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Nama Prestasi</th>
+                <th>Tingkat</th>
+                <th>Juara</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($siswa->prestasis as $idx => $prestasi)
+            <tr>
+                <td style="text-align:center; width:5%;">{{ $idx + 1 }}</td>
+                <td>{{ $prestasi->nama_prestasi }}</td>
+                <td style="text-align:center;">{{ $prestasi->tingkat ?? '-' }}</td>
+                <td style="text-align:center;">{{ $prestasi->juara ?? '-' }}</td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="4" style="text-align:center; font-style:italic;">Tidak ada data prestasi.</td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+
+    {{-- Ketidakhadiran --}}
+    <h3 class="section-title">Rekap Ketidakhadiran</h3>
     <div class="absensi-section">
         <table>
             <tr>
-                <td>Hadir</td><td>: {{ $rekap['hadir'] }} kali</td>
-                <td style="padding-left:30px">Sakit</td><td>: {{ $rekap['sakit'] }} kali</td>
-            </tr>
-            <tr>
-                <td>Izin</td><td>: {{ $rekap['izin'] }} kali</td>
-                <td style="padding-left:30px">Alpa</td><td>: {{ $rekap['alpa'] }} kali</td>
+                <td>Sakit</td><td>: {{ $rekapAbsensi['sakit'] }} hari</td>
+                <td style="padding-left:30px;">Izin</td><td>: {{ $rekapAbsensi['izin'] }} hari</td>
+                <td style="padding-left:30px;">Alpa</td><td>: {{ $rekapAbsensi['alpa'] }} hari</td>
             </tr>
         </table>
     </div>
 
-    <!-- Tanda Tangan -->
-    <div class="ttd-section">
-        <div class="ttd-box">
-            <p>Orang Tua / Wali</p>
-            <div class="nama">( __________________________ )</div>
-        </div>
-        <div class="ttd-box">
-            <p>{{ config('app.name') }}, {{ now()->translatedFormat('d F Y') }}</p>
-            <p>Wali Kelas</p>
-            <div class="nama">{{ $siswa->kelas?->waliKelas?->guru?->nama_lengkap ?? $siswa->kelas?->waliKelas?->name ?? '________________________' }}</div>
-        </div>
+    {{-- Catatan Wali Kelas --}}
+    <h3 class="section-title">Catatan Wali Kelas</h3>
+    <div class="catatan-box">
+        <div class="content"></div>
     </div>
 
-    <!-- Mengetahui Kepala Sekolah -->
-    <div class="ttd-section" style="margin-top: 15px; justify-content: flex-end;">
-        <div class="ttd-box">
-            <p>Mengetahui,</p>
-            <p>Kepala Sekolah</p>
-            <div class="nama">( __________________________ )</div>
-        </div>
+    {{-- Tanggapan Orang Tua/Wali --}}
+    <h3 class="section-title">Tanggapan Orang Tua/Wali</h3>
+    <div class="catatan-box">
+        <div class="content"></div>
+    </div>
+
+    {{-- Tanda Tangan --}}
+    <div style="margin-top: 10px;">
+        <table style="width:100%;">
+            <tr>
+                <td style="text-align:center; width:33%;">
+                    <div class="kota-tgl">{{ config('app.name') }}, .....................................</div>
+                    <div class="jabatan">Orang Tua / Wali</div>
+                    <div style="margin-bottom:50px;"></div>
+                    <div style="border-top:1px solid #000; padding-top:3px; font-weight:bold; font-size:10pt; display:inline-block; min-width:150px;">( ________________________ )</div>
+                </td>
+                <td style="text-align:center; width:33%;">
+                    <div class="kota-tgl">{{ config('app.name') }}, {{ now()->translatedFormat('d F Y') }}</div>
+                    <div class="jabatan">Wali Kelas</div>
+                    <div style="margin-bottom:50px;"></div>
+                    <div style="border-top:1px solid #000; padding-top:3px; font-weight:bold; font-size:10pt; display:inline-block; min-width:150px;">
+                        {{ $siswa->kelas?->waliKelas?->guru?->nama_lengkap ?? $siswa->kelas?->waliKelas?->name ?? '________________________' }}
+                    </div>
+                    <div class="nip">{{ $siswa->kelas?->waliKelas?->guru?->nip ? 'NIP. ' . $siswa->kelas?->waliKelas?->guru?->nip : '' }}</div>
+                </td>
+                <td style="text-align:center; width:33%;">
+                    <div style="margin-top:30px;"></div>
+                    <div class="jabatan">Mengetahui,<br>Kepala Sekolah</div>
+                    <div style="margin-bottom:50px;"></div>
+                    <div style="border-top:1px solid #000; padding-top:3px; font-weight:bold; font-size:10pt; display:inline-block; min-width:150px;">( ________________________ )</div>
+                    <div class="nip">NIP. ........................................</div>
+                </td>
+            </tr>
+        </table>
     </div>
 
     <div class="footer">
-        Rapor ini dicetak secara digital oleh Sistem Informasi Akademik SMA (SIAKAD SMA).<br>
-        Dicetak pada: {{ now()->format('d/m/Y H:i') }}
+        Dokumen ini dicetak secara digital melalui {{ config('app.name') }} | {{ now()->format('d/m/Y H:i') }}
     </div>
+
 </div>
 </body>
 </html>

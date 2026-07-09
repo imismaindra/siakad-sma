@@ -61,13 +61,21 @@ class NilaiSiswaController extends Controller
             return back()->withErrors(['error' => 'Rapor belum tersedia.']);
         }
 
-        $siswa->load(['kelas.jurusan']);
+        $siswa->load([
+            'kelas.jurusan',
+            'kelas.waliKelas.guru',
+            'ekstrakurikulers' => fn ($q) => $q->wherePivot('tahun_ajaran_id', $tahunAjaranId),
+            'prestasis' => fn ($q) => $q->where('tahun_ajaran_id', $tahunAjaranId),
+        ]);
         $tahunAjaran = TahunAjaran::find($tahunAjaranId);
 
-        $pdf = Pdf::loadView('pdf.rapor', compact('siswa', 'nilais', 'tahunAjaran'))
+        $rekapAbsensi = $siswa->rekapAbsensi($tahunAjaranId);
+
+        $pdf = Pdf::loadView('pdf.rapor', compact('siswa', 'nilais', 'tahunAjaran', 'rekapAbsensi'))
             ->setPaper('A4', 'portrait');
 
         $filename = "rapor_{$siswa->nis}_{$tahunAjaran->nama}_sem{$tahunAjaran->semester}.pdf";
+        $filename = str_replace(['/', '\\'], '-', $filename);
 
         return $pdf->download($filename);
     }

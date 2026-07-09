@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Siswa extends Model
@@ -57,6 +58,18 @@ class Siswa extends Model
     public function nilais(): HasMany
     {
         return $this->hasMany(Nilai::class);
+    }
+
+    public function ekstrakurikulers(): BelongsToMany
+    {
+        return $this->belongsToMany(Ekstrakurikuler::class, 'siswa_ekstrakurikuler')
+            ->withPivot('tahun_ajaran_id', 'keterangan')
+            ->withTimestamps();
+    }
+
+    public function prestasis(): HasMany
+    {
+        return $this->hasMany(Prestasi::class);
     }
 
     // Helpers

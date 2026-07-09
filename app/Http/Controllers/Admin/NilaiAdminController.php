@@ -113,19 +113,27 @@ class NilaiAdminController extends Controller
             return back()->withErrors(['error' => 'Rapor belum tersedia atau belum dikunci.']);
         }
 
-        $siswa->load(['kelas.jurusan', 'kelas.waliKelas.guru']);
+        $siswa->load([
+            'kelas.jurusan',
+            'kelas.waliKelas.guru',
+            'ekstrakurikulers' => fn ($q) => $q->wherePivot('tahun_ajaran_id', $tahunAjaranId),
+            'prestasis' => fn ($q) => $q->where('tahun_ajaran_id', $tahunAjaranId),
+        ]);
         $tahunAjaran = TahunAjaran::find($tahunAjaranId);
 
-        $pdf = Pdf::loadView('pdf.rapor', compact('siswa', 'nilais', 'tahunAjaran'))
+        $rekapAbsensi = $siswa->rekapAbsensi($tahunAjaranId);
+
+        $pdf = Pdf::loadView('pdf.rapor', compact('siswa', 'nilais', 'tahunAjaran', 'rekapAbsensi'))
             ->setPaper('A4', 'portrait');
 
         $filename = "rapor_{$siswa->nis}_{$tahunAjaran->nama}_sem{$tahunAjaran->semester}.pdf";
+        $filename = str_replace(['/', '\\'], '-', $filename);
 
         return $pdf->download($filename);
     }
 
     /**
-     * Export rapor seluruh kelas ke PDF (per siswa dalam satu file).
+     * Export rapor seluruh kelas ke satu file PDF (per siswa).
      */
     public function exportRaporKelas(Request $request)
     {
@@ -138,11 +146,16 @@ class NilaiAdminController extends Controller
         $tahunAjaran = TahunAjaran::find($validated['tahun_ajaran_id']);
 
         $siswaDenganNilai = $kelas->siswas->map(function ($siswa) use ($validated) {
+            $siswa->load([
+                'ekstrakurikulers' => fn ($q) => $q->wherePivot('tahun_ajaran_id', $validated['tahun_ajaran_id']),
+                'prestasis' => fn ($q) => $q->where('tahun_ajaran_id', $validated['tahun_ajaran_id']),
+            ]);
             $siswa->nilaiRapor = Nilai::with('mataPelajaran')
                 ->where('siswa_id', $siswa->id)
                 ->where('tahun_ajaran_id', $validated['tahun_ajaran_id'])
                 ->where('is_final', true)
                 ->get();
+            $siswa->rekapAbsensi = $siswa->rekapAbsensi($validated['tahun_ajaran_id']);
             return $siswa;
         });
 
@@ -150,6 +163,7 @@ class NilaiAdminController extends Controller
             ->setPaper('A4', 'portrait');
 
         $filename = "rapor_kelas_{$kelas->nama_kelas}_{$tahunAjaran->nama}_sem{$tahunAjaran->semester}.pdf";
+        $filename = str_replace(['/', '\\'], '-', $filename);
 
         return $pdf->download($filename);
     }
