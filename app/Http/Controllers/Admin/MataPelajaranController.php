@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\MataPelajaran;
 use App\Models\BobotNilai;
+use App\Models\Kelas;
+use App\Models\MataPelajaran;
 use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
 
@@ -95,8 +96,9 @@ class MataPelajaranController extends Controller
             ->get();
 
         $tahunAjarans = TahunAjaran::orderByDesc('nama')->get();
+        $kelasList = Kelas::with('tahunAjaran')->orderBy('tingkat')->orderBy('nomor')->get();
 
-        return view('admin.mata-pelajaran.bobot', compact('mataPelajaran', 'bobotNilais', 'tahunAjarans'));
+        return view('admin.mata-pelajaran.bobot', compact('mataPelajaran', 'bobotNilais', 'tahunAjarans', 'kelasList'));
     }
 
     public function bobotStore(Request $request, MataPelajaran $mataPelajaran)

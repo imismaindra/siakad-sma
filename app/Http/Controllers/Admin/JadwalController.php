@@ -18,20 +18,16 @@ class JadwalController extends Controller
         $kelasId = $request->get('kelas_id');
         $hari = $request->get('hari');
         $search = $request->get('search');
+        $mode = $request->get('mode', 'grid');
 
-        $jadwals = JadwalPelajaran::with(['kelas.jurusan', 'mataPelajaran', 'guru'])
+        $base = JadwalPelajaran::with(['kelas.jurusan', 'mataPelajaran', 'guru'])
             ->where('tahun_ajaran_id', $tahunAjaranId)
             ->when($kelasId, fn ($q) => $q->where('kelas_id', $kelasId))
-            ->when($hari, fn ($q) => $q->where('hari', $hari))
             ->when($search, fn ($q) => $q->where(function ($qq) use ($search) {
                 $qq->where('ruangan', 'like', "%{$search}%")
                     ->orWhereHas('mataPelajaran', fn ($m) => $m->where('nama', 'like', "%{$search}%"))
                     ->orWhereHas('guru', fn ($g) => $g->where('nama_lengkap', 'like', "%{$search}%"));
-            }))
-            ->orderByRaw("FIELD(hari, 'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu')")
-            ->orderBy('jam_mulai')
-            ->paginate(20)
-            ->withQueryString();
+            }));
 
         $tahunAjarans = TahunAjaran::orderByDesc('nama')->get();
         $kelasList = $tahunAjaranId
@@ -39,7 +35,20 @@ class JadwalController extends Controller
             : collect();
         $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
-        return view('admin.jadwal.index', compact('jadwals', 'tahunAjarans', 'kelasList', 'tahunAjaranId', 'kelasId', 'hariList', 'hari', 'search'));
+        if ($mode === 'daftar') {
+            $jadwals = (clone $base)
+                ->when($hari, fn ($q) => $q->where('hari', $hari))
+                ->orderByRaw("FIELD(hari, 'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu')")
+                ->orderBy('jam_mulai')
+                ->paginate(20)
+                ->withQueryString();
+
+            return view('admin.jadwal.index', compact('jadwals', 'tahunAjarans', 'kelasList', 'tahunAjaranId', 'kelasId', 'hariList', 'hari', 'search', 'mode'));
+        }
+
+        $jadwals = (clone $base)->orderBy('jam_mulai')->get()->groupBy('hari');
+
+        return view('admin.jadwal.grid', compact('jadwals', 'tahunAjarans', 'kelasList', 'tahunAjaranId', 'kelasId', 'hariList', 'search', 'mode'));
     }
 
     public function create()
@@ -147,28 +156,6 @@ class JadwalController extends Controller
      */
     public function grid(Request $request)
     {
-        $tahunAjaranId = $request->get('tahun_ajaran_id', TahunAjaran::aktif()->value('id'));
-        $kelasId = $request->get('kelas_id');
-        $search = $request->get('search');
-
-        $jadwals = JadwalPelajaran::with(['mataPelajaran', 'guru'])
-            ->where('tahun_ajaran_id', $tahunAjaranId)
-            ->when($kelasId, fn ($q) => $q->where('kelas_id', $kelasId))
-            ->when($search, fn ($q) => $q->where(function ($qq) use ($search) {
-                $qq->where('ruangan', 'like', "%{$search}%")
-                    ->orWhereHas('mataPelajaran', fn ($m) => $m->where('nama', 'like', "%{$search}%"))
-                    ->orWhereHas('guru', fn ($g) => $g->where('nama_lengkap', 'like', "%{$search}%"));
-            }))
-            ->get()
-            ->groupBy('hari');
-
-        $kelasList = $tahunAjaranId
-            ? Kelas::where('tahun_ajaran_id', $tahunAjaranId)->with('jurusan')->orderBy('tingkat')->get()
-            : collect();
-
-        $tahunAjarans = TahunAjaran::orderByDesc('nama')->get();
-        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-
-        return view('admin.jadwal.grid', compact('jadwals', 'kelasList', 'tahunAjarans', 'tahunAjaranId', 'kelasId', 'hariList', 'search'));
+        return redirect()->route('admin.jadwal.index', $request->query());
     }
 }
