@@ -63,7 +63,7 @@
                                 <td class="font-mono text-slate-500 text-xs">{{ $siswa->nis }}</td>
                                 <td class="font-bold text-slate-800">{{ $siswa->nama_lengkap }}</td>
                                 <td class="text-center font-mono font-semibold text-slate-600">
-                                    {{ $n?->nilai_harian ?? '—' }}
+                                    {{ $n?->rata_rata_harian ?? '—' }}
                                 </td>
                                 <td class="text-center font-mono font-semibold text-slate-600">
                                     {{ $n?->nilai_uts ?? '—' }}

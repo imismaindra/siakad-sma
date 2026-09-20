@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\Kelas;
+use App\Models\MataPelajaran;
 use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
 
@@ -17,12 +18,19 @@ class AbsensiAdminController extends Controller
     {
         $tahunAjaranId = $request->get('tahun_ajaran_id', TahunAjaran::aktif()->value('id'));
         $kelasId = $request->get('kelas_id');
+        $mapelId = $request->get('mata_pelajaran_id');
+        $search = $request->get('search');
 
         $absensis = Absensi::with(['kelas.jurusan', 'mataPelajaran', 'guru', 'detailAbsensis'])
             ->where(function ($q) use ($tahunAjaranId) {
                 $q->whereHas('jadwalPelajaran', fn ($jq) => $jq->where('tahun_ajaran_id', $tahunAjaranId));
             })
             ->when($kelasId, fn ($q) => $q->where('kelas_id', $kelasId))
+            ->when($mapelId, fn ($q) => $q->where('mata_pelajaran_id', $mapelId))
+            ->when($search, fn ($q) => $q->where(function ($qq) use ($search) {
+                $qq->whereHas('mataPelajaran', fn ($m) => $m->where('nama', 'like', "%{$search}%"))
+                    ->orWhereHas('guru', fn ($g) => $g->where('nama_lengkap', 'like', "%{$search}%"));
+            }))
             ->orderByDesc('tanggal')
             ->paginate(20)
             ->withQueryString();
@@ -31,8 +39,9 @@ class AbsensiAdminController extends Controller
         $kelasList = $tahunAjaranId
             ? Kelas::where('tahun_ajaran_id', $tahunAjaranId)->with('jurusan')->orderBy('tingkat')->get()
             : collect();
+        $mapelList = MataPelajaran::orderBy('nama')->get();
 
-        return view('admin.absensi.rekap', compact('absensis', 'tahunAjarans', 'kelasList', 'tahunAjaranId', 'kelasId'));
+        return view('admin.absensi.rekap', compact('absensis', 'tahunAjarans', 'kelasList', 'tahunAjaranId', 'kelasId', 'mapelList', 'mapelId', 'search'));
     }
 
     /**

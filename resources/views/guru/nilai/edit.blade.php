@@ -15,7 +15,7 @@
             <p class="page-subtitle">Siswa: <span class="font-bold text-slate-800">{{ $siswa->nama_lengkap }}</span> (NIS: {{ $siswa->nis }}) | Mapel: <span class="font-bold text-navy-500">{{ $nilai->mataPelajaran->nama }}</span></p>
         </div>
         <div>
-            <a href="{{ route('guru.nilai.kelas', $siswa->kelas_id) }}" class="btn-secondary">
+            <a href="{{ $siswa->kelas_id ? route('guru.nilai.kelas', $siswa->kelas_id) : route('guru.nilai.index') }}" class="btn-secondary">
                 Kembali
             </a>
         </div>
@@ -73,7 +73,7 @@
                         <div class="flex items-center justify-between pt-4 border-t border-slate-100">
                             <div>
                                 @if($nilai->exists)
-                                    <span class="text-xs text-slate-400">Rata Harian: <span class="font-bold font-mono text-slate-700">{{ $nilai->nilai_harian ?? '0' }}</span> | Nilai Akhir: <span class="font-extrabold font-mono text-navy-600 text-sm">{{ $nilai->nilai_akhir ?? '0' }}</span></span>
+                                    <span class="text-xs text-slate-400">Rata Harian: <span class="font-bold font-mono text-slate-700">{{ $nilai->rata_rata_harian ?? '0' }}</span> | Nilai Akhir: <span class="font-extrabold font-mono text-navy-600 text-sm">{{ $nilai->nilai_akhir ?? '0' }}</span></span>
                                 @endif
                             </div>
                             <button type="submit" class="btn-primary">
@@ -87,7 +87,7 @@
             {{-- Daily Tasks list --}}
             <div class="card">
                 <div class="card-header">
-                    <h3 class="text-sm font-bold font-display text-slate-800 uppercase tracking-wider">Daftar Nilai Harian (Rata-rata: {{ $nilai->nilai_harian ?? '0' }})</h3>
+                    <h3 class="text-sm font-bold font-display text-slate-800 uppercase tracking-wider">Daftar Nilai Harian (Rata-rata: {{ $nilai->rata_rata_harian ?? '0' }})</h3>
                 </div>
                 
                 <div class="table-wrapper">

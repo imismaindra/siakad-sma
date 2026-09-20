@@ -72,7 +72,7 @@
                         <tr>
                             <td class="font-bold text-slate-800">{{ $nilai->mataPelajaran->nama }}</td>
                             <td class="font-mono text-slate-600 font-semibold">{{ $nilai->mataPelajaran->kkm }}</td>
-                            <td class="font-mono text-slate-600">{{ $nilai->nilai_harian ?? '—' }}</td>
+                            <td class="font-mono text-slate-600">{{ $nilai->rata_rata_harian ?? '—' }}</td>
                             <td class="font-mono text-slate-600">{{ $nilai->nilai_uts ?? '—' }}</td>
                             <td class="font-mono text-slate-600">{{ $nilai->nilai_uas ?? '—' }}</td>
                             <td class="font-bold font-mono text-navy-600 text-base">{{ $nilai->nilai_akhir ?? '—' }}</td>

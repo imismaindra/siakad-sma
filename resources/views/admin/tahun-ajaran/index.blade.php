@@ -7,33 +7,56 @@
 
 @section('admin-content')
 <div class="space-y-6 animate-fade-in-up">
-    
-    {{-- Page Header --}}
-    <div class="page-header">
+    <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
-            <h1 class="page-title font-display">Tahun Ajaran</h1>
+            <p class="inline-flex rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-medium bg-white text-navy-800 ring-1 ring-black/5">Data Master</p>
+            <h1 class="page-title font-display !text-3xl mt-3">Tahun Ajaran.</h1>
             <p class="page-subtitle">Kelola tahun ajaran, semester aktif, beserta durasi kalender akademiknya.</p>
         </div>
         <div>
-            <a href="{{ route('admin.tahun-ajaran.create') }}" class="btn-primary">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Tambah Tahun Ajaran
+            <a href="{{ route('admin.tahun-ajaran.create') }}" class="group inline-flex items-center gap-3 rounded-full bg-navy-800 py-1.5 pl-5 pr-1.5 text-sm font-semibold text-white transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-navy-900">
+                <span>Tambah Tahun Ajaran</span>
+                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-gold-500 text-navy-900">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                </span>
             </a>
         </div>
     </div>
 
-    {{-- Table Card --}}
-    <div class="card">
-        <div class="table-wrapper">
+    <form method="GET" action="{{ route('admin.tahun-ajaran.index') }}" class="rounded-[2rem] bg-white p-2 ring-1 ring-black/5 shadow-[0_24px_60px_-30px_rgba(15,37,87,0.3)]">
+        <div class="flex flex-col lg:flex-row gap-3 p-2">
+            <div class="relative flex-1">
+                <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M10 18a8 8 0 110-16 8 8 0 010 16z" />
+                </svg>
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama tahun ajaran..." class="w-full rounded-full bg-slate-50 border border-slate-200 px-5 py-2.5 pl-11 text-sm text-navy-900 outline-none focus:border-navy-800 focus:ring-4 focus:ring-navy-800/10" />
+            </div>
+            <select name="semester" class="rounded-full bg-slate-50 border border-slate-200 px-5 py-2.5 text-sm font-semibold text-navy-900 outline-none">
+                <option value="">Semua Semester</option>
+                <option value="1" {{ request('semester') == '1' ? 'selected' : '' }}>Semester 1</option>
+                <option value="2" {{ request('semester') == '2' ? 'selected' : '' }}>Semester 2</option>
+            </select>
+            <select name="status" class="rounded-full bg-slate-50 border border-slate-200 px-5 py-2.5 text-sm font-semibold text-navy-900 outline-none">
+                <option value="">Semua Status</option>
+                <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                <option value="nonaktif" {{ request('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+            </select>
+            <button type="submit" class="rounded-full bg-navy-800 text-white text-sm font-semibold px-6 py-2.5 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-navy-900">Terapkan</button>
+            <a href="{{ route('admin.tahun-ajaran.index') }}" class="rounded-full ring-1 ring-black/5 px-5 py-2.5 text-sm font-semibold text-slate-500 text-center transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-slate-50">Atur Ulang</a>
+        </div>
+    </form>
+
+    <div class="rounded-[2rem] bg-white p-2 ring-1 ring-black/5 shadow-[0_24px_60px_-30px_rgba(15,37,87,0.3)]">
+        <div class="rounded-[calc(2rem-0.5rem)] overflow-x-auto">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Tahun Ajaran</th>
+                        <th>Nama</th>
                         <th>Semester</th>
-                        <th>Tanggal Mulai</th>
-                        <th>Tanggal Selesai</th>
+                        <th>Tgl Mulai</th>
+                        <th>Tgl Selesai</th>
                         <th>Status</th>
                         <th class="text-right">Aksi</th>
                     </tr>
@@ -41,63 +64,63 @@
                 <tbody>
                     @forelse($tahunAjarans as $ta)
                         <tr>
-                            <td class="font-bold text-slate-800">{{ $ta->nama }}</td>
+                            <td class="font-semibold text-navy-900">{{ $ta->nama }}</td>
                             <td>
-                                <span class="badge {{ $ta->semester == '1' ? 'badge-navy' : 'badge-gold' }}">
-                                    {{ $ta->semester_label }}
-                                </span>
+                                <span class="badge {{ $ta->semester == '1' ? 'badge-info' : 'badge-warning' }}">{{ $ta->semester_label }}</span>
                             </td>
-                            <td>{{ $ta->tanggal_mulai->locale('id')->isoFormat('D MMMM YYYY') }}</td>
-                            <td>{{ $ta->tanggal_selesai->locale('id')->isoFormat('D MMMM YYYY') }}</td>
+                            <td class="text-slate-500 tabular-nums">{{ $ta->tanggal_mulai->locale('id')->isoFormat('D MMMM YYYY') }}</td>
+                            <td class="text-slate-500 tabular-nums">{{ $ta->tanggal_selesai->locale('id')->isoFormat('D MMMM YYYY') }}</td>
                             <td>
                                 @if($ta->is_aktif)
-                                    <span class="badge badge-success animate-pulse">Aktif</span>
+                                    <span class="badge badge-success">Aktif</span>
                                 @else
-                                    <span class="badge badge-gray">Tidak Aktif</span>
+                                    <span class="badge badge-danger">Nonaktif</span>
                                 @endif
                             </td>
-                            <td class="text-right space-x-1 whitespace-nowrap">
-                                @if(!$ta->is_aktif)
-                                    <form action="{{ route('admin.tahun-ajaran.set-aktif', $ta) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button type="submit" class="btn-secondary btn-sm bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200">
-                                            Set Aktif
-                                        </button>
-                                    </form>
-                                @endif
-
-                                <a href="{{ route('admin.tahun-ajaran.edit', $ta) }}" class="btn-secondary btn-sm">
-                                    Edit
-                                </a>
-
-                                @if(!$ta->is_aktif)
-                                    <form action="{{ route('admin.tahun-ajaran.destroy', $ta) }}" method="POST" class="inline" data-confirm="Apakah Anda yakin ingin menghapus tahun ajaran {{ $ta->nama_lengkap }}?">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-danger btn-sm">
-                                            Hapus
-                                        </button>
-                                    </form>
-                                @endif
+                            <td class="text-right whitespace-nowrap">
+                                <span class="inline-flex items-center gap-2">
+                                    @if(!$ta->is_aktif)
+                                        <form action="{{ route('admin.tahun-ajaran.set-aktif', $ta) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" title="Set Aktif" class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-emerald-100">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    @endif
+                                    <a href="{{ route('admin.tahun-ajaran.edit', $ta) }}" title="Edit" class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gold-100 text-gold-700 ring-1 ring-gold-200 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-gold-200">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+                                        </svg>
+                                    </a>
+                                    @if(!$ta->is_aktif)
+                                        <form action="{{ route('admin.tahun-ajaran.destroy', $ta) }}" method="POST" class="inline" data-confirm="Apakah Anda yakin ingin menghapus tahun ajaran {{ $ta->nama_lengkap }}?">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" title="Hapus" class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-rose-50 text-rose-700 ring-1 ring-rose-100 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-rose-100">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916" />
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    @endif
+                                </span>
                             </td>
                         </tr>
                     @empty
-                        <tr>
-                            <td colspan="6" class="text-center py-8 text-slate-400">Belum ada data tahun ajaran.</td>
-                        </tr>
+                        <tr><td colspan="6" class="text-center py-12"><p class="font-bold text-navy-900">Belum ada data yang cocok.</p><p class="text-sm text-slate-500 mt-1">Ubah kata kunci atau atur ulang filter.</p></td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        
-        {{-- Pagination --}}
-        @if($tahunAjarans->hasPages())
-            <div class="px-6 py-4 border-t border-slate-100 pagination-wrapper">
-                {{ $tahunAjarans->links() }}
+        @if($tahunAjarans->hasPages() || $tahunAjarans->total() > 0)
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-4">
+                <p class="text-xs text-slate-500">Menampilkan {{ $tahunAjarans->firstItem() ?? 0 }} sampai {{ $tahunAjarans->lastItem() ?? 0 }} dari {{ $tahunAjarans->total() }} data</p>
+                <div class="pagination-wrapper">{{ $tahunAjarans->links() }}</div>
             </div>
         @endif
     </div>
-
 </div>
 @endsection

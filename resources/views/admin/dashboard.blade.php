@@ -6,244 +6,191 @@
 @section('breadcrumb-current', 'Dashboard')
 
 @section('admin-content')
-<div class="space-y-8 animate-fade-in-up">
-    
+<div class="space-y-6 animate-fade-in-up">
+
     {{-- Header --}}
-    <div class="page-header">
+    <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
-            <h1 class="page-title font-display">Dashboard Admin</h1>
-            <p class="page-subtitle">Selamat datang kembali di panel administrasi SIAKAD SMA Nusantara.</p>
+            <p class="inline-flex rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-medium bg-white text-navy-800 ring-1 ring-black/5">Panel admin</p>
+            <h1 class="page-title font-display !text-3xl mt-3">Ringkasan sekolah.</h1>
+            <p class="page-subtitle">Kondisi terkini SIAKAD SMA Cihuy dalam satu layar.</p>
         </div>
         <div>
             @if($tahunAktif)
-                <span class="badge badge-gold px-4 py-2 border border-gold-500/20 text-xs font-bold uppercase tracking-wider">
-                    Tahun Ajaran: {{ $tahunAktif->tahun_ajaran }} — Semester {{ $tahunAktif->semester == 'ganjil' ? 'Ganjil' : 'Genap' }}
+                <span class="badge badge-gold !py-2 !px-4">
+                    {{ $tahunAktif->tahun_ajaran }}, Semester {{ $tahunAktif->semester == 'ganjil' ? 'Ganjil' : 'Genap' }}
                 </span>
             @else
-                <span class="badge badge-danger px-4 py-2 text-xs font-bold uppercase tracking-wider">
+                <span class="badge badge-danger !py-2 !px-4">
                     Tahun Ajaran Tidak Aktif
                 </span>
             @endif
         </div>
     </div>
 
-    {{-- Stat Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        
-        {{-- Total Siswa --}}
-        <div class="stat-card navy">
-            <div class="flex items-center justify-between">
+    {{-- Stat Bento --}}
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+        {{-- Siswa hero --}}
+        <div class="lg:col-span-7 rounded-[2rem] bg-navy-800 p-2 ring-1 ring-black/5 shadow-[0_32px_80px_-40px_rgba(15,37,87,0.6)]">
+            <div class="rounded-[calc(2rem-0.5rem)] p-7 sm:p-8 flex flex-wrap items-end justify-between gap-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
                 <div>
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Siswa Aktif</p>
-                    <p class="text-3xl font-extrabold font-display text-slate-800 mt-2">{{ $stats['total_siswa'] }}</p>
+                    <p class="text-[11px] font-medium uppercase tracking-[0.2em] text-slate-400">Siswa aktif</p>
+                    <p class="mt-2 font-display font-extrabold tracking-tight text-white text-5xl sm:text-6xl tabular-nums">{{ $stats['total_siswa'] }}</p>
+                    <p class="mt-2 text-sm text-slate-300">Terdaftar di sistem tahun berjalan.</p>
                 </div>
-                <div class="w-12 h-12 rounded-xl bg-navy-50 flex items-center justify-center text-navy-500 shadow-sm">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                </div>
-            </div>
-            <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span class="text-slate-400">Terdaftar di SIstem</span>
-                <a href="{{ route('admin.siswa.index') }}" class="text-navy-500 font-semibold hover:underline flex items-center gap-1">
-                    Lihat Semua
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
+                <a href="{{ route('admin.siswa.index') }}" class="group inline-flex items-center gap-3 rounded-full bg-white/10 py-1.5 pl-5 pr-1.5 text-sm font-semibold text-white ring-1 ring-white/15 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-white/15 active:scale-[0.98]">
+                    Kelola siswa
+                    <span class="w-8 h-8 rounded-full bg-gold-500 text-navy-900 flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-0.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12"/></svg>
+                    </span>
                 </a>
             </div>
         </div>
 
-        {{-- Total Guru --}}
-        <div class="stat-card gold">
-            <div class="flex items-center justify-between">
+        {{-- Guru --}}
+        <div class="lg:col-span-5 rounded-[2rem] bg-white p-2 ring-1 ring-black/5 shadow-[0_24px_60px_-30px_rgba(15,37,87,0.3)]">
+            <div class="rounded-[calc(2rem-0.5rem)] p-7 flex items-center justify-between gap-4 h-full">
                 <div>
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Guru Aktif</p>
-                    <p class="text-3xl font-extrabold font-display text-slate-800 mt-2">{{ $stats['total_guru'] }}</p>
+                    <p class="text-[11px] font-medium uppercase tracking-[0.2em] text-slate-500">Guru aktif</p>
+                    <p class="mt-2 font-display font-extrabold tracking-tight text-navy-900 text-4xl sm:text-5xl tabular-nums">{{ $stats['total_guru'] }}</p>
+                    <p class="mt-2 text-sm text-slate-500">Tenaga pendidik terdaftar.</p>
                 </div>
-                <div class="w-12 h-12 rounded-xl bg-gold-50 flex items-center justify-center text-gold-500 shadow-sm">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                    </svg>
-                </div>
-            </div>
-            <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span class="text-slate-400">Tenaga Pendidik</span>
-                <a href="{{ route('admin.guru.index') }}" class="text-gold-600 font-semibold hover:underline flex items-center gap-1">
-                    Lihat Semua
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
+                <a href="{{ route('admin.guru.index') }}" aria-label="Kelola guru" class="group w-12 h-12 shrink-0 rounded-full bg-navy-800 text-white flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-navy-700 active:scale-[0.98]">
+                    <svg class="w-5 h-5 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12"/></svg>
                 </a>
             </div>
         </div>
 
-        {{-- Total Kelas --}}
-        <div class="stat-card green">
-            <div class="flex items-center justify-between">
+        {{-- Kelas --}}
+        <div class="lg:col-span-5 rounded-[2rem] bg-white p-2 ring-1 ring-black/5 shadow-[0_24px_60px_-30px_rgba(15,37,87,0.3)]">
+            <div class="rounded-[calc(2rem-0.5rem)] p-7 flex items-center justify-between gap-4 h-full">
                 <div>
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Kelas Terdaftar</p>
-                    <p class="text-3xl font-extrabold font-display text-slate-800 mt-2">{{ $stats['total_kelas'] }}</p>
+                    <p class="text-[11px] font-medium uppercase tracking-[0.2em] text-slate-500">Kelas terdaftar</p>
+                    <p class="mt-2 font-display font-extrabold tracking-tight text-navy-900 text-4xl sm:text-5xl tabular-nums">{{ $stats['total_kelas'] }}</p>
+                    <p class="mt-2 text-sm text-slate-500">Rombongan belajar aktif.</p>
                 </div>
-                <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-500 shadow-sm">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                    </svg>
-                </div>
-            </div>
-            <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span class="text-slate-400">Rombongan Belajar</span>
-                <a href="{{ route('admin.kelas.index') }}" class="text-emerald-600 font-semibold hover:underline flex items-center gap-1">
-                    Lihat Semua
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
+                <a href="{{ route('admin.kelas.index') }}" aria-label="Kelola kelas" class="group w-12 h-12 shrink-0 rounded-full bg-navy-800 text-white flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-navy-700 active:scale-[0.98]">
+                    <svg class="w-5 h-5 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12"/></svg>
                 </a>
             </div>
         </div>
 
-        {{-- Pending Grades --}}
-        <div class="stat-card red">
-            <div class="flex items-center justify-between">
+        {{-- Nilai menunggu --}}
+        <div class="lg:col-span-7 rounded-[2rem] {{ $nilaiMenunggu > 0 ? 'bg-gold-500' : 'bg-white' }} p-2 ring-1 ring-black/5 shadow-[0_24px_60px_-30px_rgba(15,37,87,0.3)]">
+            <div class="rounded-[calc(2rem-0.5rem)] p-7 flex flex-wrap items-center justify-between gap-4 {{ $nilaiMenunggu > 0 ? 'shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)]' : '' }}">
                 <div>
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Nilai Menunggu Finalisasi</p>
-                    <p class="text-3xl font-extrabold font-display text-slate-800 mt-2">{{ $nilaiMenunggu }}</p>
+                    <p class="text-[11px] font-medium uppercase tracking-[0.2em] {{ $nilaiMenunggu > 0 ? 'text-navy-900/70' : 'text-slate-500' }}">Nilai menunggu finalisasi</p>
+                    <p class="mt-2 font-display font-extrabold tracking-tight {{ $nilaiMenunggu > 0 ? 'text-navy-900' : 'text-navy-900' }} text-4xl sm:text-5xl tabular-nums">{{ $nilaiMenunggu }}</p>
+                    <p class="mt-2 text-sm {{ $nilaiMenunggu > 0 ? 'text-navy-900/70' : 'text-slate-500' }}">{{ $nilaiMenunggu > 0 ? 'Perlu tindakan sebelum rapor terbit.' : 'Semua nilai sudah final. Rapi.' }}</p>
                 </div>
-                <div class="w-12 h-12 rounded-xl bg-rose-50 flex items-center justify-center text-rose-500 shadow-sm">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
-                    </svg>
-                </div>
-            </div>
-            <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span class="text-slate-400">Ujian &amp; Tugas</span>
-                <a href="{{ route('admin.nilai.laporan') }}" class="text-rose-600 font-semibold hover:underline flex items-center gap-1">
-                    Kelola Nilai
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
+                <a href="{{ route('admin.nilai.laporan') }}" class="group inline-flex items-center gap-3 rounded-full {{ $nilaiMenunggu > 0 ? 'bg-navy-800 text-white hover:bg-navy-700' : 'bg-navy-800 text-white hover:bg-navy-700' }} py-1.5 pl-5 pr-1.5 text-sm font-semibold transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98]">
+                    Kelola nilai
+                    <span class="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-0.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12"/></svg>
+                    </span>
                 </a>
             </div>
         </div>
 
     </div>
 
-    {{-- Main Grid --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {{-- Quick Actions --}}
-        <div class="lg:col-span-2 space-y-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="text-sm font-bold font-display text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                        <svg class="w-5 h-5 text-navy-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                        </svg>
-                        Akses Cepat Admin
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        
-                        <a href="{{ route('admin.tahun-ajaran.index') }}" class="flex items-center gap-4 p-4 rounded-xl border border-slate-100 hover:border-navy-100 hover:bg-navy-50/20 transition-all group">
-                            <div class="w-10 h-10 rounded-lg bg-navy-50 text-navy-500 flex items-center justify-center font-bold text-lg group-hover:scale-105 transition-transform">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-bold text-slate-700">Tahun Ajaran</h4>
-                                <p class="text-xs text-slate-400 mt-0.5">Atur tahun aktif &amp; semester.</p>
-                            </div>
-                        </a>
+    {{-- Lower Bento --}}
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
 
-                        <a href="{{ route('admin.guru.create') }}" class="flex items-center gap-4 p-4 rounded-xl border border-slate-100 hover:border-navy-100 hover:bg-navy-50/20 transition-all group">
-                            <div class="w-10 h-10 rounded-lg bg-gold-50 text-gold-600 flex items-center justify-center font-bold text-lg group-hover:scale-105 transition-transform">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-bold text-slate-700">Tambah Guru</h4>
-                                <p class="text-xs text-slate-400 mt-0.5">Pendaftaran pendidik baru.</p>
-                            </div>
+        {{-- Akses cepat --}}
+        <div class="lg:col-span-7 rounded-[2rem] bg-white p-2 ring-1 ring-black/5 shadow-[0_24px_60px_-30px_rgba(15,37,87,0.3)]">
+            <div class="rounded-[calc(2rem-0.5rem)] px-3 py-3">
+                <p class="px-4 pt-3 text-[11px] font-medium uppercase tracking-[0.2em] text-slate-500">Akses cepat</p>
+                <ul class="mt-2 divide-y divide-slate-100">
+                    <li>
+                        <a href="{{ route('admin.tahun-ajaran.index') }}" class="group flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-slate-50 active:scale-[0.99]">
+                            <span class="w-11 h-11 rounded-2xl bg-navy-800 text-gold-200 flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            </span>
+                            <span class="flex-1 min-w-0">
+                                <span class="block font-bold text-navy-900 text-[15px]">Tahun ajaran</span>
+                                <span class="block text-[13px] text-slate-500 mt-0.5">Atur tahun aktif dan semester.</span>
+                            </span>
+                            <svg class="w-5 h-5 text-slate-300 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:text-navy-800 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                         </a>
-
-                        <a href="{{ route('admin.siswa.create') }}" class="flex items-center gap-4 p-4 rounded-xl border border-slate-100 hover:border-navy-100 hover:bg-navy-50/20 transition-all group">
-                            <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg group-hover:scale-105 transition-transform">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-bold text-slate-700">Tambah Siswa</h4>
-                                <p class="text-xs text-slate-400 mt-0.5">Pendaftaran siswa baru.</p>
-                            </div>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.guru.create') }}" class="group flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-slate-50 active:scale-[0.99]">
+                            <span class="w-11 h-11 rounded-2xl bg-gold-100 text-gold-700 flex items-center justify-center shrink-0 ring-1 ring-gold-200">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                            </span>
+                            <span class="flex-1 min-w-0">
+                                <span class="block font-bold text-navy-900 text-[15px]">Tambah guru</span>
+                                <span class="block text-[13px] text-slate-500 mt-0.5">Daftarkan pendidik baru.</span>
+                            </span>
+                            <svg class="w-5 h-5 text-slate-300 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:text-navy-800 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                         </a>
-
-                        <a href="{{ route('admin.jadwal.index') }}" class="flex items-center gap-4 p-4 rounded-xl border border-slate-100 hover:border-navy-100 hover:bg-navy-50/20 transition-all group">
-                            <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-lg group-hover:scale-105 transition-transform">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-bold text-slate-700">Jadwal Pelajaran</h4>
-                                <p class="text-xs text-slate-400 mt-0.5">Kelola plot jadwal mengajar.</p>
-                            </div>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.siswa.create') }}" class="group flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-slate-50 active:scale-[0.99]">
+                            <span class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 ring-1 ring-emerald-100">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                            </span>
+                            <span class="flex-1 min-w-0">
+                                <span class="block font-bold text-navy-900 text-[15px]">Tambah siswa</span>
+                                <span class="block text-[13px] text-slate-500 mt-0.5">Daftarkan siswa baru.</span>
+                            </span>
+                            <svg class="w-5 h-5 text-slate-300 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:text-navy-800 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                         </a>
-                        
-                    </div>
-                </div>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.jadwal.index') }}" class="group flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-slate-50 active:scale-[0.99]">
+                            <span class="w-11 h-11 rounded-2xl bg-slate-100 text-navy-800 flex items-center justify-center shrink-0 ring-1 ring-black/5">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </span>
+                            <span class="flex-1 min-w-0">
+                                <span class="block font-bold text-navy-900 text-[15px]">Jadwal pelajaran</span>
+                                <span class="block text-[13px] text-slate-500 mt-0.5">Kelola plot jadwal mengajar.</span>
+                            </span>
+                            <svg class="w-5 h-5 text-slate-300 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:text-navy-800 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
 
-        {{-- Attendance Info --}}
-        <div class="space-y-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="text-sm font-bold font-display text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                        <svg class="w-5 h-5 text-gold-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                        </svg>
-                        Kehadiran Pekan Ini
-                    </h3>
-                </div>
-                <div class="card-body space-y-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-xs text-slate-400">Total Status Hadir</p>
-                            <p class="text-2xl font-bold font-display text-emerald-600 mt-1">{{ $totalHadir }}</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-slate-400 text-right">Total Status Alpa</p>
-                            <p class="text-2xl font-bold font-display text-rose-600 mt-1 text-right">{{ $totalAlpa }}</p>
-                        </div>
-                    </div>
-                    
-                    {{-- Progress Bar --}}
+        {{-- Kehadiran --}}
+        <div class="lg:col-span-5 rounded-[2rem] bg-navy-800 p-2 ring-1 ring-black/5 shadow-[0_32px_80px_-40px_rgba(15,37,87,0.6)]">
+            <div class="rounded-[calc(2rem-0.5rem)] p-7 h-full flex flex-col shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
+                <p class="text-[11px] font-medium uppercase tracking-[0.2em] text-slate-400">Kehadiran pekan ini</p>
+                <div class="mt-5 grid grid-cols-2 gap-4">
                     <div>
-                        <div class="flex items-center justify-between text-xs text-slate-400 mb-2 font-semibold">
-                            <span>Rasio Kehadiran</span>
-                            <span>
-                                @if($totalHadir + $totalAlpa > 0)
-                                    {{ round(($totalHadir / ($totalHadir + $totalAlpa)) * 100, 1) }}%
-                                @else
-                                    0%
-                                @endif
-                            </span>
-                        </div>
-                        <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden flex">
-                            @if($totalHadir + $totalAlpa > 0)
-                                <div class="bg-emerald-500 h-full" style="width: {{ ($totalHadir / ($totalHadir + $totalAlpa)) * 100 }}%"></div>
-                                <div class="bg-rose-500 h-full" style="width: {{ ($totalAlpa / ($totalHadir + $totalAlpa)) * 100 }}%"></div>
-                            @else
-                                <div class="bg-slate-300 h-full w-full"></div>
-                            @endif
-                        </div>
-                        <p class="text-[10px] text-slate-400 mt-3 text-center italic">Rasio kehadiran dihitung berdasarkan total absensi terisi minggu ini.</p>
+                        <p class="font-display font-extrabold tracking-tight text-emerald-400 text-4xl tabular-nums">{{ $totalHadir }}</p>
+                        <p class="mt-1 text-xs text-slate-400">Hadir</p>
+                    </div>
+                    <div>
+                        <p class="font-display font-extrabold tracking-tight text-rose-400 text-4xl tabular-nums">{{ $totalAlpa }}</p>
+                        <p class="mt-1 text-xs text-slate-400">Alpa</p>
                     </div>
                 </div>
+                @if($totalHadir + $totalAlpa > 0)
+                    <div class="mt-6 h-2 rounded-full overflow-hidden flex ring-1 ring-white/15" aria-hidden="true">
+                        <div class="bg-emerald-400 h-full" style="width: {{ ($totalHadir / ($totalHadir + $totalAlpa)) * 100 }}%"></div>
+                        <div class="bg-rose-400 h-full" style="width: {{ ($totalAlpa / ($totalHadir + $totalAlpa)) * 100 }}%"></div>
+                    </div>
+                @else
+                    <div class="mt-6 h-2 rounded-full ring-1 ring-white/15" aria-hidden="true"></div>
+                @endif
+                <p class="mt-4 font-display font-bold text-white text-xl">
+                    @if($totalHadir + $totalAlpa > 0)
+                        {{ round(($totalHadir / ($totalHadir + $totalAlpa)) * 100, 1) }}% hadir
+                    @else
+                        Belum ada data
+                    @endif
+                </p>
+                <p class="mt-1 text-[13px] text-slate-400">Dari total absensi terisi minggu ini.</p>
+                <a href="{{ route('admin.absensi.rekap') }}" class="group mt-auto pt-6 inline-flex items-center gap-3 rounded-full bg-white/10 py-1.5 pl-5 pr-1.5 text-sm font-semibold text-white ring-1 ring-white/15 self-start transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-white/15 active:scale-[0.98]">
+                    Buka rekap absensi
+                    <span class="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-0.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12"/></svg>
+                    </span>
+                </a>
             </div>
         </div>
 

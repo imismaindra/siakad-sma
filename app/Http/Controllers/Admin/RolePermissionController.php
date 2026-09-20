@@ -17,10 +17,15 @@ class RolePermissionController extends Controller
     /**
      * Daftar semua role beserta jumlah user & permission.
      */
-    public function roleIndex()
+    public function roleIndex(Request $request)
     {
-        $roles = Role::withCount(['users', 'permissions'])->orderBy('name')->get();
+        $roles = Role::withCount(['users', 'permissions'])
+            ->when($request->filled('search'), fn ($q) => $q->where('name', 'like', "%{$request->search}%"))
+            ->orderBy('name')
+            ->paginate(10)
+            ->withQueryString();
         $totalPermissions = Permission::count();
+
         return view('admin.rbac.role-index', compact('roles', 'totalPermissions'));
     }
 
@@ -103,10 +108,14 @@ class RolePermissionController extends Controller
     /**
      * Daftar semua permission beserta role yang memilikinya.
      */
-    public function permissionIndex()
+    public function permissionIndex(Request $request)
     {
-        $permissions = Permission::with('roles')->orderBy('name')->get()
+        $permissions = Permission::with('roles')
+            ->when($request->filled('search'), fn ($q) => $q->where('name', 'like', "%{$request->search}%"))
+            ->orderBy('name')
+            ->get()
             ->groupBy(fn($p) => explode('-', $p->name)[0]);
+
         return view('admin.rbac.permission-index', compact('permissions'));
     }
 

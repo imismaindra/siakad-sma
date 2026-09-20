@@ -14,15 +14,26 @@ class KelasController extends Controller
     public function index(Request $request)
     {
         $tahunAjaranId = $request->get('tahun_ajaran_id', TahunAjaran::aktif()->value('id'));
+        $jurusanId = $request->get('jurusan_id');
+        $search = $request->get('search');
+
         $kelas = Kelas::with(['jurusan', 'waliKelas', 'tahunAjaran'])
             ->where('tahun_ajaran_id', $tahunAjaranId)
+            ->when($jurusanId, fn ($q) => $q->where('jurusan_id', $jurusanId))
+            ->when($search, fn ($q) => $q->where(function ($qq) use ($search) {
+                $qq->where('nama', 'like', "%{$search}%")
+                    ->orWhere('tingkat', 'like', "%{$search}%")
+                    ->orWhereHas('waliKelas', fn ($w) => $w->where('name', 'like', "%{$search}%"));
+            }))
             ->orderBy('tingkat')
             ->orderBy('nomor')
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
         $tahunAjarans = TahunAjaran::orderByDesc('nama')->get();
+        $jurusans = Jurusan::orderBy('nama')->get();
 
-        return view('admin.kelas.index', compact('kelas', 'tahunAjarans', 'tahunAjaranId'));
+        return view('admin.kelas.index', compact('kelas', 'tahunAjarans', 'tahunAjaranId', 'jurusans', 'jurusanId', 'search'));
     }
 
     public function create()
@@ -101,9 +112,17 @@ class KelasController extends Controller
 
     // ---- Jurusan sub-resource ----
 
-    public function jurusanIndex()
+    public function jurusanIndex(Request $request)
     {
-        $jurusans = Jurusan::withCount('kelas')->paginate(10);
+        $jurusans = Jurusan::withCount('kelas')
+            ->when($request->filled('search'), fn ($q) => $q->where(function ($qq) use ($request) {
+                $qq->where('nama', 'like', "%{$request->search}%")
+                    ->orWhere('kode', 'like', "%{$request->search}%");
+            }))
+            ->orderBy('nama')
+            ->paginate(10)
+            ->withQueryString();
+
         return view('admin.jurusan.index', compact('jurusans'));
     }
 

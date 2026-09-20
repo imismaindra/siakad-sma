@@ -15,8 +15,14 @@ class MataPelajaranController extends Controller
         $query = MataPelajaran::withCount(['gurus', 'jadwalPelajarans']);
 
         if ($request->filled('search')) {
-            $query->where('nama', 'like', "%{$request->search}%")
-                ->orWhere('kode', 'like', "%{$request->search}%");
+            $query->where(function ($qq) use ($request) {
+                $qq->where('nama', 'like', "%{$request->search}%")
+                    ->orWhere('kode', 'like', "%{$request->search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('is_aktif', $request->status === 'aktif');
         }
 
         $mapels = $query->orderBy('nama')->paginate(15)->withQueryString();

@@ -8,9 +8,17 @@ use Illuminate\Http\Request;
 
 class TahunAjaranController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $tahunAjarans = TahunAjaran::orderByDesc('nama')->orderBy('semester')->paginate(10);
+        $tahunAjarans = TahunAjaran::query()
+            ->when($request->filled('search'), fn ($q) => $q->where('nama', 'like', "%{$request->search}%"))
+            ->when($request->filled('semester'), fn ($q) => $q->where('semester', $request->semester))
+            ->when($request->filled('status'), fn ($q) => $q->where('is_aktif', $request->status === 'aktif'))
+            ->orderByDesc('nama')
+            ->orderBy('semester')
+            ->paginate(10)
+            ->withQueryString();
+
         return view('admin.tahun-ajaran.index', compact('tahunAjarans'));
     }
 

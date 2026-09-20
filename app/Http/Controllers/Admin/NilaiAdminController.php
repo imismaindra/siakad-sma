@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Kelas;
+use App\Models\MataPelajaran;
 use App\Models\Nilai;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
@@ -19,10 +20,19 @@ class NilaiAdminController extends Controller
     {
         $tahunAjaranId = $request->get('tahun_ajaran_id', TahunAjaran::aktif()->value('id'));
         $kelasId = $request->get('kelas_id');
+        $mapelId = $request->get('mata_pelajaran_id');
+        $statusFinal = $request->get('is_final');
+        $search = $request->get('search');
 
         $nilais = Nilai::with(['siswa', 'mataPelajaran', 'guru', 'kelas.jurusan'])
             ->where('tahun_ajaran_id', $tahunAjaranId)
             ->when($kelasId, fn ($q) => $q->where('kelas_id', $kelasId))
+            ->when($mapelId, fn ($q) => $q->where('mata_pelajaran_id', $mapelId))
+            ->when($statusFinal !== null && $statusFinal !== '', fn ($q) => $q->where('is_final', (bool) $statusFinal))
+            ->when($search, fn ($q) => $q->where(function ($qq) use ($search) {
+                $qq->whereHas('siswa', fn ($s) => $s->where('nama_lengkap', 'like', "%{$search}%")->orWhere('nis', 'like', "%{$search}%"))
+                    ->orWhereHas('mataPelajaran', fn ($m) => $m->where('nama', 'like', "%{$search}%"));
+            }))
             ->orderBy('is_final')
             ->paginate(25)
             ->withQueryString();
@@ -31,8 +41,9 @@ class NilaiAdminController extends Controller
         $kelasList = $tahunAjaranId
             ? Kelas::where('tahun_ajaran_id', $tahunAjaranId)->with('jurusan')->orderBy('tingkat')->get()
             : collect();
+        $mapelList = MataPelajaran::orderBy('nama')->get();
 
-        return view('admin.nilai.laporan', compact('nilais', 'tahunAjarans', 'kelasList', 'tahunAjaranId', 'kelasId'));
+        return view('admin.nilai.laporan', compact('nilais', 'tahunAjarans', 'kelasList', 'tahunAjaranId', 'kelasId', 'mapelList', 'mapelId', 'statusFinal', 'search'));
     }
 
     /**
@@ -79,6 +90,10 @@ class NilaiAdminController extends Controller
         // Hitung rata-rata nilai akhir per siswa
         $peringkat = Siswa::with(['kelas'])
             ->where('kelas_id', $kelasId)
+            ->when($request->filled('search'), fn ($q) => $q->where(function ($qq) use ($request) {
+                $qq->where('nama_lengkap', 'like', "%{$request->search}%")
+                    ->orWhere('nis', 'like', "%{$request->search}%");
+            }))
             ->withAvg(
                 ['nilais' => fn ($q) => $q->where('tahun_ajaran_id', $tahunAjaranId)->where('is_final', true)],
                 'nilai_akhir'
