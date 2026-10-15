@@ -96,7 +96,13 @@
                     @empty
                         <tr>
                             <td colspan="8" class="text-center py-12 text-slate-400">
-                                Tidak ada data nilai rapor untuk Anda pada periode semester ini.
+                                <div class="inline-flex w-10 h-10 items-center justify-center rounded-full bg-slate-100 text-slate-400 mb-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                                    </svg>
+                                </div>
+                                <p class="font-semibold text-slate-700">Tidak ada data nilai rapor pada periode semester ini.</p>
+                                <p class="text-xs text-slate-400 mt-1">Silakan pilih tahun ajaran lain pada filter di kanan atas jika ingin melihat riwayat nilai semester sebelumnya.</p>
                             </td>
                         </tr>
                     @endforelse
