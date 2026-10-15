@@ -14,10 +14,12 @@ use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Guru\AbsensiGuruController;
+use App\Http\Controllers\Guru\AbsensiQrGuruController;
 use App\Http\Controllers\Guru\DashboardGuruController;
 use App\Http\Controllers\Guru\NilaiGuruController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Siswa\AbsensiSiswaController;
+use App\Http\Controllers\Siswa\AbsensiQrSiswaController;
 use App\Http\Controllers\Siswa\DashboardSiswaController;
 use App\Http\Controllers\Siswa\NilaiSiswaController;
 use Illuminate\Support\Facades\Route;
@@ -183,6 +185,13 @@ Route::middleware(['auth', 'role:guru,admin'])
         Route::post('/absensi', [AbsensiGuruController::class, 'store'])->name('absensi.store');
         Route::get('/absensi/{absensi}', [AbsensiGuruController::class, 'show'])->name('absensi.show');
 
+        // Sesi Absensi QR Dinamis (F1)
+        Route::post('/absensi/qr/buka/{jadwal}', [AbsensiQrGuruController::class, 'buka'])->name('absensi.qr.buka');
+        Route::get('/absensi/qr/{sesi}', [AbsensiQrGuruController::class, 'show'])->name('absensi.qr.show');
+        Route::get('/absensi/qr/{sesi}/token', [AbsensiQrGuruController::class, 'token'])->name('absensi.qr.token');
+        Route::get('/absensi/qr/{sesi}/live-status', [AbsensiQrGuruController::class, 'liveStatus'])->name('absensi.qr.status');
+        Route::post('/absensi/qr/{sesi}/tutup', [AbsensiQrGuruController::class, 'tutup'])->name('absensi.qr.tutup');
+
         // Nilai
         Route::get('/nilai', [NilaiGuruController::class, 'index'])->name('nilai.index');
         Route::get('/nilai/kelas/{kelas}', [NilaiGuruController::class, 'kelas'])->name('nilai.kelas');
@@ -208,6 +217,8 @@ Route::middleware(['auth', 'role:siswa'])
 
         // Absensi
         Route::get('/absensi', [AbsensiSiswaController::class, 'index'])->name('absensi');
+        Route::get('/absensi/scan', [AbsensiQrSiswaController::class, 'index'])->name('absensi.scan');
+        Route::post('/absensi/scan', [AbsensiQrSiswaController::class, 'scan'])->name('absensi.scan.post');
 
         // Nilai & Rapor
         Route::get('/nilai', [NilaiSiswaController::class, 'index'])->name('nilai');

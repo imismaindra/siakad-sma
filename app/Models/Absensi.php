@@ -27,6 +27,7 @@ class Absensi extends Model
         'guru_id',
         'mata_pelajaran_id',
         'tanggal',
+        'metode',
         'materi',
         'catatan',
     ];
@@ -39,6 +40,11 @@ class Absensi extends Model
     }
 
     // Relationships
+    public function sesiAbsensiQr()
+    {
+        return $this->hasOne(SesiAbsensiQr::class);
+    }
+
     public function jadwalPelajaran(): BelongsTo
     {
         return $this->belongsTo(JadwalPelajaran::class);

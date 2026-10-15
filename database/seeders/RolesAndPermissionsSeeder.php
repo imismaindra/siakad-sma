@@ -35,6 +35,7 @@ class RolesAndPermissionsSeeder extends Seeder
         // Guru – Dashboard & Akademik
         'view-dashboard-guru'  => 'Akses dashboard guru',
         'input-absensi'        => 'Input kehadiran siswa',
+        'buka-sesi-qr'         => 'Buka dan kelola sesi absensi QR',
         'view-absensi-guru'    => 'Lihat rekap absensi milik sendiri',
         'input-nilai'          => 'Input & update nilai siswa',
         'export-rapor-guru'    => 'Export rapor kelas (guru)',
@@ -58,12 +59,12 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage-mapel', 'manage-jadwal', 'manage-tahun-ajaran',
             'view-absensi-rekap', 'koreksi-absensi',
             'view-nilai-laporan', 'finalisasi-nilai', 'view-peringkat', 'export-rapor-kelas',
-            'view-profile', 'manage-roles', 'lihat-audit-log',
+            'view-profile', 'manage-roles', 'lihat-audit-log', 'buka-sesi-qr',
             // Admin juga dapat akses area guru (review)
             'view-dashboard-guru', 'view-absensi-guru', 'export-rapor-guru',
         ],
         UserRole::Guru->value => [
-            'view-dashboard-guru', 'input-absensi', 'view-absensi-guru',
+            'view-dashboard-guru', 'input-absensi', 'buka-sesi-qr', 'view-absensi-guru',
             'input-nilai', 'export-rapor-guru',
             'view-profile',
         ],

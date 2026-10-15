@@ -25,8 +25,24 @@ class DetailAbsensi extends Model
         'absensi_id',
         'siswa_id',
         'status',
+        'metode',
+        'waktu_absen',
+        'jarak_meter',
+        'akurasi_meter',
+        'lokasi_valid',
+        'alasan_override',
         'keterangan',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'waktu_absen' => 'datetime',
+            'lokasi_valid' => 'boolean',
+            'jarak_meter' => 'float',
+            'akurasi_meter' => 'float',
+        ];
+    }
 
     // Relationships
     public function absensi(): BelongsTo
