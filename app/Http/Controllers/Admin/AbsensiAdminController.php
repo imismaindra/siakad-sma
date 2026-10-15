@@ -66,10 +66,25 @@ class AbsensiAdminController extends Controller
         ]);
 
         foreach ($validated['detail'] as $item) {
-            $absensi->detailAbsensis()->where('id', $item['id'])->update([
-                'status' => $item['status'],
-                'keterangan' => $item['keterangan'] ?? null,
-            ]);
+            $detail = $absensi->detailAbsensis()->with('siswa')->find($item['id']);
+            if ($detail && ($detail->status !== $item['status'] || $detail->keterangan !== ($item['keterangan'] ?? null))) {
+                $oldStatus = $detail->status;
+                $detail->update([
+                    'status' => $item['status'],
+                    'keterangan' => $item['keterangan'] ?? null,
+                ]);
+
+                activity('absensi')
+                    ->causedBy(auth()->user())
+                    ->performedOn($detail)
+                    ->event('override')
+                    ->withProperties([
+                        'old_status' => $oldStatus,
+                        'new_status' => $item['status'],
+                        'alasan' => $item['keterangan'] ?? 'Koreksi absensi oleh admin',
+                    ])
+                    ->log("Admin mengoreksi kehadiran siswa {$detail->siswa?->nama_lengkap} dari {$oldStatus} ke {$item['status']}");
+            }
         }
 
         return back()->with('success', 'Absensi berhasil dikoreksi.');

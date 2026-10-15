@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\SiswaController;
 use App\Http\Controllers\Admin\TahunAjaranController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RolePermissionController;
+use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Guru\AbsensiGuruController;
 use App\Http\Controllers\Guru\DashboardGuruController;
@@ -154,6 +155,12 @@ Route::middleware(['auth', 'role:admin'])
 
         Route::get('/users/{user}/roles', [RolePermissionController::class, 'userRoles'])->name('user.roles');
         Route::put('/users/{user}/roles', [RolePermissionController::class, 'userRolesUpdate'])->name('user.roles.update');
+
+        // ── F3: Audit Log (Hanya-Baca / Append-Only) ────────────────
+        Route::middleware('can:lihat-audit-log')->group(function () {
+            Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
+            Route::get('/audit-log/{activity}', [AuditLogController::class, 'show'])->name('audit-log.show');
+        });
     });
 
 // ============================================================

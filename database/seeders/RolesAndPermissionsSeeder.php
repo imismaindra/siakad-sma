@@ -31,6 +31,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'finalisasi-nilai'     => 'Finalisasi & publish nilai rapor',
         'view-peringkat'       => 'Lihat peringkat siswa',
         'export-rapor-kelas'   => 'Export rapor kelas (admin)',
+        'lihat-audit-log'      => 'Lihat riwayat audit log aktivitas sistem',
         // Guru – Dashboard & Akademik
         'view-dashboard-guru'  => 'Akses dashboard guru',
         'input-absensi'        => 'Input kehadiran siswa',
@@ -57,7 +58,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage-mapel', 'manage-jadwal', 'manage-tahun-ajaran',
             'view-absensi-rekap', 'koreksi-absensi',
             'view-nilai-laporan', 'finalisasi-nilai', 'view-peringkat', 'export-rapor-kelas',
-            'view-profile', 'manage-roles',
+            'view-profile', 'manage-roles', 'lihat-audit-log',
             // Admin juga dapat akses area guru (review)
             'view-dashboard-guru', 'view-absensi-guru', 'export-rapor-guru',
         ],

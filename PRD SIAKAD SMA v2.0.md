@@ -201,7 +201,7 @@ Permission baru: kelola-pengumuman, kelola-kalender, kelola-lokasi-sekolah, buka
 
 | Tahap | Isi | Keluaran |
 | --- | --- | --- |
-| 1 Inti | F1 QR dinamis, F2 geofence di server, F3 audit log | Absensi QR berfungsi dan tercatat di audit log |
+| 1 Inti | F3 audit log (fondasi), F1 QR dinamis, F2 geofence di server | Jejak audit data aktif; absensi QR berfungsi dan tervalidasi lokasi |
 | 2 Pendukung | F4 role orang tua, F5 pengumuman dan kalender | Orang tua dapat memantau; Admin mengelola pengumuman dan kalender |
 | 3 Notifikasi | F6 arsitektur channel, Telegram atau email, adapter WA (opsional) | Notifikasi otomatis untuk alpa, nilai, rapor, pengumuman |
 | 4 Penutupan | Feature test, CHANGELOG, tag v2.0.0, pembaruan README | Rilis v2.0.0 terdokumentasi |

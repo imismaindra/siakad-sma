@@ -5,9 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Nilai extends Model
 {
+    use LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->useLogName('nilai')
+            ->setDescriptionForEvent(fn (string $eventName) => "Nilai mata pelajaran ID #{$this->mata_pelajaran_id} siswa ID #{$this->siswa_id} di-{$eventName}");
+    }
     protected $fillable = [
         'siswa_id',
         'mata_pelajaran_id',

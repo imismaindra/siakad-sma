@@ -5,9 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Absensi extends Model
 {
+    use LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->useLogName('absensi')
+            ->setDescriptionForEvent(fn (string $eventName) => "Sesi absensi kelas ID #{$this->kelas_id} tanggal {$this->tanggal?->format('d/m/Y')} di-{$eventName}");
+    }
     protected $fillable = [
         'jadwal_pelajaran_id',
         'kelas_id',
