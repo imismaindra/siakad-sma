@@ -120,8 +120,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Kode Token Rahasia</label>
-                        <input type="text" x-model="manualForm.token" placeholder="Masukkan 64 karakter token atau paste dari guru" class="w-full text-xs rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 font-mono" required>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Kode Cadangan (OTP / Token)</label>
+                        <input type="text" x-model="manualForm.token" placeholder="Masukkan 6-digit OTP (misal: 849201) atau token" class="w-full text-xs rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 font-mono" required>
                     </div>
 
                     <button type="submit" :disabled="isProcessing" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold text-xs rounded-xl shadow-sm transition">
@@ -238,8 +238,8 @@
 @endsection
 
 @push('scripts')
-{{-- Library html5-qrcode --}}
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+{{-- Library html5-qrcode dari asset lokal (100% offline localhost ready) --}}
+<script src="{{ asset('js/html5-qrcode.min.js') }}"></script>
 <script>
 function siswaScannerApp() {
     return {
@@ -253,6 +253,15 @@ function siswaScannerApp() {
             token: ''
         },
         init() {
+            // Cek apakah dibuka dari pemindaian kamera native ponsel lewat URL parameter ?qr=...
+            const urlParams = new URLSearchParams(window.location.search);
+            const qrParam = urlParams.get('qr');
+            if (qrParam) {
+                this.isProcessing = true;
+                this.submitScan(qrParam);
+                window.history.replaceState({}, document.title, window.location.pathname);
+                return;
+            }
             this.startScanner();
         },
         startScanner() {
@@ -281,33 +290,21 @@ function siswaScannerApp() {
             this.playBeep();
             if (navigator.vibrate) navigator.vibrate(100);
 
-            try {
-                const payload = JSON.parse(decodedText);
-                if (payload.sesi_id && payload.token) {
-                    this.submitScan(payload.sesi_id, payload.token);
-                } else {
-                    throw new Error("Format QR tidak valid");
-                }
-            } catch (e) {
-                this.isProcessing = false;
-                this.resultData = {
-                    success: false,
-                    message: "Kode QR tidak dikenali sebagai format absensi SIAKAD."
-                };
-                this.resultModal = true;
-            }
+            // Kirim langsung payload QR (bisa berupa generic URL atau token terenkripsi)
+            this.submitScan(decodedText);
         },
-        submitScan(sesiId, token) {
+        submitScan(qrPayload, sesiId = null) {
+            const requestBody = sesiId 
+                ? { sesi_id: sesiId, token: qrPayload }
+                : { qr: qrPayload };
+
             fetch(`{{ route('siswa.absensi.scan.post') }}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
-                body: JSON.stringify({
-                    sesi_id: sesiId,
-                    token: token
-                })
+                body: JSON.stringify(requestBody)
             })
             .then(res => res.json().then(data => ({ status: res.status, body: data })))
             .then(({ status, body }) => {
@@ -330,7 +327,7 @@ function siswaScannerApp() {
         submitManual() {
             if (!this.manualForm.sesi_id || !this.manualForm.token) return;
             this.isProcessing = true;
-            this.submitScan(this.manualForm.sesi_id, this.manualForm.token);
+            this.submitScan(this.manualForm.token, this.manualForm.sesi_id);
         },
         closeResultModal() {
             this.resultModal = false;

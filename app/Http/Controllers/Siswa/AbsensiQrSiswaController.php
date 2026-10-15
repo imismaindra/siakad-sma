@@ -51,19 +51,110 @@ class AbsensiQrSiswaController extends Controller
         $siswa = $this->getSiswa();
 
         $validated = $request->validate([
-            'sesi_id' => ['required', 'integer', 'exists:sesi_absensi_qrs,id'],
-            'token' => ['required', 'string'],
+            'qr' => ['nullable', 'string'],
+            'sesi_id' => ['nullable', 'integer', 'exists:sesi_absensi_qrs,id'],
+            'token' => ['nullable', 'string'],
+            'kode_cadangan' => ['nullable', 'string'],
             'latitude' => ['nullable', 'numeric'],
             'longitude' => ['nullable', 'numeric'],
             'accuracy' => ['nullable', 'numeric'],
         ]);
 
-        $sesi = SesiAbsensiQr::with([
-            'jadwalPelajaran.kelas',
-            'jadwalPelajaran.mataPelajaran',
-            'guru',
-            'absensi',
-        ])->findOrFail($validated['sesi_id']);
+        $sesi = null;
+
+        if ($request->filled('qr')) {
+            $rawQr = trim($request->input('qr'));
+            $ticketData = SesiAbsensiQr::decryptTicket($rawQr);
+
+            if ($ticketData) {
+                $sesi = SesiAbsensiQr::with([
+                    'jadwalPelajaran.kelas',
+                    'jadwalPelajaran.mataPelajaran',
+                    'guru',
+                    'absensi',
+                ])->find($ticketData['sesi_id']);
+
+                if (! $sesi) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Sesi absensi tidak ditemukan.',
+                    ], 404);
+                }
+
+                if ($sesi->status !== 'aktif') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Sesi absensi ini sudah ditutup oleh guru.',
+                    ], 422);
+                }
+
+                if (isset($ticketData['exp']) && now()->timestamp > (int) $ticketData['exp']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Kode QR telah kedaluwarsa. Silakan scan kode QR terbaru di layar.',
+                    ], 422);
+                }
+
+                if (! $sesi->isValidTicketPayload($ticketData)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Token QR tidak valid atau rotasi waktu telah berganti. Silakan scan ulang kode QR terbaru.',
+                    ], 422);
+                }
+            } else {
+                // Fallback untuk backward-compatibility jika format berupa raw JSON sesi_id & token
+                $legacy = json_decode($rawQr, true);
+                if (is_array($legacy) && isset($legacy['sesi_id'], $legacy['token'])) {
+                    $sesi = SesiAbsensiQr::with([
+                        'jadwalPelajaran.kelas',
+                        'jadwalPelajaran.mataPelajaran',
+                        'guru',
+                        'absensi',
+                    ])->find($legacy['sesi_id']);
+
+                    if (! $sesi || ! $sesi->isValidToken($legacy['token'])) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Token QR sudah kedaluwarsa atau tidak valid.',
+                        ], 422);
+                    }
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Format kode QR tidak valid atau telah dirusak.',
+                    ], 422);
+                }
+            }
+        } elseif ($request->filled('sesi_id')) {
+            $sesi = SesiAbsensiQr::with([
+                'jadwalPelajaran.kelas',
+                'jadwalPelajaran.mataPelajaran',
+                'guru',
+                'absensi',
+            ])->findOrFail($validated['sesi_id']);
+
+            if ($sesi->status !== 'aktif') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sesi absensi ini sudah ditutup oleh guru.',
+                ], 422);
+            }
+
+            $inputToken = trim($request->input('token') ?? $request->input('kode_cadangan') ?? '');
+            $isValid = $sesi->isValidToken($inputToken) || $sesi->isValidRollingCode($inputToken);
+
+            if (! $isValid) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kode token / OTP tidak valid atau sudah kedaluwarsa.',
+                ], 422);
+            }
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data presensi tidak lengkap. Pindai kode QR atau masukkan kode sesi.',
+            ], 422);
+        }
 
         // 1. Validasi status sesi (F1-07)
         if ($sesi->status !== 'aktif') {
@@ -79,14 +170,6 @@ class AbsensiQrSiswaController extends Controller
                 'success' => false,
                 'message' => 'Anda bukan anggota kelas ' . $sesi->jadwalPelajaran->kelas->nama_lengkap . '.',
             ], 403);
-        }
-
-        // 3. Validasi token QR (F1-02, F1-03, F1-07)
-        if (! $sesi->isValidToken($validated['token'])) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Token QR sudah kedaluwarsa atau tidak valid. Silakan scan ulang kode QR terbaru.',
-            ], 422);
         }
 
         // Pastikan absensi induk terhubung

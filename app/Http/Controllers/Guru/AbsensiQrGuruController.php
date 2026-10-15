@@ -122,9 +122,11 @@ class AbsensiQrGuruController extends Controller
             'status' => 'aktif',
             'sesi_id' => $sesi->id,
             'token' => $sesi->generateToken(),
+            'rolling_code' => $sesi->getRollingCode(),
             'time_remaining' => $sesi->getTimeRemaining(),
             'durasi' => $sesi->durasi_token_detik,
             'qr_payload' => $sesi->getQrPayload(),
+            'qr_url' => $sesi->getQrUrl(),
         ]);
     }
 

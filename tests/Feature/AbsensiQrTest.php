@@ -90,6 +90,93 @@ class AbsensiQrTest extends TestCase
         $this->assertEquals('qr', $detail->metode);
     }
 
+    public function test_student_can_scan_using_generic_encrypted_qr_url(): void
+    {
+        $guruUser = User::role('guru')->first();
+        $jadwal = JadwalPelajaran::where('guru_id', $guruUser->guru->id)->first();
+        $siswa = Siswa::where('kelas_id', $jadwal->kelas_id)->first();
+        $siswaUser = $siswa->user;
+
+        $sesi = SesiAbsensiQr::create([
+            'jadwal_pelajaran_id' => $jadwal->id,
+            'guru_id' => $guruUser->guru->id,
+            'tanggal' => today(),
+            'dibuka_pada' => now(),
+            'secret' => 'test-secret-key-1234567890abcdef',
+            'durasi_token_detik' => 30,
+            'status' => 'aktif',
+        ]);
+
+        $genericQrUrl = $sesi->getQrPayload();
+        $this->assertStringContainsString('qr=', $genericQrUrl);
+
+        $response = $this->actingAs($siswaUser)
+            ->postJson(route('siswa.absensi.scan.post'), [
+                'qr' => $genericQrUrl,
+            ]);
+
+        $response->assertStatus(200);
+        $response->assertJson(['success' => true]);
+
+        $detail = DetailAbsensi::where('siswa_id', $siswa->id)->latest()->first();
+        $this->assertNotNull($detail);
+        $this->assertEquals('hadir', $detail->status);
+    }
+
+    public function test_tampered_or_fake_qr_is_rejected(): void
+    {
+        $guruUser = User::role('guru')->first();
+        $jadwal = JadwalPelajaran::where('guru_id', $guruUser->guru->id)->first();
+        $siswa = Siswa::where('kelas_id', $jadwal->kelas_id)->first();
+
+        $sesi = SesiAbsensiQr::create([
+            'jadwal_pelajaran_id' => $jadwal->id,
+            'guru_id' => $guruUser->guru->id,
+            'tanggal' => today(),
+            'dibuka_pada' => now(),
+            'secret' => 'test-secret-key-1234567890abcdef',
+            'durasi_token_detik' => 30,
+            'status' => 'aktif',
+        ]);
+
+        $response = $this->actingAs($siswa->user)
+            ->postJson(route('siswa.absensi.scan.post'), [
+                'qr' => 'tampered-payload-invalid-string',
+            ]);
+
+        $response->assertStatus(422);
+        $response->assertJson(['success' => false]);
+    }
+
+    public function test_student_can_attend_using_rolling_otp_code(): void
+    {
+        $guruUser = User::role('guru')->first();
+        $jadwal = JadwalPelajaran::where('guru_id', $guruUser->guru->id)->first();
+        $siswa = Siswa::where('kelas_id', $jadwal->kelas_id)->first();
+
+        $sesi = SesiAbsensiQr::create([
+            'jadwal_pelajaran_id' => $jadwal->id,
+            'guru_id' => $guruUser->guru->id,
+            'tanggal' => today(),
+            'dibuka_pada' => now(),
+            'secret' => 'test-secret-key-1234567890abcdef',
+            'durasi_token_detik' => 30,
+            'status' => 'aktif',
+        ]);
+
+        $rollingOtp = $sesi->getRollingCode();
+        $this->assertEquals(6, strlen($rollingOtp));
+
+        $response = $this->actingAs($siswa->user)
+            ->postJson(route('siswa.absensi.scan.post'), [
+                'sesi_id' => $sesi->id,
+                'kode_cadangan' => $rollingOtp,
+            ]);
+
+        $response->assertStatus(200);
+        $response->assertJson(['success' => true]);
+    }
+
     public function test_student_from_different_class_is_rejected(): void
     {
         $guruUser = User::role('guru')->first();
