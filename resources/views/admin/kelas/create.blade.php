@@ -88,9 +88,18 @@
                         <label for="wali_kelas_id" class="form-label">Wali Kelas</label>
                         <select id="wali_kelas_id" name="wali_kelas_id" class="form-select @error('wali_kelas_id') error @enderror">
                             <option value="">Belum Ditentukan</option>
+                            @php
+                                $selectedTaId = old('tahun_ajaran_id', $tahunAjarans->where('is_aktif', true)->first()?->id ?? $tahunAjarans->first()?->id);
+                            @endphp
                             @foreach($gurus as $g)
-                                <option value="{{ $g->id }}" {{ old('wali_kelas_id') == $g->id ? 'selected' : '' }}>
-                                    {{ $g->name }}
+                                @php
+                                    $assignedClass = $assignedWaliMap[$selectedTaId][$g->id] ?? null;
+                                @endphp
+                                <option value="{{ $g->id }}"
+                                    data-original-name="{{ $g->name }}"
+                                    {{ $assignedClass ? 'disabled' : '' }}
+                                    {{ old('wali_kelas_id') == $g->id ? 'selected' : '' }}>
+                                    {{ $g->name }}{{ $assignedClass ? ' (Sudah Wali Kelas ' . $assignedClass . ')' : '' }}
                                 </option>
                             @endforeach
                         </select>
@@ -120,4 +129,39 @@
     </div>
 
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const taSelect = document.getElementById('tahun_ajaran_id');
+    const waliSelect = document.getElementById('wali_kelas_id');
+    const assignedWaliMap = @json($assignedWaliMap ?? []);
+
+    function updateWaliOptions() {
+        if (!taSelect || !waliSelect) return;
+        const taId = taSelect.value;
+        const assignedInTa = assignedWaliMap[taId] || {};
+
+        Array.from(waliSelect.options).forEach(option => {
+            if (!option.value) return;
+
+            const guruId = option.value;
+            const originalName = option.getAttribute('data-original-name') || option.text.split(' (Sudah Wali')[0];
+
+            if (assignedInTa[guruId]) {
+                option.text = `${originalName} (Sudah Wali Kelas ${assignedInTa[guruId]})`;
+                option.disabled = true;
+            } else {
+                option.text = originalName;
+                option.disabled = false;
+            }
+        });
+    }
+
+    if (taSelect) {
+        taSelect.addEventListener('change', updateWaliOptions);
+    }
+});
+</script>
+@endpush
 @endsection

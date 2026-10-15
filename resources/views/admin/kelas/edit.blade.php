@@ -81,8 +81,13 @@
                         <select id="wali_kelas_id" name="wali_kelas_id" class="form-select @error('wali_kelas_id') error @enderror">
                             <option value="">Belum Ditentukan</option>
                             @foreach($gurus as $g)
-                                <option value="{{ $g->id }}" {{ old('wali_kelas_id', $kelas->wali_kelas_id) == $g->id ? 'selected' : '' }}>
-                                    {{ $g->name }}
+                                @php
+                                    $assignedClass = $assignedWaliMap[$kelas->tahun_ajaran_id][$g->id] ?? null;
+                                @endphp
+                                <option value="{{ $g->id }}"
+                                    {{ $assignedClass ? 'disabled' : '' }}
+                                    {{ old('wali_kelas_id', $kelas->wali_kelas_id) == $g->id ? 'selected' : '' }}>
+                                    {{ $g->name }}{{ $assignedClass ? ' (Sudah Wali Kelas ' . $assignedClass . ')' : '' }}
                                 </option>
                             @endforeach
                         </select>

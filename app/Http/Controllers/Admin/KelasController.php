@@ -8,6 +8,7 @@ use App\Models\Kelas;
 use App\Models\TahunAjaran;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class KelasController extends Controller
 {
@@ -42,7 +43,13 @@ class KelasController extends Controller
         $jurusans = Jurusan::all();
         $gurus = User::role('guru')->aktif()->get();
 
-        return view('admin.kelas.create', compact('tahunAjarans', 'jurusans', 'gurus'));
+        $assignedWali = Kelas::whereNotNull('wali_kelas_id')->get();
+        $assignedWaliMap = [];
+        foreach ($assignedWali as $k) {
+            $assignedWaliMap[$k->tahun_ajaran_id][$k->wali_kelas_id] = $k->nama_kelas;
+        }
+
+        return view('admin.kelas.create', compact('tahunAjarans', 'jurusans', 'gurus', 'assignedWaliMap'));
     }
 
     public function store(Request $request)
@@ -50,10 +57,26 @@ class KelasController extends Controller
         $validated = $request->validate([
             'tahun_ajaran_id' => ['required', 'exists:tahun_ajarans,id'],
             'jurusan_id' => ['nullable', 'exists:jurusans,id'],
-            'wali_kelas_id' => ['nullable', 'exists:users,id'],
             'tingkat' => ['required', 'in:X,XI,XII'],
-            'nomor' => ['required', 'integer', 'min:1'],
+            'nomor' => [
+                'required',
+                'integer',
+                'min:1',
+                Rule::unique('kelas', 'nomor')
+                    ->where(fn ($q) => $q->where('tahun_ajaran_id', $request->tahun_ajaran_id)
+                                        ->where('jurusan_id', $request->jurusan_id)
+                                        ->where('tingkat', $request->tingkat)),
+            ],
+            'wali_kelas_id' => [
+                'nullable',
+                'exists:users,id',
+                Rule::unique('kelas', 'wali_kelas_id')
+                    ->where(fn ($q) => $q->where('tahun_ajaran_id', $request->tahun_ajaran_id)),
+            ],
             'kapasitas' => ['required', 'integer', 'min:1', 'max:50'],
+        ], [
+            'nomor.unique' => 'Kelas dengan kombinasi Tingkat, Jurusan, dan Nomor ini sudah ada pada tahun ajaran tersebut.',
+            'wali_kelas_id.unique' => 'Guru yang dipilih sudah menjadi wali kelas di kelas lain pada tahun ajaran ini.',
         ]);
 
         Kelas::create($validated);
@@ -74,11 +97,20 @@ class KelasController extends Controller
         $jurusans = Jurusan::all();
         $gurus = User::role('guru')->aktif()->get();
 
+        $assignedWali = Kelas::whereNotNull('wali_kelas_id')
+            ->where('id', '!=', $kela->id)
+            ->get();
+        $assignedWaliMap = [];
+        foreach ($assignedWali as $k) {
+            $assignedWaliMap[$k->tahun_ajaran_id][$k->wali_kelas_id] = $k->nama_kelas;
+        }
+
         return view('admin.kelas.edit', [
             'kelas' => $kela,
             'tahunAjarans' => $tahunAjarans,
             'jurusans' => $jurusans,
             'gurus' => $gurus,
+            'assignedWaliMap' => $assignedWaliMap,
         ]);
     }
 
@@ -86,10 +118,28 @@ class KelasController extends Controller
     {
         $validated = $request->validate([
             'jurusan_id' => ['nullable', 'exists:jurusans,id'],
-            'wali_kelas_id' => ['nullable', 'exists:users,id'],
             'tingkat' => ['required', 'in:X,XI,XII'],
-            'nomor' => ['required', 'integer', 'min:1'],
+            'nomor' => [
+                'required',
+                'integer',
+                'min:1',
+                Rule::unique('kelas', 'nomor')
+                    ->where(fn ($q) => $q->where('tahun_ajaran_id', $kela->tahun_ajaran_id)
+                                        ->where('jurusan_id', $request->jurusan_id)
+                                        ->where('tingkat', $request->tingkat))
+                    ->ignore($kela->id),
+            ],
+            'wali_kelas_id' => [
+                'nullable',
+                'exists:users,id',
+                Rule::unique('kelas', 'wali_kelas_id')
+                    ->where(fn ($q) => $q->where('tahun_ajaran_id', $kela->tahun_ajaran_id))
+                    ->ignore($kela->id),
+            ],
             'kapasitas' => ['required', 'integer', 'min:1', 'max:50'],
+        ], [
+            'nomor.unique' => 'Kelas dengan kombinasi Tingkat, Jurusan, dan Nomor ini sudah ada pada tahun ajaran tersebut.',
+            'wali_kelas_id.unique' => 'Guru yang dipilih sudah menjadi wali kelas di kelas lain pada tahun ajaran ini.',
         ]);
 
         $kela->update($validated);
