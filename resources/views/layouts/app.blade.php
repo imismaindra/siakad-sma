@@ -7,6 +7,7 @@
     <title>@yield('title', 'SIAKAD SMA') - {{ config('app.name') }}</title>
     <meta name="description" content="@yield('meta-description', 'Sistem Informasi Akademik SMA')">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script defer src="{{ asset('js/alpine.min.js') }}"></script>
     @stack('styles')
 </head>
 <body class="bg-[#F4F5F7] text-slate-600 font-sans antialiased">

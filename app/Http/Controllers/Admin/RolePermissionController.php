@@ -52,6 +52,13 @@ class RolePermissionController extends Controller
         $role = Role::create(['name' => $validated['name'], 'guard_name' => 'web']);
         $role->syncPermissions($validated['permissions'] ?? []);
 
+        activity('role_permission')
+            ->causedBy(auth()->user())
+            ->performedOn($role)
+            ->event('created')
+            ->withProperties(['permissions' => $validated['permissions'] ?? []])
+            ->log("Admin membuat role baru: {$role->name}");
+
         return redirect()->route('admin.roles.index')
             ->with('success', "Role <strong>{$role->name}</strong> berhasil dibuat dengan " . count($validated['permissions'] ?? []) . " permission.");
     }
@@ -77,8 +84,19 @@ class RolePermissionController extends Controller
             'permissions.*' => ['exists:permissions,name'],
         ]);
 
+        $oldPermissions = $role->permissions->pluck('name')->toArray();
         $role->update(['name' => $validated['name']]);
         $role->syncPermissions($validated['permissions'] ?? []);
+
+        activity('role_permission')
+            ->causedBy(auth()->user())
+            ->performedOn($role)
+            ->event('updated')
+            ->withProperties([
+                'old_permissions' => $oldPermissions,
+                'new_permissions' => $validated['permissions'] ?? [],
+            ])
+            ->log("Admin memperbarui role {$role->name}");
 
         return redirect()->route('admin.roles.index')
             ->with('success', "Role <strong>{$role->name}</strong> berhasil diperbarui.");
@@ -96,6 +114,12 @@ class RolePermissionController extends Controller
 
         $roleName = $role->name;
         $role->delete();
+
+        activity('role_permission')
+            ->causedBy(auth()->user())
+            ->event('deleted')
+            ->withProperties(['role_name' => $roleName])
+            ->log("Admin menghapus role {$roleName}");
 
         return redirect()->route('admin.roles.index')
             ->with('success', "Role <strong>{$roleName}</strong> berhasil dihapus.");
@@ -179,6 +203,7 @@ class RolePermissionController extends Controller
             'roles.*' => ['exists:roles,name'],
         ]);
 
+        $oldRoles = $user->roles->pluck('name')->toArray();
         $newRoles = $validated['roles'] ?? [];
 
         // Sync roles via spatie
@@ -189,6 +214,16 @@ class RolePermissionController extends Controller
         if ($primaryRole) {
             $user->update(['role' => $primaryRole]);
         }
+
+        activity('role_permission')
+            ->causedBy(auth()->user())
+            ->performedOn($user)
+            ->event('updated')
+            ->withProperties([
+                'old_roles' => $oldRoles,
+                'new_roles' => $newRoles,
+            ])
+            ->log("Admin mengubah hak akses / role untuk pengguna {$user->name}");
 
         return redirect()->route('admin.user.index')
             ->with('success', "Role pengguna <strong>{$user->name}</strong> berhasil diperbarui.");

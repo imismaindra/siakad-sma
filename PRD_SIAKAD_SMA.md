@@ -5,19 +5,19 @@
 
 | Field | Detail |
 |---|---|
-| **Versi Dokumen** | 2.0 (Post-MVP & Feature Enhancement) |
-| **Tanggal** | 15 Oktober 2026 |
-| **Status** | Produksi & Stabil (Feature Complete) |
+| **Versi Dokumen** | 2.1 (Post-MVP, Dynamic QR Attendance, Spatie Audit Trail, & CI/CD Pipeline) |
+| **Tanggal** | 16 Oktober 2026 |
+| **Status** | Produksi & Stabil (Feature Complete - v2.1) |
 | **Platform** | Web Application (Responsive Desktop, Tablet, & Mobile) |
-| **Target Rilis** | Q4 2026 (Rilis Stabil v1.0 & v2.0) |
+| **Target Rilis** | Q4 2026 (Rilis Stabil v1.0, v2.0, & v2.1) |
 
 ---
 
 ## 1. Ringkasan Eksekutif
 
-SIAKAD SMA adalah platform administrasi akademik berbasis web modern yang dirancang untuk **menjembatani komunikasi, tata kelola data, dan alur kerja** antara tiga aktor utama sekolah: **Tata Usaha (Admin)**, **Guru (Pendidik & Wali Kelas)**, dan **Siswa**. Sistem ini mentransformasi proses administrasi sekolah dari metode manual (pembukuan fisik & lembar spreadsheet yang terfragmentasi) menjadi ekosistem digital terintegrasi.
+SIAKAD SMA adalah platform administrasi akademik berbasis web modern yang dirancang untuk **menjembatani komunikasi, tata kelola data, integritas informasi, dan alur kerja operasional** antara tiga aktor utama sekolah: **Tata Usaha (Admin)**, **Guru (Pendidik & Wali Kelas)**, dan **Siswa**. Sistem ini mentransformasi proses administrasi sekolah dari metode manual (pembukuan fisik & lembar spreadsheet yang terfragmentasi) menjadi ekosistem digital terintegrasi.
 
-Cakupan fungsional mencakup pengelolaan data master sekolah dengan validasi integritas ketat, penyusunan jadwal bebas bentrok (*clashing-free scheduling*), pencatatan kehadiran digital per sesi pelajaran, pengolahan nilai berbobot fleksibel berstandar Kurikulum Merdeka, hingga penerbitan dan ekspor dokumen e-Rapor resmi berformat PDF secara mandiri maupun kolektif.
+Cakupan fungsional mencakup pengelolaan data master sekolah dengan validasi integritas ketat, penyusunan jadwal bebas bentrok (*clashing-free scheduling*), pencatatan kehadiran digital per sesi (baik manual maupun **presensi mandiri QR code dinamis dengan rolling token & live monitoring**), pengolahan nilai berbobot fleksibel berstandar Kurikulum Merdeka, penerbitan dan ekspor dokumen e-Rapor resmi berformat PDF secara mandiri maupun kolektif, **jejak audit otomatis (*audit trail/activity log*) untuk akuntabilitas mutasi data sensitif**, hingga **otomatisasi deployment berkelanjutan (CI/CD via GitHub Actions ke cPanel shared hosting)**.
 
 ---
 
@@ -27,24 +27,28 @@ Cakupan fungsional mencakup pengelolaan data master sekolah dengan validasi inte
 
 | # | Masalah | Dampak Nyata di Sekolah |
 |---|---|---|
-| 1 | Data siswa & kelas dikelola terpisah di spreadsheet, rentan duplikasi & inkonsistensi | Inefisiensi operasional tinggi dan risiko kehilangan data |
+| 1 | Data siswa & kelas dikelola terpisah di spreadsheet, rentan duplikasi & inkonsistensi | Inefisiensi operasional tinggi dan risiko kehilangan data pokok siswa |
 | 2 | Jadwal pelajaran dibuat manual, sering terjadi guru mengajar di dua kelas pada jam yang sama | Tabrakan jadwal (*schedule clashing*), kebingungan guru & siswa |
 | 3 | Pengangkatan wali kelas rawan tumpang tindih (satu guru memegang banyak kelas di tahun ajaran sama) | Pelanggaran beban kerja dan pembagian tugas perwalian yang tidak merata |
 | 4 | Rekapitulasi absensi harian di kertas memakan waktu lama setiap akhir bulan/semester | Beban administrasi berlebih bagi guru mata pelajaran dan wali kelas |
-| 5 | Kalkulasi nilai rapor dihitung manual dengan bobot yang kaku atau tidak konsisten | Potensi kesalahan hitung nilai akhir siswa dan keterlambatan rapor |
-| 6 | Siswa & wali murid tidak memiliki visibilitas real-time terhadap kehadiran dan nilai berkala | Kurangnya transparansi pemantauan akademik sebelum rapor fisik terbit |
-| 7 | Pengumuman sekolah tersebar lewat grup chat informal yang mudah tertimbun | Informasi penting sekolah tidak tersampaikan secara merata dan terarsip |
+| 5 | Presensi manual memakan waktu berharga guru di 10–15 menit awal jam belajar | Waktu efektif kegiatan belajar mengajar (KBM) berkurang drastis |
+| 6 | Kalkulasi nilai rapor dihitung manual dengan bobot yang kaku atau tidak konsisten | Potensi kesalahan hitung nilai akhir siswa dan keterlambatan rapor |
+| 7 | Perubahan data sensitif (nilai siswa, absensi susulan, hak akses akun) tidak terdokumentasi pelakunya | Hilangnya akuntabilitas data jika terjadi sengketa koreksi nilai atau kehadiran |
+| 8 | Siswa & wali murid tidak memiliki visibilitas real-time terhadap kehadiran dan nilai berkala | Kurangnya transparansi pemantauan akademik sebelum rapor fisik terbit |
+| 9 | Pengumuman sekolah tersebar lewat grup chat informal yang mudah tertimbun | Informasi penting sekolah tidak tersampaikan secara merata dan terarsip |
+| 10 | Proses deployment ke server produksi cPanel manual via FTP rentan kelalaian kompilasi aset | Terjadinya downtime atau aset CSS/JS yang desinkronisasi pada pengguna |
 
 ### 2.2 Peluang & Regulasi
 - **Kurikulum Merdeka**: Mendorong pelaporan berbasis capaian kompetensi dengan deskripsi capaian pembelajaran yang terpersonalisasi per siswa.
-- **Efisiensi Administrasi**: Mengurangi durasi pembuatan e-Rapor dari ~2 minggu menjadi ≤ 3 hari kerja.
-- **Kemandirian Sekolah**: Menghadirkan sistem terpadu yang ringan, minim ketergantungan infrastruktur rumit (zero-config SQLite untuk lokal dan MySQL/PostgreSQL untuk skala penuh).
+- **Efisiensi Administrasi**: Mengurangi durasi pembuatan e-Rapor dari ~2 minggu menjadi ≤ 3 hari kerja dan memangkas waktu absensi kelas menjadi < 1 menit lewat QR code.
+- **Akuntabilitas & Kepatuhan Data**: Memastikan setiap mutasi nilai dan kehadiran siswa tercatat dalam sistem audit log yang tidak dapat diubah (*append-only*).
+- **Kemandirian Sekolah**: Menghadirkan sistem terpadu yang ringan, minim ketergantungan infrastruktur rumit (zero-config SQLite untuk lokal, MySQL/PostgreSQL untuk produksi cPanel).
 
 ---
 
 ## 3. Visi & Tujuan Produk
 
-> **Visi:** Menjadi platform administrasi akademik SMA yang paling andal, intuitif, dan efisien, sehingga pendidik fokus membimbing dan siswa fokus berkembang.
+> **Visi:** Menjadi platform administrasi akademik SMA yang paling andal, intuitif, transparan, dan efisien, sehingga pendidik fokus membimbing dan siswa fokus berkembang.
 
 ### 3.1 Tujuan Bisnis & Key Results (OKR)
 
@@ -52,8 +56,11 @@ Cakupan fungsional mencakup pengelolaan data master sekolah dengan validasi inte
 |---|---|:---:|
 | Meningkatkan efisiensi kerja staf & guru | Memangkas waktu penyusunan jadwal dan kalkulasi rapor ≥ 70% | ✅ Tercapai |
 | Menjamin integritas & validitas data akademik | Zero konflik jadwal guru dan zero duplikasi wali kelas per tahun ajaran | ✅ Tercapai |
+| Mempercepat presensi kelas nirsentuh | Mempersingkat waktu absensi per sesi dari 10 menit menjadi < 60 detik via QR dinamis | ✅ Tercapai (F1) |
+| Akuntabilitas mutasi data akademik | 100% perubahan absensi, nilai, dan akun tercatat di Audit Log append-only | ✅ Tercapai (F3) |
 | Mendorong transparansi akademik | 100% siswa aktif dapat mengakses jadwal, kehadiran, dan e-Rapor mandiri | ✅ Tercapai |
-| Keamanan & fleksibilitas tata kelola | Penerapan Dynamic Role-Based Access Control (RBAC) berbasis database | ✅ Tercapai |
+| Keamanan & fleksibilitas tata kelola | Dynamic Role-Based Access Control (RBAC) berbasis database | ✅ Tercapai |
+| Otomatisasi rilis & deployment | Zero-friction automated deployment ke cPanel via GitHub Actions | ✅ Tercapai (CI/CD) |
 
 ---
 
@@ -61,24 +68,24 @@ Cakupan fungsional mencakup pengelolaan data master sekolah dengan validasi inte
 
 ### 👤 Persona 1 — Admin / Tata Usaha (TU)
 - **Profil:** Staf administrasi sekolah, mengelola operasional harian dan data pokok sekolah.
-- **Goal:** Mengontrol seluruh master data, memvalidasi pembagian kelas & wali kelas, menyusun jadwal pelajaran, memverifikasi nilai rapor, serta mengelola akun dan izin hak akses secara fleksibel.
-- **Pain Point:** Sering terjadi jadwal guru bentrok saat awal semester dan koreksi data nilai siswa memakan waktu lama.
+- **Goal:** Mengontrol seluruh master data, memvalidasi pembagian kelas & wali kelas, menyusun jadwal pelajaran, memverifikasi nilai rapor, mengelola akun dan izin hak akses secara fleksibel, mengawasi **Jejak Audit (Audit Log)** untuk menginvestigasi mutasi nilai/absensi, serta memantau rilis sistem via pipeline deployment otomatis.
+- **Pain Point:** Sering terjadi jadwal guru bentrok saat awal semester, koreksi data nilai siswa memakan waktu lama, serta tidak adanya bukti log saat terjadi perubahan nilai tanpa izin.
 
 ### 👤 Persona 2 — Guru (Pendidik & Wali Kelas)
 - **Profil:** Tenaga pengajar mata pelajaran dan wali kelas bimbingan.
-- **Goal:** Melihat jadwal mengajar pribadi, mengisi absensi per jam pelajaran, menginput nilai harian/UTS/UAS dengan kalkulasi otomatis, mengisi deskripsi capaian kompetensi, serta mengunduh e-Rapor kelas bimbingannya.
-- **Pain Point:** Menghitung manual persentase bobot nilai dan merekap kehadiran ratusan siswa di akhir semester.
+- **Goal:** Melihat jadwal mengajar pribadi, membuka **Sesi Absensi QR Dinamis** di layar kelas dengan pemantauan siswa realtime (*live polling*), melakukan koreksi/override kehadiran manual dengan alasan tercatat, menginput nilai harian/UTS/UAS dengan kalkulasi otomatis, mengisi deskripsi capaian kompetensi, serta mengunduh e-Rapor kelas bimbingannya.
+- **Pain Point:** Memanggil nama puluhan siswa satu per satu di awal jam, menghitung manual persentase bobot nilai, dan merekap kehadiran ratusan siswa di akhir semester.
 
 ### 👤 Persona 3 — Siswa
 - **Profil:** Pelajar tingkat SMA (Kelas X, XI, XII).
-- **Goal:** Memantau jadwal pelajaran mingguan, mengecek riwayat absensi, membaca pengumuman sekolah, serta melihat lembar nilai dan mengunduh berkas resmi e-Rapor PDF setelah difinalisasi.
-- **Pain Point:** Tidak mengetahui rekap nilai berjalan dan kartu rapor fisik sering rusak atau lambat dibagikan.
+- **Goal:** Melakukan absensi mandiri instan via pemindai kamera browser smartphone (**HTML5-QRCode**) atau kode OTP cadangan, memantau jadwal pelajaran mingguan, mengecek riwayat absensi harian, membaca pengumuman sekolah, serta melihat lembar nilai dan mengunduh berkas resmi e-Rapor PDF setelah difinalisasi.
+- **Pain Point:** Proses absensi manual lambat, tidak mengetahui rekap kehadiran berjalan, dan kartu rapor fisik sering rusak atau lambat dibagikan.
 
 ---
 
 ## 5. Ruang Lingkup Produk
 
-### 5.1 In-Scope (Fitur Selesai & Aktif di v2.0)
+### 5.1 In-Scope (Fitur Selesai & Aktif di v2.1)
 - ✅ **Dynamic RBAC**: Manajemen Role & Permission dinamis melalui antarmuka web ([spatie/laravel-permission](https://spatie.be/docs/laravel-permission)).
 - ✅ **Manajemen Data Master**: Tahun Ajaran (kontrol aktif global), Jurusan, Kelas, Mata Pelajaran, Guru, Siswa, serta mutasi pindah kelas.
 - ✅ **Validasi Integritas Ketat**:
@@ -87,7 +94,17 @@ Cakupan fungsional mencakup pengelolaan data master sekolah dengan validasi inte
 - ✅ **Jadwal Pelajaran Bebas Bentrok**:
   - Algoritma pencegah tabrakan jadwal (*time overlap detection*) antar-kelas untuk guru yang sama.
   - Tampilan visual Grid Kalender mingguan dan Tabel tabular dengan fitur pencarian & penyaringan.
-- ✅ **Absensi Digital**: Pencatatan kehadiran per sesi kelas (Hadir, Sakit, Izin, Alpa) dan fitur koreksi administratif oleh Admin.
+- ✅ **Absensi Digital Multi-Metode**:
+  - Pencatatan kehadiran konvensional per sesi kelas (Hadir, Sakit, Izin, Alpa) dan koreksi administratif oleh Admin.
+  - **Absensi QR Code Dinamis (F1)**: Guru membuka sesi dengan QR code dinamis yang berotasi tiap 30 detik (HMAC secret hash), tiket payload terenkripsi, pencegahan scan kedaluwarsa, dan pencegahan duplikasi data (*idempotent*).
+  - **Scanner Kamera Browser Siswa**: Pemindaian kamera mandiri smartphone siswa menggunakan library lokal `html5-qrcode.min.js` (100% offline localhost ready).
+  - **Kode Cadangan (OTP Rolling 6-Digit)**: Alternatif presensi bagi siswa dengan kendala kamera tanpa perlu reload.
+  - **Live Monitoring Kehadiran Guru**: Polling AJAX ringan setiap 3 detik menampilkan daftar siswa hadir vs belum absen secara real-time.
+  - **Override Kehadiran Guru**: Guru dapat meng-override siswa yang berkendala dengan kewajiban mengisi alasan yang otomatis tercatat di audit log.
+- ✅ **Audit Trail & Log Aktivitas Sistem (F3)**:
+  - Integrasi [spatie/laravel-activitylog](https://spatie.be/docs/laravel-activitylog) untuk mencatat otomatis seluruh pembuatan, pembaruan, dan penghapusan data pada model `Absensi`, `DetailAbsensi`, `Nilai`, dan `User`.
+  - GUI Admin Audit Log dengan filter multi-kriteria: Pelaku (*causer*), Modul (*log_name*), Jenis Aksi (*event*), Rentang Tanggal, dan Pencarian teks bebas pada data lama vs baru.
+  - Log bersifat hanya-tambah (*append-only*, immutable).
 - ✅ **Pengolahan Nilai Berbobot & e-Rapor**:
   - Pengaturan persentase bobot nilai (Harian, UTS, UAS) fleksibel dengan live validasi total 100%.
   - Perhitungan otomatis nilai akhir dengan algoritma normalisasi dinamis saat komponen nilai belum lengkap.
@@ -95,12 +112,16 @@ Cakupan fungsional mencakup pengelolaan data master sekolah dengan validasi inte
   - Lembar e-Rapor PDF resmi standar Kurikulum Merdeka (ekspor mandiri siswa, per siswa oleh guru/admin, dan ekspor kolektif per kelas).
 - ✅ **Peringkat Siswa**: Penentuan ranking otomatis kelas berdasarkan rerata nilai akhir.
 - ✅ **Modul Pengumuman Terarah**: Publikasi pengumuman dengan target audiens spesifik (Semua, Guru, Siswa, atau Kelas tertentu).
-- ✅ **Automated Testing Suite**: Pengujian logika bisnis dan validasi aturan database menggunakan automated Feature Tests.
+- ✅ **Continuous Integration & Continuous Deployment (CI/CD)**:
+  - Workflow GitHub Actions (`.github/workflows/deploy.yml`) untuk rilis otomatis ke cPanel Shared Hosting (subdomain) saat push ke branch `v2.0-development` atau `main`.
+  - Kompatibilitas runtime PHP ^8.2 di composer.json dan optimasi build aset Vite frontend.
+- ✅ **Automated Testing Suite**: Pengujian logika bisnis, integritas data, alur QR code, dan audit trail menggunakan feature test PHPUnit.
 
 ### 5.2 Out-of-Scope (Rencana Pengembangan Masa Depan / Fase 3)
-- ⏳ Portal akses khusus Orang Tua / Wali Murid (akan diintegrasikan dengan notifikasi WhatsApp).
+- ⏳ Portal akses khusus Orang Tua / Wali Murid (Tahap 2 Evolusi - F4).
+- ⏳ Notifikasi Multi-Channel modular (Telegram Bot, Email, Adapter WhatsApp - F6).
+- ⏳ Kalender Akademik interaktif terpadu (F5).
 - ⏳ Integrasi sinkronisasi langsung dua arah dengan API Dapodik Kemdikbud.
-- ⏳ Aplikasi Mobile Native (iOS & Android) — saat ini web sudah sepenuhnya responsif via mobile browser.
 - ⏳ Modul Pembayaran SPP & Keuangan Sekolah (dipisahkan ke sistem microservice terpisah).
 
 ---
@@ -150,15 +171,20 @@ Cakupan fungsional mencakup pengelolaan data master sekolah dengan validasi inte
 
 ---
 
-### 6.4 Modul Absensi Digital (Guru & Admin)
+### 6.4 Modul Absensi Digital & Dynamic QR Attendance (Guru, Siswa, & Admin)
 
 | ID | Fitur | Keterangan & Aturan Bisnis | Prioritas | Status |
 |---|---|---|---|:---:|
-| ABSEN-01 | Input Kehadiran Sesi | Guru mata pelajaran menginput kehadiran per siswa (Hadir, Sakit, Izin, Alpa) pada jadwal aktif | 🔴 Must Have | ✅ Selesai |
+| ABSEN-01 | Input Kehadiran Sesi Manual | Guru mata pelajaran menginput kehadiran per siswa (Hadir, Sakit, Izin, Alpa) pada jadwal aktif | 🔴 Must Have | ✅ Selesai |
 | ABSEN-02 | Rekapitulasi Otomatis | Sistem otomatis menghitung total H/S/I/A dan persentase kehadiran kumulatif per siswa | 🔴 Must Have | ✅ Selesai |
 | ABSEN-03 | Rekap Semester Kelas | Tinjauan menyeluruh kehadiran seluruh siswa dalam satu kelas per semester | 🔴 Must Have | ✅ Selesai |
 | ABSEN-04 | Koreksi Absensi Admin | Admin TU memiliki wewenang mengoreksi catatan kehadiran jika terdapat surat dokter/izin susulan | 🔴 Must Have | ✅ Selesai |
 | ABSEN-05 | Portal Kehadiran Siswa | Siswa dapat memantau akumulasi kehadiran dan tingkat kedisiplinan belajar secara mandiri | 🟡 Should Have | ✅ Selesai |
+| ABSEN-06 | Sesi Absensi QR Dinamis | Guru membuka sesi presensi QR; token QR berganti otomatis tiap 30 detik berbasis HMAC secret | 🔴 Must Have | ✅ Selesai (F1) |
+| ABSEN-07 | Presensi Kamera Mandiri Siswa | Siswa memindai QR lewat browser smartphone (HTML5-QRCode); server memvalidasi masa berlaku token, kelas, dan jam pelajaran | 🔴 Must Have | ✅ Selesai (F1) |
+| ABSEN-08 | Fallback OTP Rolling Code | Tersedia 6-digit OTP rolling code bagi siswa yang mengalami kendala teknis pada kamera perangkat | 🔴 Must Have | ✅ Selesai (F1) |
+| ABSEN-09 | Live Monitoring Kehadiran | Tampilan monitor guru melakukan polling otomatis per 3 detik memperbarui status hadir siswa tanpa reload | 🟡 Should Have | ✅ Selesai (F1) |
+| ABSEN-10 | Override Presensi Guru | Guru dapat meng-override status siswa yang berkendala dengan input alasan wajib yang terdata di audit log | 🔴 Must Have | ✅ Selesai (F1/F2) |
 
 ---
 
@@ -200,29 +226,56 @@ Cakupan fungsional mencakup pengelolaan data master sekolah dengan validasi inte
 
 ---
 
+### 6.8 Modul Jejak Audit & Keamanan (Audit Log)
+
+| ID | Fitur | Keterangan & Aturan Bisnis | Prioritas | Status |
+|---|---|---|---|:---:|
+| AUDIT-01 | Auto Activity Logging | Sistem otomatis merekam event `created`, `updated`, `deleted` pada model `Absensi`, `DetailAbsensi`, `Nilai`, dan `User` | 🔴 Must Have | ✅ Selesai (F3) |
+| AUDIT-02 | Dashboard Audit Trail Admin | Antarmuka khusus bagi Admin TU untuk meninjau log aktivitas dengan pagination dan visual badge | 🔴 Must Have | ✅ Selesai (F3) |
+| AUDIT-03 | Multi-Dimensional Filtering | Penyaringan log berdasarkan Pelaku (*causer*), Modul (*log_name*), Jenis Aksi (*event*), Rentang Tanggal, dan Full-Text Search properti | 🔴 Must Have | ✅ Selesai (F3) |
+| AUDIT-04 | Immutabilitas Log (Append-Only) | Rekam audit log tidak dapat diedit atau dihapus melalui GUI demi integritas barang bukti data | 🔴 Must Have | ✅ Selesai (F3) |
+
+---
+
+### 6.9 Modul DevOps & Continuous Deployment (CI/CD Pipeline)
+
+| ID | Fitur | Keterangan & Aturan Bisnis | Prioritas | Status |
+|---|---|---|---|:---:|
+| DEVOPS-01 | GitHub Actions Deployment | Otomatisasi alur CI/CD saat push ke branch `v2.0-development` dan `main` menuju cPanel Shared Hosting | 🔴 Must Have | ✅ Selesai |
+| DEVOPS-02 | Automated Asset Compilation | Setup runtime Node.js 20 & Vite build untuk Tailwind CSS v4 dan tracking bundle manifest di repository | 🔴 Must Have | ✅ Selesai |
+| DEVOPS-03 | Deployment Terisolasi via SSH/Rsync | Transfer berkas produksi terisolasi dengan proteksi direktori `storage` dan file `.env` di hosting | 🔴 Must Have | ✅ Selesai |
+| DEVOPS-04 | Post-Deployment Automation | Eksekusi otomatis `php artisan migrate --force`, caching route & view, serta storage link di server | 🔴 Must Have | ✅ Selesai |
+
+---
+
 ## 7. Spesifikasi Non-Fungsional
 
 | Kategori | Parameter | Spesifikasi & Tolok Ukur |
 |---|---|---|
-| **Performa & Responsivitas** | Response Time | Waktu load halaman dashboard dan data master < 2.0 detik pada koneksi internet standar (10 Mbps) |
-| **Keamanan** | Enkripsi & Proteksi | Kata sandi di-hash menggunakan algoritma Bcrypt; seluruh form dilengkapi proteksi CSRF token; input tersanitasi dari ancaman XSS & SQL Injection |
-| **Otorisasi & Hak Akses** | Dynamic RBAC | Seluruh rute dan aksi terlindungi oleh middleware Spatie Permission; pengguna dilarang mengakses modul di luar izin yang diberikan (HTTP 403) |
-| **Integritas Basis Data** | Constraints & Transactions | Relasi database dilindungi oleh foreign keys dan index; operasi transaksi majemuk (seperti perhitungan rapor massal) dibungkus dalam `DB::transaction` |
+| **Performa & Responsivitas** | Response Time | Waktu load halaman dashboard dan data master < 2.0 detik pada koneksi internet standar (10 Mbps). Polling live monitoring guru < 300 ms |
+| **Keamanan Presensi** | Rotasi Token QR | Token berbasis hash HMAC-SHA256 berotasi tiap 30 detik; verifikasi server memastikan token kedaluwarsa tidak dapat dipakai kembali |
+| **Kemandirian Aset** | Zero External CDN | Seluruh library pendukung pemindai QR (`html5-qrcode.min.js`, `qrcode.min.js`, `alpine.min.js`) disediakan lokal di `public/js` |
+| **Keamanan & Akuntabilitas** | Audit Log & Enkripsi | Kata sandi di-hash Bcrypt; formulir diproteksi token CSRF; mutasi data dicatat append-only di tabel `activity_log` |
+| **Otorisasi & Hak Akses** | Dynamic RBAC | Seluruh rute dilindungi middleware Spatie Permission; aksi tanpa izin menghasilkan respon HTTP 403 Forbidden |
+| **Integritas Basis Data** | Constraints & Transactions | Relasi dilindungi foreign keys cascade/restrict; operasi ganda dibungkus dalam `DB::transaction` |
 | **Kompatibilitas Tampilan** | Cross-Browser & Device | UI responsif menggunakan Tailwind CSS v4, berjalan optimal pada Chrome, Firefox, Edge, Safari (Desktop, Tablet, Smartphone) |
-| **Generasi Dokumen** | PDF Engine | Hasil render e-Rapor PDF menggunakan format kertas A4 standar cetak dinas dengan margin presisi dan font ramah cetak |
-| **Keandalan & Pengujian** | Test Automation | Dilengkapi automated Feature Tests untuk memverifikasi integritas aturan bisnis (seperti validasi wali kelas ganda) |
+| **Generasi Dokumen** | PDF Engine | Render e-Rapor PDF menggunakan format kertas A4 standar cetak dinas dengan margin presisi dan font ramah cetak |
+| **Keandalan & Pengujian** | Test Automation | Dilengkapi automated Feature Tests PHPUnit/Pest untuk validasi jadwal anti-bentrok, presensi QR, dan audit log |
 
 ---
 
 ## 8. Arsitektur Sistem (Implementasi Aktual)
 
-Sistem SIAKAD SMA mengadopsi pola arsitektur **Monolith Modern (Model-View-Controller)** yang menggabungkan performa server-side rendering dengan kecepatan build modern:
+Sistem SIAKAD SMA mengadopsi pola arsitektur **Monolith Modern (Model-View-Controller)** yang menggabungkan performa server-side rendering dengan kecepatan build modern serta pipeline deployment otomatis:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                    KLIEN / BROWSER PENGGUNA                             │
 │       Admin / TU                  Guru / Wali Kelas           Siswa     │
 │   (Desktop / Laptop)             (Laptop / Tablet)      (Smartphone/PC) │
+│                                                                         │
+│   • Dashboard & Master Data       • QR Show & Live Monitor • HTML5 Camera│
+│   • Audit Trail Interface        • Override Presensi      • OTP Fallback│
 └────────────────────────────────────┬────────────────────────────────────┘
                                      │ HTTPS
 ┌────────────────────────────────────▼────────────────────────────────────┐
@@ -230,33 +283,44 @@ Sistem SIAKAD SMA mengadopsi pola arsitektur **Monolith Modern (Model-View-Contr
 │   • Blade View Templates (app, admin, guru, siswa, pdf)                 │
 │   • Tailwind CSS v4 (Modern Utility Engine)                             │
 │   • Asset Bundling & Hot Module Replacement via Vite 8.x                │
+│   • Script Lokal: html5-qrcode.min.js, qrcode.min.js, alpine.min.js    │
 │   • Google Fonts (Inter & Plus Jakarta Sans)                            │
 └────────────────────────────────────┬────────────────────────────────────┘
-                                     │ PHP 8.3+ Dispatcher
+                                     │ PHP 8.2 / 8.3 Dispatcher
 ┌────────────────────────────────────▼────────────────────────────────────┐
 │                  BACKEND CORE (Laravel 13.x MVC)                        │
 │                                                                         │
 │  [ Routing & Middleware (Auth, Spatie Dynamic RBAC) ]                  │
 │                                                                         │
 │  Controllers:                                                           │
-│  ├─ Admin: Master Data, Kelas, Jadwal, Absensi, Nilai, RBAC, Users     │
-│  ├─ Guru : Jadwal, Input Absensi, Nilai, Deskripsi, Rapor Perwalian     │
-│  ├─ Siswa: Dashboard, Jadwal, Absensi, e-Rapor Download                 │
+│  ├─ Admin: Master Data, Kelas, Jadwal, Absensi, Nilai, RBAC, AuditLog   │
+│  ├─ Guru : Jadwal, Input Absensi, AbsensiQrGuru, Nilai, Rapor Perwalian  │
+│  ├─ Siswa: Dashboard, Jadwal, AbsensiQrSiswa, e-Rapor Download          │
 │  └─ Auth & Profile: Sesi, Kredensial, Pengaturan Akun                   │
 │                                                                         │
 │  Services & Libraries:                                                  │
 │  ├─ Barryvdh Laravel-DomPDF (Penerbit e-Rapor PDF Resmi)                │
+│  ├─ Spatie Laravel-Activitylog (Audit Trail & Tracking Mutasi Data)     │
 │  ├─ Maatwebsite Excel (Pengolahan Lembar Kerja)                         │
-│  └─ Logika Anti-Bentrok Jadwal & Normalisasi Nilai                      │
+│  └─ Logika Anti-Bentrok Jadwal, HMAC QR Token, & Normalisasi Nilai      │
 └───────────────────┬─────────────────────────────────┬───────────────────┘
                     │                                 │
 ┌───────────────────▼───────────────┐ ┌───────────────▼───────────────────┐
 │         DATABASE STORAGE          │ │           FILE STORAGE            │
 │  • SQLite (Default Dev/Testing)   │ │  • Storage / Public Directory    │
 │  • MySQL / PostgreSQL (Production)│ │  • Aset Logo Sekolah, Tanda Tangan│
-│  • Spatie RBAC Tables (Roles,     │ │  • Cache Template & Rapor PDF     │
-│    Permissions, ModelHasRoles)    │ │                                   │
+│  • Spatie RBAC & Activity Tables  │ │  • Cache Template & Rapor PDF     │
+│  • Sesi Absensi QR & Detail Absen │ │                                   │
 └───────────────────────────────────┘ └───────────────────────────────────┘
+                    ▲
+                    │ Automated Delivery
+┌───────────────────┴─────────────────────────────────────────────────────┐
+│                 CI/CD PIPELINE (GitHub Actions)                         │
+│  • Push Trigger: v2.0-development & main                                │
+│  • Automated Setup: PHP 8.2, Composer --no-dev, Node.js 20, Vite Build  │
+│  • Automated Deploy: SSH / Rsync ke cPanel Shared Hosting Subdomain     │
+│  • Post-Deploy: php artisan migrate --force, route cache, symlink      │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -280,7 +344,7 @@ Wali Kelas
        ▼
 Admin TU
   → Review ketercapaian nilai seluruh kelas (NILAI-08)
-  → Finalisasi & Penguncian Nilai Rapor (*is_final = true*)
+  → Finalisasi & Penguncian Nilai Rapor (is_final = true)
   → Publikasi rapor ke portal siswa
        │
        ▼
@@ -323,6 +387,52 @@ Sistem memvalidasi aturan integritas:
        └─► [Valid] ── Kelas berhasil dibuat dan ditugaskan.
 ```
 
+### Flow 4: Presensi Mandiri QR Code Dinamis & Pemantauan Real-Time
+
+```
+Guru Mata Pelajaran
+  → Masuk ke Menu Absensi & Buka Sesi QR untuk Jadwal Hari Ini
+  → Layar proyektor menampilkan QR Code Dinamis (rotasi tiap 30s) + Kode OTP Cadangan
+  → Sistem menjalankan background live polling tiap 3 detik
+       │
+       ▼
+Siswa (di kelas)
+  → Buka menu Scanner Absensi di smartphone
+  → Arahkan kamera ke QR di proyektor (atau input 6-digit rolling OTP)
+       │
+       ▼
+Backend Server Validation:
+  1. Apakah sesi absensi masih berstatus aktif?
+  2. Apakah token QR / OTP cocok dengan signature HMAC dan belum expired?
+  3. Apakah siswa tercatat sebagai anggota kelas jadwal tersebut?
+  4. Apakah siswa sudah tercatat hadir sebelumnya? (Idempotent check)
+       │
+       ├─► [Gagal Validasi] ── Muncul modal error interaktif (HTTP 422/403).
+       │
+       └─► [Valid] ── Tercatat Hadir (metode = qr), detail waktu tercatat,
+                     dan Audit Log tercipta otomatis.
+       │
+       ▼
+Layar Guru
+  → Tanpa reload, nama siswa yang baru absen otomatis berpindah dari daftar
+    "Belum Absen" ke daftar "Sudah Hadir" dengan animasi transisi halus.
+  → Guru dapat meng-override siswa bermasalah secara langsung dengan alasan wajib.
+```
+
+### Flow 5: Investigasi Jejak Audit (*Audit Trail Tracking*)
+
+```
+Admin TU
+  → Membuka menu Audit Log (`admin.audit-log.index`)
+  → Memilih filter:
+      - Pelaku (User Tertentu)
+      - Modul (misal: 'absensi', 'nilai', 'user')
+      - Jenis Aksi ('created', 'updated', 'deleted')
+      - Rentang Tanggal Kejadian
+  → Membaca detail properti: Nilai Lama vs Nilai Baru
+  → Admin dapat membuktikan secara sah siapa yang mengubah nilai/kehadiran dan kapan.
+```
+
 ---
 
 ## 10. Matriks Hak Akses (Role-Based Access Control)
@@ -338,9 +448,13 @@ Hak akses dikelola secara terstruktur melalui permission dinamis Spatie dan terb
 | **Master Data Guru & Siswa** | `manage-guru`, `manage-siswa` | ✅ | ❌ | ❌ | ❌ |
 | **Master Mapel & Konfigurasi Bobot** | `manage-mapel` | ✅ | ❌ | ❌ | ❌ |
 | **Manajemen Jadwal & Mode Grid** | `manage-jadwal` | ✅ | 👁️ (Mapelnya) | 👁️ (Kelasnya) | 👁️ (Kelasnya) |
-| **Input Kehadiran Siswa** | `input-absensi` | ✅ | ✅ (Sesi Mengajar) | ✅ (Kelasnya) | ❌ |
+| **Input Kehadiran Siswa Manual** | `input-absensi` | ✅ | ✅ (Sesi Mengajar) | ✅ (Kelasnya) | ❌ |
+| **Buka Sesi Absensi QR Dinamis** | `buka-sesi-qr` | ✅ | ✅ (Sesi Mengajar) | ❌ | ❌ |
+| **Override Presensi Kehadiran** | `override-absensi` | ✅ | ✅ (Sesi Mengajar) | ❌ | ❌ |
+| **Pindai Presensi Mandiri Siswa** | - (Role Siswa) | ❌ | ❌ | ❌ | ✅ (Kelasnya) |
 | **Koreksi Absensi Administratif** | `koreksi-absensi` | ✅ | ❌ | ❌ | ❌ |
 | **Tinjau Rekap Kehadiran** | `view-absensi-rekap` | ✅ | 👁️ (Sesi Mengajar) | 👁️ (Kelasnya) | 👁️ (Pribadi) |
+| **Tinjau Jejak Audit (Audit Log)** | `lihat-audit-log` | ✅ | ❌ | ❌ | ❌ |
 | **Input Nilai & Deskripsi Capaian** | `input-nilai` | ✅ | ✅ (Mapel yang Diampu) | ✅ (Mapelnya) | ❌ |
 | **Finalisasi & Kunci Nilai Rapor** | `finalisasi-nilai` | ✅ | ❌ | ❌ | ❌ |
 | **Lihat Peringkat Siswa** | `view-peringkat` | ✅ | ❌ | ✅ (Kelas Bimbingan) | ❌ |
@@ -374,11 +488,29 @@ Hak akses dikelola secara terstruktur melalui permission dinamis Spatie dan terb
 - [x] **Pencarian & Penyaringan Responsif**: Input search dan filter instan di seluruh tabel data master.
 - [x] **Automated Feature Testing**: Test suite PHPUnit/Pest untuk memvalidasi aturan integritas data.
 
-### 🌟 Fase 3 — Skalabilitas & Ekspansi (Masa Depan)
-- [ ] **Portal Akses Orang Tua / Wali**: Tampilan khusus untuk orang tua murid guna memantau perkembangan nilai dan kehadiran anak secara langsung.
-- [ ] **Notifikasi Multi-Channel**: Integrasi pengiriman notifikasi pengumuman atau rekap kehadiran via WhatsApp API / Email.
+### 🛡️ Fase 2.5 — Evolusi Keamanan, Absensi QR & Otomatisasi DevOps (Bulan 9–10) — [SELESAI 100%]
+- [x] **Absensi QR Code Dinamis (F1)**:
+  - Model `SesiAbsensiQr` dengan rotasi token per 30 detik berbasis signature HMAC-SHA256.
+  - Tiket payload terenkripsi URL dan verifikasi kedaluwarsa ketat di sisi server.
+  - Fallback input 6-digit rolling code OTP untuk perangkat dengan kendala kamera.
+  - Pemindai kamera mandiri siswa berbasis library lokal `html5-qrcode.min.js`.
+  - Live monitoring pemantauan presensi guru via AJAX polling per 3 detik.
+  - Mekanisme override manual oleh guru dengan kewajiban input alasan.
+- [x] **Audit Trail & Activity Log Sistem (F3)**:
+  - Integrasi paket `spatie/laravel-activitylog` v4 untuk pelacakan mutasi model `Absensi`, `DetailAbsensi`, `Nilai`, dan `User`.
+  - Antarmuka Admin Audit Log dengan pagination dan filter multi-dimensi (causer, log_name, event, tanggal, text search).
+  - Skema append-only immutable untuk menjaga keabsahan bukti log.
+  - Penambahan permission Spatie `lihat-audit-log`, `buka-sesi-qr`, dan `override-absensi`.
+- [x] **Continuous Integration & Continuous Deployment (CI/CD)**:
+  - Workflow GitHub Actions (`.github/workflows/deploy.yml`) untuk rilis otomatis ke cPanel Shared Hosting (subdomain).
+  - Setup otomatis PHP 8.2, kompilasi aset Vite, rsync SSH, dan post-deployment migration database.
+  - Penyesuaian constraint PHP `^8.2` pada `composer.json` untuk kompatibilitas hosting produksi.
+
+### 🌟 Fase 3 — Skalabilitas & Komunikasi Eksternal (Masa Depan)
+- [ ] **Portal Akses Orang Tua / Wali (F4)**: Tampilan khusus untuk orang tua murid guna memantau perkembangan nilai dan kehadiran anak secara langsung.
+- [ ] **Notifikasi Multi-Channel Modular (F6)**: Integrasi pengiriman notifikasi pengumuman atau rekap kehadiran via Telegram Bot, Email, atau WhatsApp API adapter.
+- [ ] **Kalender Akademik Terpadu (F5)**: Manajemen event sekolah (libur, ujian, kegiatan) dengan tampilan kalender visual.
 - [ ] **Integrasi Dua Arah Dapodik**: Fasilitas impor/ekspor data format resmi Dapodik Kemdikbud secara berkala.
-- [ ] **PWA (Progressive Web App)**: Peningkatan kapabilitas web untuk instalasi layar utama smartphone dan mode offline terbatas.
 - [ ] **Multi-Tenancy**: Arsitektur multi-sekolah untuk mendukung pengelolaan banyak SMA dalam satu instansi yayasan.
 
 ---
@@ -388,9 +520,12 @@ Hak akses dikelola secara terstruktur melalui permission dinamis Spatie dan terb
 | Metrik | Target Awal | Realisasi Terkini | Status |
 |---|---|---|:---:|
 | Waktu pengerjaan & penerbitan e-Rapor | Berkurang ≥ 70% | Dari ~14 hari kerja menjadi ≤ 2 hari | 🎯 Melampaui Target |
+| Durasi absensi harian per kelas | < 2 menit | Dari ~10–15 menit menjadi ≤ 45 detik via QR | 🎯 Melampaui Target |
 | Kasus guru mengajar bentrok di jadwal | 0 insiden | 0 insiden (dicegah di level validasi form & model) | 🎯 Tercapai |
 | Kasus duplikasi penugasan wali kelas | 0 insiden | 0 insiden (dicegah oleh database unique rule & test) | 🎯 Tercapai |
+| Akuntabilitas mutasi nilai & presensi | 100% terlacak | Seluruh aksi create/update/delete tercatat di Audit Log | 🎯 Tercapai |
 | Waktu muat halaman dashboard & tabel | < 3.0 detik | Rata-rata 0.6 – 1.2 detik | 🎯 Tercapai |
+| Keandalan CI/CD Deployment | 100% automated | Deploy otomatis sukses ke cPanel hosting via Git push | 🎯 Tercapai |
 | Adopsi Guru & Siswa login | ≥ 80% | 100% akun terakomodasi dan aktif pada simulasi data | 🎯 Tercapai |
 
 ---
@@ -399,10 +534,13 @@ Hak akses dikelola secara terstruktur melalui permission dinamis Spatie dan terb
 
 | Risiko | Tingkat | Dampak | Strategi Mitigasi Terapan |
 |---|:---:|:---:|---|
+| Siswa membagikan foto QR ke teman di luar kelas | Sedang | Sedang | Token QR berotasi otomatis setiap 30 detik berbasis HMAC secret, sehingga foto QR cepat usang dan ditolak server |
+| Siswa mengalami kendala kamera scanner | Sedang | Rendah | Disediakan kode cadangan 6-digit OTP rolling code dan tombol override langsung oleh guru dengan pencatatan alasan |
+| Kamera browser gagal berfungsi di jaringan lokal | Rendah | Tinggi | Library scanner `html5-qrcode.min.js` disimpan lokal (zero CDN dependency) dan HTTPS diwajibkan di lingkungan rilis |
+| Perubahan nilai tidak sah tanpa jejak | Tinggi | Tinggi | Setiap mutasi model `Nilai` dan `Absensi` otomatis mencatat snapshot nilai lama vs baru di tabel `activity_log` append-only |
 | Variasi bobot nilai antar-mata pelajaran | Sedang | Sedang | Menyediakan modul pengaturan bobot kustom per mapel dengan validasi live total harus 100% |
 | Nilai siswa belum lengkap saat masa berjalan | Tinggi | Sedang | Algoritma normalisasi nilai dinamis yang menghitung proporsional nilai sementara tanpa distorsi angka |
-| Kesalahan atau keterlambatan surat izin absensi | Rendah | Rendah | Disediakan modul Koreksi Absensi khusus bagi Admin TU untuk audit dan perbaikan data kehadiran |
-| Human error saat penugasan guru & pembagian kelas | Sedang | Tinggi | Penerapan validasi unik ganda di level Request Validation dan Database Constraints, serta didukung unit testing |
+| Kesalahan saat deploy manual ke cPanel | Sedang | Tinggi | Penerapan pipeline CI/CD GitHub Actions terstandarisasi yang mengeksekusi build, rsync, dan migrasi otomatis |
 
 ---
 
@@ -411,11 +549,13 @@ Hak akses dikelola secara terstruktur melalui permission dinamis Spatie dan terb
 ### Asumsi
 - Sekolah beroperasi dengan sistem semester (2 semester per tahun ajaran: Ganjil & Genap).
 - Komponen penilaian akademik standar terdiri dari Nilai Harian (tugas/kuis/ulangan harian), UTS, dan UAS dalam skala 0–100.
+- Siswa membawa smartphone atau perangkat berkamera yang mendukung browser modern (Chrome, Safari, Firefox).
 - Sekolah memiliki setidaknya 1 staf Admin/TU yang memegang peran super-admin pengelola sistem.
 
 ### Ketergantungan
-- Lingkungan server PHP 8.3+ dengan ekstensi SQLite / MySQL, Mbstring, OpenSSL, dan DomPDF dependencies.
-- Font engine standar TrueType (DejaVu Sans / Helvetica) untuk kompilasi dokumen PDF berstandar cetak.
+- Lingkungan server PHP 8.2 / 8.3+ dengan ekstensi SQLite / MySQL, Mbstring, OpenSSL, GD, dan DomPDF dependencies.
+- Font engine standar TrueType (DejaVu Sans / Helvetica) untuk kompilasi dokumen PDF berstandar cetak dinas.
+- GitHub Secrets (`CPANEL_SSH_HOST`, `CPANEL_SSH_USER`, `CPANEL_SSH_KEY`, dll.) untuk pipeline otomatisasi deployment.
 
 ---
 
@@ -426,7 +566,7 @@ Hak akses dikelola secara terstruktur melalui permission dinamis Spatie dan terb
 | **v1.0** | 10 Mei 2026 | Draf inisial PRD, definisi user persona, perancangan kebutuhan MVP | Tim Pengembang |
 | **v1.1** | 14 Juni 2026 | Penyelesaian MVP, penyesuaian dependensi Laravel, penambahan arsitektur data | Tim Pengembang |
 | **v2.0** | 15 Oktober 2026 | Pembaruan spesifikasi produksi: integrasi Dynamic RBAC Spatie, validasi integritas wali kelas & kelas, jadwal anti-bentrok dengan grid kalender, konfigurasi bobot nilai interaktif, e-Rapor lengkap Kurikulum Merdeka (Ekskul, Prestasi, Catatan Wali Kelas, Batch Print), modul pengumuman multi-target, serta dokumentasi automated feature testing | Tim Pengembang |
+| **v2.1** | 16 Oktober 2026 | **Evolusi Keamanan, Absensi QR & DevOps**: Penambahan spesifikasi Absensi QR Dinamis (F1) berotasi 30s + OTP cadangan, scanner kamera lokal `html5-qrcode`, live monitoring presensi guru (polling 3s), integrasi Jejak Audit append-only `spatie/laravel-activitylog` (F3) beserta GUI filter admin, penambahan permission RBAC (`buka-sesi-qr`, `override-absensi`, `lihat-audit-log`), otomatisasi deployment CI/CD GitHub Actions ke cPanel Shared Hosting, dan pembaruan constraint runtime PHP ^8.2 | Tim Pengembang |
 
 ---
 *Dokumen ini merupakan spesifikasi kebutuhan produk resmi SIAKAD SMA.*
-

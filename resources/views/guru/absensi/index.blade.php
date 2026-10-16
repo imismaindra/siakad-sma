@@ -45,7 +45,14 @@
                         @endphp
                         <tr>
                             <td class="font-bold text-slate-800">
-                                {{ $a->tanggal->locale('id')->isoFormat('dddd, D MMMM YYYY') }}
+                                <div class="flex items-center gap-1.5">
+                                    <span>{{ $a->tanggal->locale('id')->isoFormat('dddd, D MMMM YYYY') }}</span>
+                                    @if($a->metode === 'qr')
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                            QR
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
                             <td>
                                 <span class="badge badge-navy font-mono font-bold">{{ $a->kelas->nama_kelas }}</span>

@@ -69,7 +69,8 @@
                         <th>NIS</th>
                         <th>Nama Lengkap</th>
                         <th>L/P</th>
-                        <th>Status Kehadiran</th>
+                        <th>Status</th>
+                        <th>Metode</th>
                         <th>Keterangan</th>
                     </tr>
                 </thead>
@@ -88,6 +89,22 @@
                                 <span class="badge absensi-status-{{ $da->status }}">
                                     {{ ucfirst($da->status) }}
                                 </span>
+                            </td>
+                            <td>
+                                @if($da->metode === 'qr')
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                        <svg class="w-3 h-3 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                                        QR ({{ $da->waktu_absen ? $da->waktu_absen->format('H:i') : '' }})
+                                    </span>
+                                @elseif($da->metode === 'override')
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                                        Override Guru
+                                    </span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600">
+                                        Manual
+                                    </span>
+                                @endif
                             </td>
                             <td class="text-xs text-slate-500">{{ $da->keterangan ?? '—' }}</td>
                         </tr>
