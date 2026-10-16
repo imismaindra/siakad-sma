@@ -33,7 +33,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
+          port: ${{ secrets.SSH_PORT || 45022 }}
           source: 'public/build'
           target: '${{ secrets.DEPLOY_PATH }}'
 
@@ -43,7 +43,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
+          port: ${{ secrets.SSH_PORT || 45022 }}
           script: |
             set -e
             echo "📂 Navigating to deployment directory..."
