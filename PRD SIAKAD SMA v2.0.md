@@ -86,9 +86,9 @@ Peran Orang Tua ditambahkan melalui mekanisme role dan permission yang sudah ada
 
 | ID | Kebutuhan | Prioritas | Status |
 | --- | --- | --- | :---:|
-| F3-01 | Sistem mencatat pembuatan, perubahan, dan penghapusan pada data absensi, nilai, dan akun pengguna (`spatie/laravel-activitylog`), mencakup pelaku, IP, waktu, properti lama, dan properti baru. | Tinggi | ✅ Selesai |
-| F3-02 | Override absensi dan perubahan role/permission tercatat secara khusus dengan alasan dan pelaku. | Tinggi | ✅ Selesai |
-| F3-03 | Admin TU dapat mengakses antarmuka audit log dengan filter pelaku (causer), jenis modul (`log_name`), jenis aksi (`event`), rentang tanggal, dan full-text search. | Tinggi | ✅ Selesai |
+| F3-01 | Sistem mencatat pembuatan, perubahan, dan penghapusan pada data absensi, nilai, profil guru/siswa, dan akun pengguna (`spatie/laravel-activitylog`), mencakup pelaku, IP Address, User-Agent, waktu, properti lama, dan properti baru. | Tinggi | ✅ Selesai |
+| F3-02 | Override absensi, anomali fake GPS, dan perubahan role/permission tercatat secara khusus dengan alasan, koordinat, dan pelaku. | Tinggi | ✅ Selesai |
+| F3-03 | Admin TU dapat mengakses antarmuka audit log dengan filter pelaku (causer), jenis modul (`log_name`), jenis aksi (`event`), rentang tanggal, pencarian full-text, serta ekspor file CSV. | Tinggi | ✅ Selesai |
 | F3-04 | Log bersifat hanya-tambah (*append-only*); tidak disediakan aksi edit maupun hapus log pada antarmuka admin demi integritas bukti. | Sedang | ✅ Selesai |
 | F3-05 | Dilindungi permission khusus `lihat-audit-log` agar hanya staf berwenang yang dapat melihat rekam jejak. | Tinggi | ✅ Selesai |
 
@@ -199,7 +199,7 @@ Dikelola oleh paket `spatie/laravel-activitylog`:
 - **QR Engine & Scanner**:
   - Generator QR: `qrcode.min.js` (rendering canvas/SVG dinamis di browser guru).
   - Scanner QR: `html5-qrcode.min.js` lokal (zero external CDN dependency) untuk pemindaian instan via kamera smartphone siswa.
-- **Audit Logging**: `spatie/laravel-activitylog` v4 dengan trait `LogsActivity` pada model `Absensi`, `DetailAbsensi`, `Nilai`, dan `User`.
+- **Audit Logging**: `spatie/laravel-activitylog` v4 dengan trait `LogsActivity` pada model `Absensi`, `DetailAbsensi`, `Nilai`, `DetailNilai`, `User`, `Siswa`, `Guru`, `PengaturanSekolah`, dan `SesiAbsensiQr`. Rekam jejak otomatis mencakup alamat IP dan peramban pengguna. Dilengkapi fitur Ekspor CSV dan modal diff perbandingan data lama vs baru.
 - **Dynamic RBAC**: `spatie/laravel-permission` v8.
 - **PDF Engine**: `barryvdh/laravel-dompdf` v3.1.
 - **CI/CD Pipeline**: GitHub Actions (`.github/workflows/deploy.yml`) mengotomatisasi build dan rsync deployment via SSH ke cPanel Shared Hosting.
@@ -251,8 +251,10 @@ Dikelola oleh paket `spatie/laravel-activitylog`:
 - [x] Siswa yang scan berulang tidak menimbulkan data ganda (idempotent).
 - [x] Siswa dengan kendala kamera dapat menggunakan kode rolling OTP 6-digit yang cocok.
 - [x] Guru dapat melihat daftar kehadiran terupdate setiap 3 detik secara live.
-- [x] Seluruh perubahan data absensi, nilai, dan akun tercatat di audit log beserta nilai lama, nilai baru, dan causer.
+- [x] Seluruh perubahan data absensi, nilai, profil, dan akun tercatat di audit log beserta nilai lama, nilai baru, pelaku, IP address, dan user agent.
 - [x] Admin dapat memfilter rekam audit log berdasarkan pelaku, modul, event, dan tanggal.
+- [x] Admin dapat mengekspor seluruh atau riwayat terfilter audit log ke format CSV untuk keperluan akreditasi/audit resmi.
+- [x] Catatan override absensi oleh guru/admin tercatat secara khusus dengan alasan wajib dan detail siswa.
 - [x] Push ke branch `v2.0-development` otomatis memicu pipeline CI/CD dan men-deploy pembaruan ke cPanel hosting.
 - [x] Alur bawaan v1.0 (absensi manual, perhitungan nilai terbobot, ekspor e-Rapor PDF) tetap berjalan normal.
 

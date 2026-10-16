@@ -162,6 +162,7 @@ Route::middleware(['auth', 'role:admin'])
         // ── F3: Audit Log (Hanya-Baca / Append-Only) ────────────────
         Route::middleware('can:lihat-audit-log')->group(function () {
             Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
+            Route::get('/audit-log/export', [AuditLogController::class, 'export'])->name('audit-log.export');
             Route::get('/audit-log/{activity}', [AuditLogController::class, 'show'])->name('audit-log.show');
         });
 

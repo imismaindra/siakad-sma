@@ -10,9 +10,9 @@ use Spatie\Activitylog\Models\Activity;
 class AuditLogController extends Controller
 {
     /**
-     * Menampilkan daftar riwayat audit log aktivitas sistem (hanya-baca / append-only).
+     * Membangun query builder terfilter untuk Audit Log (digunakan bersama oleh index dan export).
      */
-    public function index(Request $request)
+    protected function buildFilteredQuery(Request $request)
     {
         $query = Activity::with(['causer', 'subject'])->latest();
 
@@ -27,7 +27,7 @@ class AuditLogController extends Controller
             $query->where('log_name', $request->log_name);
         }
 
-        // 3. Filter berdasarkan Event (created, updated, deleted, dll)
+        // 3. Filter berdasarkan Event (created, updated, deleted, override, anomali_lokasi, dll)
         if ($request->filled('event')) {
             $query->where('event', $request->event);
         }
@@ -40,7 +40,7 @@ class AuditLogController extends Controller
             $query->whereDate('created_at', '<=', $request->end_date);
         }
 
-        // 5. Pencarian teks bebas (deskripsi)
+        // 5. Pencarian teks bebas (deskripsi, properties, IP)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -48,6 +48,16 @@ class AuditLogController extends Controller
                   ->orWhere('properties', 'like', "%{$search}%");
             });
         }
+
+        return $query;
+    }
+
+    /**
+     * Menampilkan daftar riwayat audit log aktivitas sistem (hanya-baca / append-only).
+     */
+    public function index(Request $request)
+    {
+        $query = $this->buildFilteredQuery($request);
 
         $logs = $query->paginate(20)->withQueryString();
 
@@ -61,6 +71,7 @@ class AuditLogController extends Controller
             'total' => Activity::count(),
             'today' => Activity::whereDate('created_at', today())->count(),
             'users' => Activity::whereNotNull('causer_id')->distinct('causer_id')->count('causer_id'),
+            'overrides' => Activity::where('event', 'override')->count(),
         ];
 
         return view('admin.audit-log.index', compact('logs', 'users', 'logNames', 'events', 'stats'));
@@ -72,6 +83,7 @@ class AuditLogController extends Controller
     public function show(Activity $activity)
     {
         $activity->load(['causer', 'subject']);
+        $props = $activity->properties ? $activity->properties->toArray() : [];
 
         return response()->json([
             'id' => $activity->id,
@@ -85,9 +97,75 @@ class AuditLogController extends Controller
             ] : null,
             'subject_type' => class_basename($activity->subject_type ?? ''),
             'subject_id' => $activity->subject_id,
+            'ip' => $props['ip'] ?? $props['ip_address'] ?? '127.0.0.1',
+            'user_agent' => $props['user_agent'] ?? '-',
             'properties' => $activity->properties,
             'created_at' => $activity->created_at->format('d M Y, H:i:s'),
             'created_at_diff' => $activity->created_at->diffForHumans(),
         ]);
     }
+
+    /**
+     * Mengekspor data audit log ke file CSV (berdasarkan filter aktif) untuk keperluan audit resmi.
+     */
+    public function export(Request $request)
+    {
+        $query = $this->buildFilteredQuery($request);
+        $filename = 'audit-log-siakad-' . now()->format('Y-m-d_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        return response()->stream(function () use ($query) {
+            $handle = fopen('php://output', 'w');
+            // Menulis UTF-8 BOM agar kompatibel dengan Excel pada Windows
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($handle, [
+                'ID',
+                'Waktu',
+                'Pelaku',
+                'Role Pelaku',
+                'IP Address',
+                'User Agent',
+                'Modul',
+                'Aksi / Event',
+                'Subjek Model',
+                'Subjek ID',
+                'Deskripsi',
+                'Properti Mutasi (JSON)',
+            ]);
+
+            $query->chunk(200, function ($logs) use ($handle) {
+                foreach ($logs as $log) {
+                    $props = $log->properties ? $log->properties->toArray() : [];
+                    $ip = $props['ip'] ?? $props['ip_address'] ?? '-';
+                    $ua = $props['user_agent'] ?? '-';
+
+                    fputcsv($handle, [
+                        $log->id,
+                        $log->created_at->format('Y-m-d H:i:s'),
+                        $log->causer?->name ?? 'Sistem / Otomatis',
+                        $log->causer?->role ?? '-',
+                        $ip,
+                        $ua,
+                        $log->log_name ?? '-',
+                        $log->event ?? '-',
+                        class_basename($log->subject_type ?? ''),
+                        $log->subject_id ?? '-',
+                        $log->description ?? '-',
+                        json_encode($log->properties, JSON_UNESCAPED_UNICODE),
+                    ]);
+                }
+            });
+
+            fclose($handle);
+        }, 200, $headers);
+    }
 }
+

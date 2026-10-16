@@ -37,16 +37,22 @@
                 Pencatatan riwayat perubahan data sensitif secara <em>hanya-tambah (append-only)</em> untuk akuntabilitas sistem.
             </p>
         </div>
-        <div class="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
-            <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-            </svg>
-            <span>Integritas Log Terjamin</span>
+        <div class="flex flex-wrap items-center gap-3">
+            <a href="{{ route('admin.audit-log.export', request()->query()) }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl transition shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                <span>Ekspor CSV</span>
+            </a>
+            <div class="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
+                <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                <span>Integritas Log Terjamin</span>
+            </div>
         </div>
     </div>
 
     {{-- Ringkasan Statistik --}}
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Catatan Log</span>
@@ -78,6 +84,17 @@
             </div>
             <p class="text-2xl font-bold text-purple-600 mt-2">{{ number_format($stats['users']) }}</p>
             <p class="text-xs text-slate-400 mt-1">Pelaku unik yang melakukan aksi</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Override Absensi</span>
+                <span class="p-2 bg-amber-50 text-amber-600 rounded-lg">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                </span>
+            </div>
+            <p class="text-2xl font-bold text-amber-600 mt-2">{{ number_format($stats['overrides']) }}</p>
+            <p class="text-xs text-slate-400 mt-1">Intervensi guru/admin berargumen</p>
         </div>
     </div>
 
@@ -168,6 +185,7 @@
                     <tr>
                         <th class="px-5 py-3.5">Waktu</th>
                         <th class="px-5 py-3.5">Pelaku</th>
+                        <th class="px-5 py-3.5">IP Address</th>
                         <th class="px-5 py-3.5">Modul</th>
                         <th class="px-5 py-3.5">Aksi</th>
                         <th class="px-5 py-3.5">Deskripsi / Subjek</th>
@@ -198,6 +216,20 @@
                                 @endif
                             </td>
 
+                            {{-- IP Address --}}
+                            <td class="px-5 py-3.5 whitespace-nowrap">
+                                @php
+                                    $ip = $log->properties['ip'] ?? $log->properties['ip_address'] ?? null;
+                                @endphp
+                                @if($ip)
+                                    <span class="font-mono text-[11px] font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                        {{ $ip }}
+                                    </span>
+                                @else
+                                    <span class="text-slate-400 font-mono text-[11px]">-</span>
+                                @endif
+                            </td>
+
                             {{-- Modul --}}
                             <td class="px-5 py-3.5 whitespace-nowrap">
                                 @php
@@ -205,6 +237,9 @@
                                         'nilai' => 'bg-emerald-50 text-emerald-700 border border-emerald-200',
                                         'absensi', 'absensi_detail' => 'bg-amber-50 text-amber-700 border border-amber-200',
                                         'user' => 'bg-blue-50 text-blue-700 border border-blue-200',
+                                        'siswa' => 'bg-indigo-50 text-indigo-700 border border-indigo-200',
+                                        'guru' => 'bg-teal-50 text-teal-700 border border-teal-200',
+                                        'pengaturan' => 'bg-cyan-50 text-cyan-700 border border-cyan-200',
                                         'role_permission' => 'bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-200',
                                         default => 'bg-slate-100 text-slate-700 border border-slate-200'
                                     };
@@ -221,7 +256,8 @@
                                         'created' => 'bg-green-100 text-green-800',
                                         'updated' => 'bg-amber-100 text-amber-800',
                                         'deleted' => 'bg-red-100 text-red-800',
-                                        'override' => 'bg-purple-100 text-purple-800',
+                                        'override' => 'bg-purple-100 text-purple-800 font-bold',
+                                        'anomali_lokasi' => 'bg-rose-100 text-rose-800 font-bold',
                                         default => 'bg-slate-100 text-slate-800'
                                     };
                                 @endphp
@@ -250,7 +286,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-5 py-12 text-center text-slate-400">
+                            <td colspan="7" class="px-5 py-12 text-center text-slate-400">
                                 <svg class="w-10 h-10 mx-auto text-slate-300 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                 </svg>
@@ -310,24 +346,63 @@
                 <template x-if="!loadingDetail && selectedLog">
                     <div class="mt-4 space-y-4">
                         {{-- Ringkasan Info --}}
-                        <div class="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded-xl text-xs">
-                            <div>
-                                <span class="text-slate-400 block text-[11px]">Waktu:</span>
-                                <span class="font-medium text-slate-800" x-text="selectedLog.created_at"></span>
+                        <div class="p-3.5 bg-slate-50 rounded-xl text-xs space-y-2 border border-slate-100">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <span class="text-slate-400 block text-[11px]">Waktu:</span>
+                                    <span class="font-medium text-slate-800" x-text="selectedLog.created_at"></span>
+                                    <span class="text-[10px] text-slate-400 block" x-text="`(${selectedLog.created_at_diff})`"></span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[11px]">Pelaku:</span>
+                                    <span class="font-medium text-slate-800" x-text="selectedLog.causer ? `${selectedLog.causer.name} (${selectedLog.causer.role})` : 'Sistem / Otomatis'"></span>
+                                    <span class="text-[10px] text-slate-400 block" x-text="selectedLog.causer?.email || ''"></span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[11px]">Modul & Aksi:</span>
+                                    <span class="font-medium text-slate-800" x-text="`${selectedLog.log_name} · [${selectedLog.event}]`"></span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[11px]">Subjek Model:</span>
+                                    <span class="font-medium text-slate-800" x-text="selectedLog.subject_type ? `${selectedLog.subject_type} #${selectedLog.subject_id}` : '-'"></span>
+                                </div>
                             </div>
-                            <div>
-                                <span class="text-slate-400 block text-[11px]">Pelaku:</span>
-                                <span class="font-medium text-slate-800" x-text="selectedLog.causer ? `${selectedLog.causer.name} (${selectedLog.causer.role})` : 'Sistem'"></span>
-                            </div>
-                            <div>
-                                <span class="text-slate-400 block text-[11px]">Modul & Aksi:</span>
-                                <span class="font-medium text-slate-800" x-text="`${selectedLog.log_name} · [${selectedLog.event}]`"></span>
-                            </div>
-                            <div>
-                                <span class="text-slate-400 block text-[11px]">Subjek:</span>
-                                <span class="font-medium text-slate-800" x-text="`${selectedLog.subject_type} #${selectedLog.subject_id}`"></span>
+                            <div class="pt-2 border-t border-slate-200/60 grid grid-cols-2 gap-3">
+                                <div>
+                                    <span class="text-slate-400 block text-[11px]">IP Address:</span>
+                                    <span class="font-mono text-xs font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 inline-block" x-text="selectedLog.ip || '127.0.0.1'"></span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[11px]">User Agent / Peramban:</span>
+                                    <span class="font-mono text-[11px] text-slate-600 truncate block" x-text="selectedLog.user_agent || '-'" :title="selectedLog.user_agent"></span>
+                                </div>
                             </div>
                         </div>
+
+                        {{-- Card Khusus Override / Anomali --}}
+                        <template x-if="selectedLog.event === 'override'">
+                            <div class="p-3 bg-purple-50 border border-purple-200 rounded-xl text-xs text-purple-900">
+                                <div class="font-bold flex items-center gap-1.5 text-purple-800">
+                                    <svg class="w-4 h-4 text-purple-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    Intervensi Manual / Override Tercatat
+                                </div>
+                                <div class="mt-1 space-y-0.5">
+                                    <p x-show="selectedLog.properties?.alasan"><span class="font-semibold">Alasan Override:</span> <span class="italic text-purple-950 font-medium" x-text="selectedLog.properties?.alasan"></span></p>
+                                    <p x-show="selectedLog.properties?.siswa"><span class="font-semibold">Siswa:</span> <span x-text="selectedLog.properties?.siswa"></span></p>
+                                    <p x-show="selectedLog.properties?.old_status"><span class="font-semibold">Perubahan Status:</span> <span x-text="`${selectedLog.properties?.old_status} ➔ ${selectedLog.properties?.new_status}`"></span></p>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template x-if="selectedLog.event === 'anomali_lokasi'">
+                            <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-900">
+                                <div class="font-bold flex items-center gap-1.5 text-rose-800">
+                                    <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    Deteksi Percobaan Anomali Lokasi / Mock GPS
+                                </div>
+                                <p class="mt-1" x-text="selectedLog.description"></p>
+                            </div>
+                        </template>
 
                         {{-- Perbandingan Nilai Lama vs Nilai Baru (Diff) --}}
                         <div>
