@@ -38,7 +38,7 @@ SIAKAD SMA v1.0 sudah mencakup tiga peran (Admin/TU, Guru, Siswa) dengan fitur d
 | Kode | Fitur | Kategori | Status Implementasi |
 | --- | --- | --- | --- |
 | F1 | Absensi QR code dinamis (rotasi 30s + OTP cadangan + live monitor) | Wajib | ✅ Selesai (Feature Complete & Tested) |
-| F2 | Geofencing absensi (skema kolom & validasi di server) | Wajib | 🟡 Siap Skema & Fallback Override (Validasi GPS Client-Server) |
+| F2 | Geofencing absensi (Haversine radius + anti-fake location + GUI admin + override guru) | Wajib | ✅ Selesai (Feature Complete & Tested) |
 | F3 | Audit log (jejak mutasi data append-only) | Wajib | ✅ Selesai (`spatie/laravel-activitylog` + Admin GUI) |
 | F4 | Monitoring orang tua (portal read-only anak) | Wajib | ⏳ Rencana Tahap 2 |
 | F5 | Pengumuman & kalender akademik | Wajib | 🟡 Pengumuman Multi-Target Selesai; Kalender Tahap 2 |
@@ -75,12 +75,12 @@ Peran Orang Tua ditambahkan melalui mekanisme role dan permission yang sudah ada
 
 | ID | Kebutuhan | Prioritas | Status |
 | --- | --- | --- | :---:|
-| F2-01 | Admin/Sistem mengatur titik koordinat sekolah dan radius toleransi (meter). | Tinggi | 🟡 Skema Siap |
-| F2-02 | Saat memindai QR, browser mengirim lokasi siswa; server menghitung jarak ke titik sekolah (rumus Haversine) dan menolak absensi di luar radius. | Tinggi | 🟡 Terintegrasi Skema |
-| F2-03 | Lokasi dengan akurasi buruk (di atas ambang batas) ditolak, dan siswa diminta mencoba lagi. | Sedang | 🟡 Terintegrasi Skema |
-| F2-04 | Jika izin lokasi ditolak browser, absensi QR dicegah dan diarahkan meminta bantuan guru. | Tinggi | ✅ Selesai (UI Error Handling) |
-| F2-05 | Guru dapat melakukan override manual untuk siswa yang bermasalah dengan GPS/kamera, wajib mengisi alasan. Override tercatat di audit log. | Tinggi | ✅ Selesai (`override-absensi`) |
-| F2-06 | Sistem mencatat jarak meter, akurasi meter, dan status validitas lokasi pada `detail_absensis`, bukan jejak tracking kontinu siswa. | Sedang | ✅ Selesai (Migrasi Database) |
+| F2-01 | Admin/Sistem mengatur titik koordinat sekolah dan radius toleransi (meter). | Tinggi | ✅ Selesai |
+| F2-02 | Saat memindai QR, browser mengirim lokasi siswa; server menghitung jarak ke titik sekolah (rumus Haversine) dan menolak absensi di luar radius. | Tinggi | ✅ Selesai |
+| F2-03 | Lokasi dengan akurasi buruk (di atas ambang batas) ditolak, dan siswa diminta mencoba lagi. Termasuk deteksi anomali Mock GPS. | Sedang | ✅ Selesai |
+| F2-04 | Jika izin lokasi ditolak browser, absensi QR dicegah dan diarahkan meminta bantuan guru. | Tinggi | ✅ Selesai |
+| F2-05 | Guru dapat melakukan override manual untuk siswa yang bermasalah dengan GPS/kamera, wajib mengisi alasan. Override tercatat di audit log. | Tinggi | ✅ Selesai |
+| F2-06 | Sistem mencatat jarak meter, akurasi meter, dan status validitas lokasi pada `detail_absensis`, bukan jejak tracking kontinu siswa. | Sedang | ✅ Selesai |
 
 ### 5.3 F3 Audit log
 
