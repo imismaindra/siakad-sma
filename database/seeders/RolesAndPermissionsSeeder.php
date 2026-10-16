@@ -44,6 +44,8 @@ class RolesAndPermissionsSeeder extends Seeder
         'view-absensi-siswa'   => 'Lihat absensi pribadi',
         'view-nilai-siswa'     => 'Lihat nilai & rapor pribadi',
         'download-rapor'       => 'Download rapor PDF',
+        // Orang Tua – Monitoring Anak (F4)
+        'lihat-data-anak'      => 'Akses pemantauan jadwal, absensi, nilai, dan rapor anak (Orang Tua)',
         // Umum
         'view-profile'         => 'Lihat & edit profil sendiri',
         // Manajemen Role (super-admin only)
@@ -71,6 +73,10 @@ class RolesAndPermissionsSeeder extends Seeder
         UserRole::Siswa->value => [
             'view-dashboard-siswa', 'view-absensi-siswa',
             'view-nilai-siswa', 'download-rapor',
+            'view-profile',
+        ],
+        UserRole::OrangTua->value => [
+            'lihat-data-anak',
             'view-profile',
         ],
     ];

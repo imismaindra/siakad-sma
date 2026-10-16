@@ -40,7 +40,7 @@ SIAKAD SMA v1.0 sudah mencakup tiga peran (Admin/TU, Guru, Siswa) dengan fitur d
 | F1 | Absensi QR code dinamis (rotasi 30s + OTP cadangan + live monitor) | Wajib | ✅ Selesai (Feature Complete & Tested) |
 | F2 | Geofencing absensi (Haversine radius + anti-fake location + GUI admin + override guru) | Wajib | ✅ Selesai (Feature Complete & Tested) |
 | F3 | Audit log (jejak mutasi data append-only) | Wajib | ✅ Selesai (`spatie/laravel-activitylog` + Admin GUI) |
-| F4 | Monitoring orang tua (portal read-only anak) | Wajib | ⏳ Rencana Tahap 2 |
+| F4 | Monitoring orang tua (portal read-only anak) | Wajib | ✅ Selesai (Portal Ortu + Switcher + e-Rapor PDF) |
 | F5 | Pengumuman & kalender akademik | Wajib | 🟡 Pengumuman Multi-Target Selesai; Kalender Tahap 2 |
 | F6 | Notifikasi modular (in-app, Telegram/email, adapter WA) | Wajib | ⏳ Rencana Tahap 3 |
 | CI/CD | Pipeline deployment otomatis GitHub Actions ke cPanel | Penunjang | ✅ Selesai (`.github/workflows/deploy.yml` Aktif) |
@@ -96,11 +96,11 @@ Peran Orang Tua ditambahkan melalui mekanisme role dan permission yang sudah ada
 
 | ID | Kebutuhan | Prioritas | Status |
 | --- | --- | --- | :---:|
-| F4-01 | Admin membuat akun orang tua dan menautkannya ke satu atau lebih siswa beserta hubungan (ayah, ibu, wali). | Tinggi | ⏳ Direncanakan |
-| F4-02 | Orang tua login dan melihat daftar anak yang tertaut; bila lebih dari satu, dapat berpindah antar anak. | Tinggi | ⏳ Direncanakan |
-| F4-03 | Per anak, orang tua dapat melihat jadwal pelajaran, riwayat absensi, nilai, dan e-Rapor yang sudah difinalisasi. | Tinggi | ⏳ Direncanakan |
-| F4-04 | Akses orang tua bersifat read-only dan hanya untuk anak yang tertaut; akses ke data siswa lain ditolak (`Policy`). | Tinggi | ⏳ Direncanakan |
-| F4-05 | Orang tua melihat pengumuman dan kalender akademik yang ditargetkan kepadanya. | Sedang | ⏳ Direncanakan |
+| F4-01 | Admin membuat akun orang tua dan menautkannya ke satu atau lebih siswa beserta hubungan (ayah, ibu, wali). | Tinggi | ✅ Selesai |
+| F4-02 | Orang tua login dan melihat daftar anak yang tertaut; bila lebih dari satu, dapat berpindah antar anak. | Tinggi | ✅ Selesai |
+| F4-03 | Per anak, orang tua dapat melihat jadwal pelajaran, riwayat absensi, nilai, dan e-Rapor yang sudah difinalisasi. | Tinggi | ✅ Selesai |
+| F4-04 | Akses orang tua bersifat read-only dan hanya untuk anak yang tertaut; akses ke data siswa lain ditolak (`AnakPolicy` HTTP 403). | Tinggi | ✅ Selesai |
+| F4-05 | Orang tua melihat pengumuman resmi sekolah dan kelas anak yang ditargetkan kepadanya. | Sedang | ✅ Selesai |
 
 ### 5.5 F5 Pengumuman dan kalender akademik
 
@@ -186,11 +186,16 @@ Dikelola oleh paket `spatie/laravel-activitylog`:
 - `batch_uuid`: uuid, nullable
 - `created_at`, `updated_at`: timestamps
 
-### 7.5 Permission Baru (Spatie RBAC)
+### 7.5 Tabel `orang_tuas` & `orang_tua_siswa` (Baru - F4)
+Menyimpan profil orang tua dan relasi banyak-ke-banyak dengan anak:
+- `orang_tuas`: `id`, `user_id` (FK -> `users`, cascade), `nama_lengkap`, `jenis_kelamin` (L/P), `no_telepon`, `pekerjaan`, `alamat`, timestamps.
+- `orang_tua_siswa`: `id`, `orang_tua_id` (FK -> `orang_tuas`, cascade), `siswa_id` (FK -> `siswas`, cascade), `hubungan` (enum: 'ayah', 'ibu', 'wali'), timestamps. Unik pada `[orang_tua_id, siswa_id]`.
+
+### 7.6 Permission Baru (Spatie RBAC)
 - `buka-sesi-qr`: Diberikan kepada Guru dan Admin untuk membuat sesi QR.
 - `override-absensi`: Diberikan kepada Guru dan Admin untuk melakukan override presensi bermasalah.
 - `lihat-audit-log`: Diberikan kepada Admin/TU untuk mengakses rekam jejak aktivitas sistem.
-- `lihat-data-anak` *(Direncanakan untuk Role Orang Tua)*.
+- `lihat-data-anak`: Diberikan kepada Role `orang_tua` untuk otorisasi akses monitoring anak.
 
 ## 8. Arsitektur dan Teknologi
 
@@ -212,8 +217,9 @@ Dikelola oleh paket `spatie/laravel-activitylog`:
 | --- | --- | --- |
 | Absensi QR Dinamis (F1) & Geofencing (F2) | Perfektif | Menambah opsi presensi mandiri nirsentuh tanpa merusak presensi manual v1.0. |
 | Audit Log (F3) & Feature Testing | Preventif | Menutup risiko integritas data, memberi akuntabilitas mutasi nilai/absensi. |
+| Monitoring Orang Tua (F4) | Adaptif | Portal pemantauan read-only anak untuk wali murid dengan kontrol akses ketat (`AnakPolicy`). |
 | Otomatisasi CI/CD cPanel & PHP 8.2 Constraint | Adaptif | Memastikan kemudahan deployment berkelanjutan ke hosting nyata. |
-| Role Orang Tua (F4) & Notifikasi (F6) | Adaptif (Mendatang) | Menghubungkan ekosistem sekolah dengan pihak wali murid. |
+| Notifikasi Modular (F6) | Adaptif (Mendatang) | Menghubungkan ekosistem sekolah dengan pihak wali murid lewat in-app, Telegram, atau WA. |
 
 ### 9.2 Modul v1.0 yang terdampak
 

@@ -80,6 +80,13 @@ class Siswa extends Model
             ->withTimestamps();
     }
 
+    public function orangTuas(): BelongsToMany
+    {
+        return $this->belongsToMany(OrangTua::class, 'orang_tua_siswa')
+            ->withPivot('hubungan')
+            ->withTimestamps();
+    }
+
     public function prestasis(): HasMany
     {
         return $this->hasMany(Prestasi::class);

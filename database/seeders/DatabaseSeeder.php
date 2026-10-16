@@ -474,15 +474,41 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // ============================================================
+        // 13. Akun Demo Orang Tua (F4)
+        // ============================================================
+        $userOrtu = User::create([
+            'name' => 'Bapak Hermawan (Orang Tua)',
+            'email' => 'ortu@siakad.sch.id',
+            'password' => Hash::make('password'),
+            'role' => 'orang_tua',
+            'is_active' => true,
+        ]);
+
+        $ortu = \App\Models\OrangTua::create([
+            'user_id' => $userOrtu->id,
+            'nama_lengkap' => 'Hermawan Wijaya, S.E.',
+            'jenis_kelamin' => 'L',
+            'no_telepon' => '081234567890',
+            'pekerjaan' => 'Wiraswasta',
+            'alamat' => 'Jl. Merdeka No. 45, Jakarta',
+        ]);
+
+        $firstSiswa = Siswa::first();
+        if ($firstSiswa) {
+            $ortu->siswas()->attach($firstSiswa->id, ['hubungan' => 'ayah']);
+        }
+
+        // ============================================================
         // Selesai
         // ============================================================
         $this->command->info('Sub: DatabaseSeeder');
         $this->command->info('✅ Seeder sukses besar! Semua menu kini memiliki data lengkap untuk demo.');
         $this->command->info('   Informasi Akun Demo:');
         $this->command->info('   --------------------------------------------------------------');
-        $this->command->info('   Admin : admin@siakad.sch.id / password');
-        $this->command->info('   Guru  : budi@siakad.sch.id (MTK), ahmad@siakad.sch.id (FIS/KIM) / password');
-        $this->command->info('   Siswa : andi@siakad.sch.id (X IPA 1), kevin@siakad.sch.id (XI IPA 1) / password');
+        $this->command->info('   Admin     : admin@siakad.sch.id / password');
+        $this->command->info('   Guru      : budi@siakad.sch.id (MTK), ahmad@siakad.sch.id (FIS/KIM) / password');
+        $this->command->info('   Siswa     : andi@siakad.sch.id (X IPA 1), kevin@siakad.sch.id (XI IPA 1) / password');
+        $this->command->info('   Orang Tua : ortu@siakad.sch.id / password');
         $this->command->info('   --------------------------------------------------------------');
 
         // ── RBAC: Seed Roles & Permissions (Spatie) ──────────────

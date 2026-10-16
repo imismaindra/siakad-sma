@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Siswa;
+use App\Policies\AnakPolicy;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Activitylog\Models\Activity;
 
@@ -20,6 +23,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // F4: Daftarkan Policy otoritas pemantauan data anak oleh Orang Tua
+        Gate::policy(Siswa::class, AnakPolicy::class);
+
         // F3 Audit Log: Rekam otomatis IP Address dan User-Agent pada setiap aktivitas sistem
         Activity::creating(function (Activity $activity) {
             $props = $activity->properties ? $activity->properties->toArray() : [];

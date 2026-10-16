@@ -13,11 +13,17 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\PengaturanLokasiController;
+use App\Http\Controllers\Admin\OrangTuaController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Guru\AbsensiGuruController;
 use App\Http\Controllers\Guru\AbsensiQrGuruController;
 use App\Http\Controllers\Guru\DashboardGuruController;
 use App\Http\Controllers\Guru\NilaiGuruController;
+use App\Http\Controllers\OrangTua\AbsensiOrangTuaController;
+use App\Http\Controllers\OrangTua\DashboardOrangTuaController;
+use App\Http\Controllers\OrangTua\JadwalOrangTuaController;
+use App\Http\Controllers\OrangTua\NilaiOrangTuaController;
+use App\Http\Controllers\OrangTua\PengumumanOrangTuaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Siswa\AbsensiSiswaController;
 use App\Http\Controllers\Siswa\AbsensiQrSiswaController;
@@ -169,6 +175,9 @@ Route::middleware(['auth', 'role:admin'])
         // ── F2: Pengaturan Lokasi Sekolah & Geofencing ──────────────
         Route::get('/pengaturan-lokasi', [PengaturanLokasiController::class, 'index'])->name('pengaturan-lokasi.index');
         Route::put('/pengaturan-lokasi', [PengaturanLokasiController::class, 'update'])->name('pengaturan-lokasi.update');
+
+        // ── F4-01: Data Orang Tua ──────────────────────────────────
+        Route::resource('orang-tua', OrangTuaController::class);
     });
 
 // ============================================================
@@ -231,3 +240,23 @@ Route::middleware(['auth', 'role:siswa'])
         Route::get('/nilai', [NilaiSiswaController::class, 'index'])->name('nilai');
         Route::get('/nilai/rapor/download', [NilaiSiswaController::class, 'downloadRapor'])->name('rapor.download');
     });
+
+// ============================================================
+// Orang Tua Routes (F4)
+// ============================================================
+Route::middleware(['auth', 'role:orang_tua', 'can:lihat-data-anak'])
+    ->prefix('orang-tua')
+    ->name('orang-tua.')
+    ->group(function () {
+        Route::get('/dashboard', [DashboardOrangTuaController::class, 'dashboard'])->name('dashboard');
+        Route::post('/switch-anak/{siswa}', [DashboardOrangTuaController::class, 'switchAnak'])->name('switch-anak');
+
+        Route::get('/jadwal', [JadwalOrangTuaController::class, 'index'])->name('jadwal');
+        Route::get('/absensi', [AbsensiOrangTuaController::class, 'index'])->name('absensi');
+        Route::get('/nilai', [NilaiOrangTuaController::class, 'index'])->name('nilai');
+        Route::get('/nilai/rapor/{siswa}', [NilaiOrangTuaController::class, 'raporPdf'])->name('nilai.rapor-pdf');
+
+        Route::get('/pengumuman', [PengumumanOrangTuaController::class, 'index'])->name('pengumuman');
+        Route::get('/pengumuman/{pengumuman}', [PengumumanOrangTuaController::class, 'show'])->name('pengumuman.show');
+    });
+
