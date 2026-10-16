@@ -49,7 +49,7 @@
     <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm overflow-hidden relative">
         
         {{-- Mode Switch (Kamera vs Input Manual) --}}
-        <div class="flex items-center justify-center p-1 bg-slate-100 rounded-xl mb-4 max-w-xs mx-auto text-xs font-semibold">
+        <div class="flex items-center justify-center p-1 bg-slate-100 rounded-xl mb-3 max-w-xs mx-auto text-xs font-semibold">
             <button type="button" @click="mode = 'camera'; startScanner();" 
                     :class="mode === 'camera' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'"
                     class="flex-1 py-1.5 rounded-lg transition text-center">
@@ -60,6 +60,37 @@
                     class="flex-1 py-1.5 rounded-lg transition text-center">
                 Kode Cadangan
             </button>
+        </div>
+
+        {{-- GPS Geofencing Status Indicator (F2) --}}
+        <div class="mb-4 p-2.5 rounded-2xl text-xs flex items-center justify-between gap-3 border transition-all max-w-md mx-auto"
+             :class="{
+                 'bg-amber-50/80 border-amber-200 text-amber-800': gpsState === 'locating',
+                 'bg-emerald-50/80 border-emerald-200 text-emerald-800': gpsState === 'ready',
+                 'bg-rose-50/80 border-rose-200 text-rose-800': gpsState === 'denied' || gpsState === 'error'
+             }">
+            <div class="flex items-center gap-2.5">
+                <template x-if="gpsState === 'locating'">
+                    <svg class="w-4 h-4 animate-spin text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                </template>
+                <template x-if="gpsState === 'ready'">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                </template>
+                <template x-if="gpsState === 'denied' || gpsState === 'error'">
+                    <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </template>
+                
+                <div>
+                    <p class="font-bold text-[11px]" x-text="getGpsTitle()"></p>
+                    <p class="text-[10px] opacity-80" x-text="getGpsSubtitle()"></p>
+                </div>
+            </div>
+
+            <template x-if="gpsState === 'denied' || gpsState === 'error'">
+                <button type="button" @click="requestGps()" class="px-2.5 py-1 bg-white border border-rose-200 text-rose-700 font-bold rounded-lg text-[10px] shadow-2xs hover:bg-rose-100 transition shrink-0 cursor-pointer">
+                    Izinkan GPS
+                </button>
+            </template>
         </div>
 
         {{-- CAMERA SCANNER VIEW --}}
@@ -170,6 +201,12 @@
                                 <span class="text-slate-400">Waktu Presensi:</span>
                                 <span class="font-mono text-emerald-600 font-bold" x-text="`${resultData.data?.waktu} WIB`"></span>
                             </div>
+                            <template x-if="resultData.data?.jarak_meter !== null && resultData.data?.jarak_meter !== undefined">
+                                <div class="flex justify-between">
+                                    <span class="text-slate-400">Verifikasi Jarak:</span>
+                                    <span class="font-mono font-bold text-emerald-700" x-text="`${resultData.data.jarak_meter} m dari sekolah`"></span>
+                                </div>
+                            </template>
                             <div class="flex justify-between">
                                 <span class="text-slate-400">Status Kehadiran:</span>
                                 <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-100 text-emerald-800">HADIR</span>
@@ -184,15 +221,24 @@
                 {{-- Error State --}}
                 <template x-if="!resultData?.success">
                     <div class="space-y-4">
-                        <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto shadow-sm"
+                             :class="resultData?.is_location_error ? 'bg-amber-100 text-amber-600' : 'bg-rose-100 text-rose-600'">
+                            <template x-if="resultData?.is_location_error">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            </template>
+                            <template x-if="!resultData?.is_location_error">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </template>
                         </div>
                         <div>
-                            <h3 class="text-lg font-bold text-slate-800">Presensi Ditolak</h3>
-                            <p class="text-xs text-rose-600 mt-1 font-medium" x-text="resultData?.message || 'Terjadi kesalahan saat memproses data.'"></p>
+                            <h3 class="text-lg font-bold text-slate-800" x-text="resultData?.is_location_error ? 'Lokasi Belum Terverifikasi' : 'Presensi Ditolak'"></h3>
+                            <p class="text-xs mt-1 font-medium leading-relaxed" 
+                               :class="resultData?.is_location_error ? 'text-amber-700 bg-amber-50 p-2.5 rounded-xl border border-amber-200' : 'text-rose-600'" 
+                               x-text="resultData?.message || 'Terjadi kesalahan saat memproses data.'"></p>
                         </div>
                         <p class="text-[11px] text-slate-400">
-                            Pastikan Anda memindai kode QR yang masih aktif dan berada pada jam pelajaran yang sesuai.
+                            <span x-show="resultData?.is_location_error">Jika Anda berada di dalam kelas namun sinyal GPS lemah, mintalah bantuan Guru pengajar untuk melakukan absensi manual / override.</span>
+                            <span x-show="!resultData?.is_location_error">Pastikan Anda memindai kode QR yang masih aktif dan berada pada jam pelajaran yang sesuai.</span>
                         </p>
                         <button type="button" @click="closeResultModal()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs rounded-xl shadow-sm transition">
                             Coba Pindai Lagi
@@ -248,12 +294,22 @@ function siswaScannerApp() {
         resultModal: false,
         resultData: null,
         html5QrCode: null,
+        gpsState: 'locating', // 'locating' | 'ready' | 'denied' | 'error'
+        coords: {
+            latitude: null,
+            longitude: null,
+            accuracy: null
+        },
+        watchId: null,
         manualForm: {
             sesi_id: '',
             token: ''
         },
         init() {
-            // Cek apakah dibuka dari pemindaian kamera native ponsel lewat URL parameter ?qr=...
+            // 1. Inisialisasi deteksi lokasi GPS (F2)
+            this.requestGps();
+
+            // 2. Cek apakah dibuka dari pemindaian kamera native ponsel lewat URL parameter ?qr=...
             const urlParams = new URLSearchParams(window.location.search);
             const qrParam = urlParams.get('qr');
             if (qrParam) {
@@ -263,6 +319,66 @@ function siswaScannerApp() {
                 return;
             }
             this.startScanner();
+        },
+        requestGps() {
+            if (!("geolocation" in navigator)) {
+                this.gpsState = 'error';
+                return;
+            }
+
+            this.gpsState = 'locating';
+
+            const geoOptions = {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            };
+
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    this.coords.latitude = pos.coords.latitude;
+                    this.coords.longitude = pos.coords.longitude;
+                    this.coords.accuracy = pos.coords.accuracy;
+                    this.gpsState = 'ready';
+                },
+                (err) => {
+                    console.warn("Geolocation error:", err);
+                    if (err.code === err.PERMISSION_DENIED) {
+                        this.gpsState = 'denied';
+                    } else {
+                        this.gpsState = 'error';
+                    }
+                },
+                geoOptions
+            );
+
+            // Pantau pergerakan / pembaruan GPS secara berkelanjutan
+            if (!this.watchId) {
+                try {
+                    this.watchId = navigator.geolocation.watchPosition(
+                        (pos) => {
+                            this.coords.latitude = pos.coords.latitude;
+                            this.coords.longitude = pos.coords.longitude;
+                            this.coords.accuracy = pos.coords.accuracy;
+                            this.gpsState = 'ready';
+                        },
+                        null,
+                        { enableHighAccuracy: true, maximumAge: 5000 }
+                    );
+                } catch (e) {}
+            }
+        },
+        getGpsTitle() {
+            if (this.gpsState === 'ready') return 'Lokasi GPS Terverifikasi';
+            if (this.gpsState === 'locating') return 'Mendeteksi Koordinat GPS...';
+            if (this.gpsState === 'denied') return 'Izin Lokasi (GPS) Belum Aktif';
+            return 'Sinyal GPS Belum Terkunci';
+        },
+        getGpsSubtitle() {
+            if (this.gpsState === 'ready') return `Akurasi sinyal ±${Math.round(this.coords.accuracy)} meter`;
+            if (this.gpsState === 'locating') return 'Memastikan Anda berada di area sekolah';
+            if (this.gpsState === 'denied') return 'Klik tombol Izinkan agar koordinat sekolah terbaca';
+            return 'Pindah ke dekat jendela / nyalakan GPS akurasi tinggi';
         },
         startScanner() {
             this.$nextTick(() => {
@@ -294,9 +410,13 @@ function siswaScannerApp() {
             this.submitScan(decodedText);
         },
         submitScan(qrPayload, sesiId = null) {
-            const requestBody = sesiId 
-                ? { sesi_id: sesiId, token: qrPayload }
-                : { qr: qrPayload };
+            const requestBody = {
+                ...(sesiId ? { sesi_id: sesiId, token: qrPayload } : { qr: qrPayload }),
+                latitude: this.coords.latitude,
+                longitude: this.coords.longitude,
+                accuracy: this.coords.accuracy,
+                client_time: Date.now()
+            };
 
             fetch(`{{ route('siswa.absensi.scan.post') }}`, {
                 method: 'POST',

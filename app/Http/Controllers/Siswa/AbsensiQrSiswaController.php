@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\DetailAbsensi;
 use App\Models\SesiAbsensiQr;
+use App\Services\GeofencingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -44,7 +45,7 @@ class AbsensiQrSiswaController extends Controller
     }
 
     /**
-     * Memproses data hasil pemindaian QR code dari kamera browser siswa (F1-03, F1-04, F1-07).
+     * Memproses data hasil pemindaian QR code dari kamera browser siswa (F1-03, F1-04, F1-07, F2).
      */
     public function scan(Request $request)
     {
@@ -58,6 +59,7 @@ class AbsensiQrSiswaController extends Controller
             'latitude' => ['nullable', 'numeric'],
             'longitude' => ['nullable', 'numeric'],
             'accuracy' => ['nullable', 'numeric'],
+            'client_time' => ['nullable', 'integer'],
         ]);
 
         $sesi = null;
@@ -172,6 +174,37 @@ class AbsensiQrSiswaController extends Controller
             ], 403);
         }
 
+        // 3. Validasi Geofencing & Deteksi Fake Location / Mock GPS (F2-02, F2-03)
+        $lat = isset($validated['latitude']) ? (float) $validated['latitude'] : null;
+        $lon = isset($validated['longitude']) ? (float) $validated['longitude'] : null;
+        $acc = isset($validated['accuracy']) ? (float) $validated['accuracy'] : null;
+        $clientTime = isset($validated['client_time']) ? (int) $validated['client_time'] : null;
+
+        $locationCheck = GeofencingService::validateLocation($lat, $lon, $acc, $clientTime);
+
+        if (! $locationCheck['valid']) {
+            if ($locationCheck['is_mock_suspected']) {
+                activity('absensi')
+                    ->causedBy(Auth::user())
+                    ->event('suspicious')
+                    ->withProperties([
+                        'sesi_id' => $sesi->id,
+                        'reason' => $locationCheck['message'],
+                        'latitude' => $lat,
+                        'longitude' => $lon,
+                        'accuracy' => $acc,
+                    ])
+                    ->log("Terdeteksi anomali lokasi / dugaan Fake GPS pada presensi siswa {$siswa->nama_lengkap}");
+            }
+
+            return response()->json([
+                'success' => false,
+                'is_location_error' => true,
+                'is_mock_suspected' => $locationCheck['is_mock_suspected'],
+                'message' => $locationCheck['message'],
+            ], 422);
+        }
+
         // Pastikan absensi induk terhubung
         $absensi = $sesi->absensi;
         if (! $absensi) {
@@ -206,27 +239,29 @@ class AbsensiQrSiswaController extends Controller
                     'mata_pelajaran' => $sesi->jadwalPelajaran->mataPelajaran->nama,
                     'kelas' => $sesi->jadwalPelajaran->kelas->nama_lengkap,
                     'waktu' => $detail->waktu_absen ? $detail->waktu_absen->format('H:i:s') : $detail->updated_at->format('H:i:s'),
+                    'jarak_meter' => $detail->jarak_meter,
                 ],
             ]);
         }
 
-        // 5. Catat kehadiran valid (F1-04)
+        // 5. Catat kehadiran valid & simpan data geofencing (F1-04, F2-06)
+        $detailData = [
+            'status' => 'hadir',
+            'metode' => 'qr',
+            'waktu_absen' => now(),
+            'jarak_meter' => $locationCheck['distance'],
+            'akurasi_meter' => $locationCheck['accuracy'],
+            'lokasi_valid' => true,
+            'keterangan' => 'Presensi mandiri via QR Code' . ($locationCheck['distance'] !== null ? " ({$locationCheck['distance']}m dari sekolah)" : ''),
+        ];
+
         if ($detail) {
-            $detail->update([
-                'status' => 'hadir',
-                'metode' => 'qr',
-                'waktu_absen' => now(),
-                'keterangan' => 'Presensi mandiri via QR Code',
-            ]);
+            $detail->update($detailData);
         } else {
-            $detail = DetailAbsensi::create([
+            $detail = DetailAbsensi::create(array_merge([
                 'absensi_id' => $absensi->id,
                 'siswa_id' => $siswa->id,
-                'status' => 'hadir',
-                'metode' => 'qr',
-                'waktu_absen' => now(),
-                'keterangan' => 'Presensi mandiri via QR Code',
-            ]);
+            ], $detailData));
         }
 
         // Audit Log (F3)
@@ -238,8 +273,10 @@ class AbsensiQrSiswaController extends Controller
                 'metode' => 'qr',
                 'sesi_qr_id' => $sesi->id,
                 'mapel' => $sesi->jadwalPelajaran->mataPelajaran->nama,
+                'jarak_meter' => $locationCheck['distance'],
+                'akurasi_meter' => $locationCheck['accuracy'],
             ])
-            ->log("Siswa {$siswa->nama_lengkap} melakukan presensi via QR code");
+            ->log("Siswa {$siswa->nama_lengkap} melakukan presensi via QR code (Jarak: {$locationCheck['distance']}m)");
 
         return response()->json([
             'success' => true,
@@ -250,6 +287,8 @@ class AbsensiQrSiswaController extends Controller
                 'kelas' => $sesi->jadwalPelajaran->kelas->nama_lengkap,
                 'guru' => $sesi->guru->nama_lengkap,
                 'waktu' => now()->format('H:i:s'),
+                'jarak_meter' => $locationCheck['distance'],
+                'akurasi_meter' => $locationCheck['accuracy'],
             ],
         ]);
     }
