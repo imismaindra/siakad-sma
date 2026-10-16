@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\TahunAjaranController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\AuditLogController;
+use App\Http\Controllers\Admin\PengaturanLokasiController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Guru\AbsensiGuruController;
 use App\Http\Controllers\Guru\AbsensiQrGuruController;
@@ -163,6 +164,10 @@ Route::middleware(['auth', 'role:admin'])
             Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
             Route::get('/audit-log/{activity}', [AuditLogController::class, 'show'])->name('audit-log.show');
         });
+
+        // ── F2: Pengaturan Lokasi Sekolah & Geofencing ──────────────
+        Route::get('/pengaturan-lokasi', [PengaturanLokasiController::class, 'index'])->name('pengaturan-lokasi.index');
+        Route::put('/pengaturan-lokasi', [PengaturanLokasiController::class, 'update'])->name('pengaturan-lokasi.update');
     });
 
 // ============================================================
@@ -184,6 +189,7 @@ Route::middleware(['auth', 'role:guru,admin'])
         Route::get('/absensi/create/{jadwal}', [AbsensiGuruController::class, 'create'])->name('absensi.create');
         Route::post('/absensi', [AbsensiGuruController::class, 'store'])->name('absensi.store');
         Route::get('/absensi/{absensi}', [AbsensiGuruController::class, 'show'])->name('absensi.show');
+        Route::post('/absensi/{absensi}/override/{siswa}', [AbsensiGuruController::class, 'overrideSiswa'])->name('absensi.override');
 
         // Sesi Absensi QR Dinamis (F1)
         Route::post('/absensi/qr/buka/{jadwal}', [AbsensiQrGuruController::class, 'buka'])->name('absensi.qr.buka');

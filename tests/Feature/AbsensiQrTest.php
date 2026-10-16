@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\DetailAbsensi;
 use App\Models\JadwalPelajaran;
+use App\Models\PengaturanSekolah;
 use App\Models\SesiAbsensiQr;
 use App\Models\Siswa;
 use App\Models\User;
@@ -18,6 +19,13 @@ class AbsensiQrTest extends TestCase
     {
         parent::setUp();
         $this->seed();
+
+        // Nonaktifkan geofencing untuk isolasi pengujian QR murni (F1)
+        PengaturanSekolah::clearCache();
+        PengaturanSekolah::updateOrCreate(
+            ['id' => 1],
+            ['is_geofencing_active' => false]
+        );
     }
 
     public function test_guru_can_open_qr_session(): void

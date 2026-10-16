@@ -183,4 +183,53 @@ class AbsensiGuruController extends Controller
 
         return view('guru.absensi.rekap', compact('guru', 'kelasList', 'kelasId', 'siswaRekap', 'tahunAktif'));
     }
+
+    /**
+     * Guru melakukan override manual status kehadiran siswa dengan alasan wajib (F2-05).
+     */
+    public function overrideSiswa(Request $request, Absensi $absensi, Siswa $siswa)
+    {
+        $guru = $this->getGuru();
+
+        if ($absensi->guru_id !== $guru->id && ! Auth::user()->hasRole('admin')) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'status' => ['required', 'in:hadir,sakit,izin,alpa'],
+            'alasan_override' => ['required', 'string', 'min:3', 'max:255'],
+        ]);
+
+        $detail = DetailAbsensi::firstOrNew([
+            'absensi_id' => $absensi->id,
+            'siswa_id' => $siswa->id,
+        ]);
+
+        $oldStatus = $detail->status ?? 'belum';
+
+        $detail->fill([
+            'status' => $validated['status'],
+            'metode' => 'override',
+            'waktu_absen' => now(),
+            'alasan_override' => $validated['alasan_override'],
+            'lokasi_valid' => false,
+            'keterangan' => 'Override Guru: ' . $validated['alasan_override'],
+        ]);
+        $detail->save();
+
+        activity('absensi')
+            ->causedBy(Auth::user())
+            ->performedOn($detail)
+            ->event('override')
+            ->withProperties([
+                'old_status' => $oldStatus,
+                'new_status' => $validated['status'],
+                'alasan' => $validated['alasan_override'],
+                'siswa' => $siswa->nama_lengkap,
+                'mapel' => $absensi->mataPelajaran->nama,
+            ])
+            ->log("Guru {$guru->nama_lengkap} melakukan override status kehadiran {$siswa->nama_lengkap} menjadi {$validated['status']}. Alasan: {$validated['alasan_override']}");
+
+        return back()->with('success', "Status kehadiran {$siswa->nama_lengkap} berhasil diubah menjadi {$validated['status']} via override.");
+    }
 }
