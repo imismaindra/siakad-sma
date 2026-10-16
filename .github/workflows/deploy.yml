@@ -1,0 +1,65 @@
+name: Deploy to cPanel
+
+on:
+  push:
+    branches:
+      - main
+      - v2.0-development
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: 🚀 Build & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install Node Dependencies & Build Assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: 📤 Upload Build Assets (public/build) to cPanel
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          source: 'public/build'
+          target: '${{ secrets.DEPLOY_PATH }}'
+
+      - name: ⚡ Execute Remote Deployment on cPanel
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            set -e
+            echo "📂 Navigating to deployment directory..."
+            cd ${{ secrets.DEPLOY_PATH }}
+
+            echo "🔄 Pulling latest changes from branch ${{ github.ref_name }}..."
+            git pull origin ${{ github.ref_name }}
+
+            echo "📦 Installing PHP dependencies..."
+            composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+            echo "🗄️ Running database migrations..."
+            php artisan migrate --force
+
+            echo "⚡ Clearing and creating cache..."
+            php artisan optimize:clear
+            php artisan optimize
+
+            echo "✅ Deployment completed successfully!"
