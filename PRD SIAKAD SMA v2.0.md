@@ -49,12 +49,12 @@ SIAKAD SMA v1.0 sudah mencakup tiga peran (Admin/TU, Guru, Siswa) dengan fitur d
 
 | Peran | Status | Kebutuhan baru di v2.0 |
 | --- | --- | --- |
-| Admin/TU | Ada | Kelola pengumuman, kalender, pengaturan lokasi sekolah, akun orang tua, lihat & filter audit log |
+| Admin/TU | Ada | Kelola pengumuman, kalender, pengaturan lokasi sekolah, akun orang tua & tautan anak, lihat & filter audit log |
 | Guru | Ada | Membuka sesi QR, melihat status absensi real-time (live polling 3s), override manual dengan alasan wajib |
 | Siswa | Ada | Memindai QR untuk absen via browser (HTML5-QRCode), fallback input OTP 6-digit, melihat pengumuman dan kalender |
-| Orang Tua/Wali | Baru (Tahap 2) | Melihat jadwal, absensi, nilai, dan rapor anak (read-only), menerima notifikasi |
+| Orang Tua/Wali | Ada (Baru di v2.0 - F4) | Melihat jadwal, absensi, nilai, dan e-Rapor anak (read-only), beralih anak via multi-child switcher, menerima pengumuman |
 
-Peran Orang Tua ditambahkan melalui mekanisme role dan permission yang sudah ada (`spatie/laravel-permission`).
+Peran Orang Tua ditambahkan melalui mekanisme role dan permission Spatie (`spatie/laravel-permission`) dengan permission khusus `lihat-data-anak` dan otorisasi ketat berbasis `AnakPolicy`. Akun demo aktif disediakan: `ortu@siakad.sch.id` / `password`.
 
 ## 5. Kebutuhan Fungsional
 
@@ -92,7 +92,7 @@ Peran Orang Tua ditambahkan melalui mekanisme role dan permission yang sudah ada
 | F3-04 | Log bersifat hanya-tambah (*append-only*); tidak disediakan aksi edit maupun hapus log pada antarmuka admin demi integritas bukti. | Sedang | ✅ Selesai |
 | F3-05 | Dilindungi permission khusus `lihat-audit-log` agar hanya staf berwenang yang dapat melihat rekam jejak. | Tinggi | ✅ Selesai |
 
-### 5.4 F4 Monitoring orang tua (Tahap 2)
+### 5.4 F4 Monitoring orang tua (Selesai)
 
 | ID | Kebutuhan | Prioritas | Status |
 | --- | --- | --- | :---:|
@@ -190,6 +190,7 @@ Dikelola oleh paket `spatie/laravel-activitylog`:
 Menyimpan profil orang tua dan relasi banyak-ke-banyak dengan anak:
 - `orang_tuas`: `id`, `user_id` (FK -> `users`, cascade), `nama_lengkap`, `jenis_kelamin` (L/P), `no_telepon`, `pekerjaan`, `alamat`, timestamps.
 - `orang_tua_siswa`: `id`, `orang_tua_id` (FK -> `orang_tuas`, cascade), `siswa_id` (FK -> `siswas`, cascade), `hubungan` (enum: 'ayah', 'ibu', 'wali'), timestamps. Unik pada `[orang_tua_id, siswa_id]`.
+- Migrasi kompatibilitas produksi: `2026_10_16_120000_alter_users_role_and_seed_orang_tua_demo.php` mengubah tipe kolom `users.role` menjadi `VARCHAR(30)` pada MySQL cPanel dan memastikan role `orang_tua`, permission `lihat-data-anak`, serta akun demo `ortu@siakad.sch.id` otomatis terpasang saat `php artisan migrate --force` dijalankan pada CI/CD.
 
 ### 7.6 Permission Baru (Spatie RBAC)
 - `buka-sesi-qr`: Diberikan kepada Guru dan Admin untuk membuat sesi QR.
@@ -226,9 +227,10 @@ Menyimpan profil orang tua dan relasi banyak-ke-banyak dengan anak:
 | Modul v1.0 | Dampak Aktual |
 | --- | --- |
 | Absensi digital | Mendukung metode ganda (`manual` dan `qr`). Tabel detail absensi mencatat waktu scan dan status override. Alur manual guru tetap 100% utuh. |
-| Autentikasi dan RBAC | Penambahan 3 permission baru (`buka-sesi-qr`, `override-absensi`, `lihat-audit-log`). |
-| Modul Nilai & Pengguna | Model ditambahkan trait logging otomatis `LogsActivity` untuk rekam jejak audit tanpa mengubah logika penilaian. |
-| Deployment | Beralih dari FTP manual menjadi automated GitHub Actions pipeline. |
+| Autentikasi dan RBAC | Penambahan 4 permission baru (`buka-sesi-qr`, `override-absensi`, `lihat-audit-log`, `lihat-data-anak`) dan penambahan role `orang_tua`. |
+| Modul Nilai & Pengguna | Model ditambahkan trait logging otomatis `LogsActivity` untuk rekam jejak audit tanpa mengubah logika penilaian. Kolom `users.role` diperluas dari enum menjadi `VARCHAR(30)`. |
+| Portal Monitoring Anak | Penambahan antarmuka portal orang tua (`orang-tua.*`), multi-child switcher, dan proteksi isolasi data melalui `AnakPolicy` (HTTP 403 untuk akses anak tak tertaut). |
+| Deployment | Beralih dari FTP manual menjadi automated GitHub Actions pipeline ke cPanel. |
 
 ## 10. Risiko dan Mitigasi
 
@@ -245,7 +247,7 @@ Menyimpan profil orang tua dan relasi banyak-ke-banyak dengan anak:
 | Tahap | Isi | Status | Keluaran |
 | --- | --- | :---:| --- |
 | **1 Inti (Core Evolution)** | F1 QR dinamis, F2 skema geofence, F3 audit log, CI/CD pipeline | **100% Selesai** | Presensi QR aktif dengan live monitoring, audit trail aktif, pipeline deployment cPanel beroperasi |
-| **2 Pendukung** | F4 role orang tua, F5 kalender akademik, penyempurnaan UI | Terjadwal | Portal wali murid read-only dan kalender akademik sekolah |
+| **2 Pendukung** | F4 role orang tua (Selesai), F5 pengumuman & kalender akademik, penyempurnaan UI | **Sedang Berjalan (F4 Selesai)** | Portal wali murid read-only selesai (F4); Kalender akademik dalam pengerjaan (F5) |
 | **3 Notifikasi** | F6 arsitektur channel, Telegram/email, adapter WA opsional | Terjadwal | Notifikasi otomatis pemicu alpa, pengumuman, dan e-Rapor |
 | **4 Penutupan** | Final documentation, test regression, tag v2.0.0 resmi | Terjadwal | Rilis v2.0.0 produksi |
 
@@ -261,6 +263,13 @@ Menyimpan profil orang tua dan relasi banyak-ke-banyak dengan anak:
 - [x] Admin dapat memfilter rekam audit log berdasarkan pelaku, modul, event, dan tanggal.
 - [x] Admin dapat mengekspor seluruh atau riwayat terfilter audit log ke format CSV untuk keperluan akreditasi/audit resmi.
 - [x] Catatan override absensi oleh guru/admin tercatat secara khusus dengan alasan wajib dan detail siswa.
+- [x] Admin dapat mengelola akun orang tua dan menautkan satu atau banyak anak dengan hubungan ayah/ibu/wali.
+- [x] Orang tua dapat login dan langsung diarahkan ke dashboard pemantauan anak.
+- [x] Orang tua yang memiliki lebih dari satu anak dapat beralih anak aktif secara instan via child switcher.
+- [x] Orang tua dapat memantau jadwal pelajaran, riwayat presensi terfilter, dan nilai akademik semester berjalan anak.
+- [x] Orang tua dapat mengunduh e-Rapor PDF resmi anak setelah nilai difinalisasi oleh pihak sekolah.
+- [x] Otorisasi ketat (`AnakPolicy`) memblokir akses dan unduh rapor siswa yang tidak tertaut dengan respon HTTP 403 Forbidden.
+- [x] Orang tua dapat melihat pengumuman resmi sekolah dan pengumuman yang ditargetkan untuk kelas anak.
 - [x] Push ke branch `v2.0-development` otomatis memicu pipeline CI/CD dan men-deploy pembaruan ke cPanel hosting.
 - [x] Alur bawaan v1.0 (absensi manual, perhitungan nilai terbobot, ekspor e-Rapor PDF) tetap berjalan normal.
 
@@ -270,7 +279,10 @@ Menyimpan profil orang tua dan relasi banyak-ke-banyak dengan anak:
 - **v2.0.0-beta / v2.0-development** (Oktober 2026):
   - Penambahan modul Absensi QR Dinamis (F1) dengan rotasi HMAC token 30s & rolling OTP.
   - Penambahan Live Monitoring presensi guru via AJAX polling 3s.
-  - Implementasi Audit Trail otomatis (F3) via `spatie/laravel-activitylog` beserta GUI admin.
-  - Penambahan permission baru (`buka-sesi-qr`, `override-absensi`, `lihat-audit-log`).
+  - Implementasi Geofencing lokasi presensi (F2) dengan formula Haversine & proteksi anti-mock GPS.
+  - Implementasi Audit Trail otomatis (F3) via `spatie/laravel-activitylog` beserta GUI admin, ekspor CSV, dan auto-capture IP/User-Agent.
+  - Penambahan Modul Monitoring Orang Tua (F4) dengan portal read-only anak, multi-child switcher, dan proteksi isolasi data melalui `AnakPolicy`.
+  - Penambahan permission baru (`buka-sesi-qr`, `override-absensi`, `lihat-audit-log`, `lihat-data-anak`) dan penambahan role `orang_tua`.
+  - Migrasi pengubahan kolom `users.role` menjadi `VARCHAR(30)` di MySQL dan auto-seed akun demo Orang Tua (`ortu@siakad.sch.id` / `password`) saat CI/CD deploy.
   - Pembuatan automated CI/CD pipeline GitHub Actions untuk deployment ke cPanel Shared Hosting.
   - Pembaruan dependensi PHP ^8.2 pada `composer.json` untuk kompatibilitas shared hosting.
