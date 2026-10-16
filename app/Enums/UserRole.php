@@ -4,9 +4,10 @@ namespace App\Enums;
 
 enum UserRole: string
 {
-    case Admin = 'admin';
-    case Guru  = 'guru';
-    case Siswa = 'siswa';
+    case Admin    = 'admin';
+    case Guru     = 'guru';
+    case Siswa    = 'siswa';
+    case OrangTua = 'orang_tua';
 
     /**
      * Label yang ditampilkan di UI.
@@ -14,9 +15,10 @@ enum UserRole: string
     public function label(): string
     {
         return match($this) {
-            UserRole::Admin => 'Administrator',
-            UserRole::Guru  => 'Guru / Tenaga Pendidik',
-            UserRole::Siswa => 'Siswa / Peserta Didik',
+            UserRole::Admin    => 'Administrator',
+            UserRole::Guru     => 'Guru / Tenaga Pendidik',
+            UserRole::Siswa    => 'Siswa / Peserta Didik',
+            UserRole::OrangTua => 'Orang Tua / Wali Murid',
         };
     }
 
@@ -26,9 +28,10 @@ enum UserRole: string
     public function badgeClass(): string
     {
         return match($this) {
-            UserRole::Admin => 'badge-navy',
-            UserRole::Guru  => 'badge-gold',
-            UserRole::Siswa => 'badge-success',
+            UserRole::Admin    => 'badge-navy',
+            UserRole::Guru     => 'badge-gold',
+            UserRole::Siswa    => 'badge-success',
+            UserRole::OrangTua => 'badge-indigo',
         };
     }
 
@@ -38,9 +41,10 @@ enum UserRole: string
     public function dashboardRoute(): string
     {
         return match($this) {
-            UserRole::Admin => 'admin.dashboard',
-            UserRole::Guru  => 'guru.dashboard',
-            UserRole::Siswa => 'siswa.dashboard',
+            UserRole::Admin    => 'admin.dashboard',
+            UserRole::Guru     => 'guru.dashboard',
+            UserRole::Siswa    => 'siswa.dashboard',
+            UserRole::OrangTua => 'orang-tua.dashboard',
         };
     }
 

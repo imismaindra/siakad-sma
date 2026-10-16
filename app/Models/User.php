@@ -88,6 +88,11 @@ class User extends Authenticatable
         return $this->hasRole(UserRole::Siswa->value);
     }
 
+    public function isOrangTua(): bool
+    {
+        return $this->hasRole(UserRole::OrangTua->value) || $this->role === UserRole::OrangTua->value;
+    }
+
     /**
      * Primary role enum (dari kolom `role`).
      * Digunakan untuk redirect dashboard & layout selection.
@@ -109,6 +114,11 @@ class User extends Authenticatable
     public function siswa(): HasOne
     {
         return $this->hasOne(Siswa::class);
+    }
+
+    public function orangTua(): HasOne
+    {
+        return $this->hasOne(OrangTua::class);
     }
 
     public function kelasWali(): HasOne
