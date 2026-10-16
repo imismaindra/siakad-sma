@@ -476,25 +476,29 @@ class DatabaseSeeder extends Seeder
         // ============================================================
         // 13. Akun Demo Orang Tua (F4)
         // ============================================================
-        $userOrtu = User::create([
-            'name' => 'Bapak Hermawan (Orang Tua)',
-            'email' => 'ortu@siakad.sch.id',
-            'password' => Hash::make('password'),
-            'role' => 'orang_tua',
-            'is_active' => true,
-        ]);
+        $userOrtu = User::firstOrCreate(
+            ['email' => 'ortu@siakad.sch.id'],
+            [
+                'name' => 'Bapak Hermawan (Orang Tua)',
+                'password' => Hash::make('password'),
+                'role' => 'orang_tua',
+                'is_active' => true,
+            ]
+        );
 
-        $ortu = \App\Models\OrangTua::create([
-            'user_id' => $userOrtu->id,
-            'nama_lengkap' => 'Hermawan Wijaya, S.E.',
-            'jenis_kelamin' => 'L',
-            'no_telepon' => '081234567890',
-            'pekerjaan' => 'Wiraswasta',
-            'alamat' => 'Jl. Merdeka No. 45, Jakarta',
-        ]);
+        $ortu = \App\Models\OrangTua::firstOrCreate(
+            ['user_id' => $userOrtu->id],
+            [
+                'nama_lengkap' => 'Hermawan Wijaya, S.E.',
+                'jenis_kelamin' => 'L',
+                'no_telepon' => '081234567890',
+                'pekerjaan' => 'Wiraswasta',
+                'alamat' => 'Jl. Merdeka No. 45, Jakarta',
+            ]
+        );
 
         $firstSiswa = Siswa::first();
-        if ($firstSiswa) {
+        if ($firstSiswa && $ortu->siswas()->where('siswas.id', $firstSiswa->id)->doesntExist()) {
             $ortu->siswas()->attach($firstSiswa->id, ['hubungan' => 'ayah']);
         }
 
