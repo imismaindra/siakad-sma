@@ -418,16 +418,40 @@ function siswaScannerApp() {
                 client_time: Date.now()
             };
 
-            fetch(`{{ route('siswa.absensi.scan.post') }}`, {
+            fetch(`{{ route('siswa.absensi.scan.post', [], false) }}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 body: JSON.stringify(requestBody)
             })
-            .then(res => res.json().then(data => ({ status: res.status, body: data })))
-            .then(({ status, body }) => {
+            .then(async res => {
+                let data = null;
+                try {
+                    data = await res.json();
+                } catch (e) {}
+
+                if (!res.ok) {
+                    if (res.status === 419) {
+                        return {
+                            success: false,
+                            message: "Sesi halaman telah kedaluwarsa. Silakan refresh halaman browser Anda."
+                        };
+                    }
+                    if (data && typeof data === 'object') {
+                        return data;
+                    }
+                    return {
+                        success: false,
+                        message: `Terjadi kendala pada server (HTTP ${res.status}).`
+                    };
+                }
+
+                return data || { success: false, message: "Respon server tidak valid." };
+            })
+            .then(body => {
                 this.isProcessing = false;
                 this.resultData = body;
                 this.resultModal = true;
@@ -439,7 +463,7 @@ function siswaScannerApp() {
                 this.isProcessing = false;
                 this.resultData = {
                     success: false,
-                    message: "Terjadi gangguan koneksi saat mengirim presensi."
+                    message: err.message || "Terjadi gangguan koneksi saat mengirim presensi."
                 };
                 this.resultModal = true;
             });
