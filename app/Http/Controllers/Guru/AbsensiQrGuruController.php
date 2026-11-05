@@ -201,4 +201,71 @@ class AbsensiQrGuruController extends Controller
         return redirect()->route('guru.absensi.show', $sesi->absensi_id)
             ->with('success', 'Sesi absensi QR telah ditutup. Silakan tinjau dan lengkapi status kehadiran siswa.');
     }
+
+    /**
+     * Guru menolak presensi siswa langsung dari layar QR live monitor (F1-05).
+     */
+    public function tolakSiswa(Request $request, SesiAbsensiQr $sesi, Siswa $siswa)
+    {
+        $guru = $this->getGuru();
+
+        if ($guru && $sesi->guru_id !== $guru->id && ! Auth::user()->hasRole('admin')) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'alasan' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $alasan = $validated['alasan'] ?? 'Ditolak Guru saat sesi QR aktif';
+
+        $absensi = $sesi->absensi;
+        if (! $absensi) {
+            $absensi = Absensi::firstOrCreate(
+                [
+                    'jadwal_pelajaran_id' => $sesi->jadwal_pelajaran_id,
+                    'tanggal' => $sesi->tanggal,
+                ],
+                [
+                    'kelas_id' => $sesi->jadwalPelajaran->kelas_id,
+                    'guru_id' => $sesi->guru_id,
+                    'mata_pelajaran_id' => $sesi->jadwalPelajaran->mata_pelajaran_id,
+                    'metode' => 'qr',
+                    'materi' => 'Presensi QR Kelas ' . $sesi->jadwalPelajaran->kelas->nama_lengkap,
+                ]
+            );
+            $sesi->update(['absensi_id' => $absensi->id]);
+        }
+
+        $detail = DetailAbsensi::firstOrNew([
+            'absensi_id' => $absensi->id,
+            'siswa_id' => $siswa->id,
+        ]);
+
+        $detail->fill([
+            'status' => 'alpa',
+            'metode' => 'override',
+            'waktu_absen' => now(),
+            'alasan_override' => $alasan,
+            'lokasi_valid' => false,
+            'keterangan' => 'Presensi ditolak guru: ' . $alasan,
+        ]);
+        $detail->save();
+
+        activity('absensi')
+            ->causedBy(Auth::user())
+            ->performedOn($detail)
+            ->event('rejected')
+            ->withProperties([
+                'sesi_id' => $sesi->id,
+                'siswa' => $siswa->nama_lengkap,
+                'alasan' => $alasan,
+            ])
+            ->log("Guru {$guru?->nama_lengkap} menolak presensi {$siswa->nama_lengkap} dari sesi QR #{$sesi->id}");
+
+        return response()->json([
+            'success' => true,
+            'message' => "Presensi {$siswa->nama_lengkap} berhasil ditolak.",
+        ]);
+    }
 }

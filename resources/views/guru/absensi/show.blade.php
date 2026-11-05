@@ -130,7 +130,16 @@
                                 @endif
                             </td>
                             <td class="text-xs text-slate-500">{{ $da->keterangan ?? '—' }}</td>
-                            <td class="text-right">
+                            <td class="text-right space-x-1 whitespace-nowrap">
+                                @if($da->status === 'hadir')
+                                    <form action="{{ route('guru.absensi.tolak', [$absensi, $da->siswa]) }}" method="POST" class="inline" onsubmit="const r = prompt('Masukkan alasan penolakan presensi untuk {{ addslashes($da->siswa->nama_lengkap) }}:', 'Siswa tidak berada di kelas / Titip absen'); if(r === null) return false; this.alasan.value = r; return true;">
+                                        @csrf
+                                        <input type="hidden" name="alasan" value="">
+                                        <button type="submit" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-semibold border border-rose-200 transition cursor-pointer" title="Tolak Presensi">
+                                            Tolak
+                                        </button>
+                                    </form>
+                                @endif
                                 <button type="button" @click="openOverride({{ $da->siswa->id }}, '{{ addslashes($da->siswa->nama_lengkap) }}', '{{ $da->status }}')" class="px-2.5 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-600 rounded-lg text-xs font-semibold transition cursor-pointer">
                                     Override
                                 </button>

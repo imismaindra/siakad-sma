@@ -244,6 +244,13 @@ class AbsensiQrSiswaController extends Controller
             ]);
         }
 
+        if ($detail && $detail->status === 'alpa' && $detail->metode === 'override') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Presensi Anda telah ditolak oleh Guru (' . ($detail->alasan_override ?? 'Ditolak Guru') . '). Anda tidak dapat melakukan presensi ulang.',
+            ], 403);
+        }
+
         // 5. Catat kehadiran valid & simpan data geofencing (F1-04, F2-06)
         $detailData = [
             'status' => 'hadir',

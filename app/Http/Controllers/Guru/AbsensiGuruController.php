@@ -232,4 +232,61 @@ class AbsensiGuruController extends Controller
 
         return back()->with('success', "Status kehadiran {$siswa->nama_lengkap} berhasil diubah menjadi {$validated['status']} via override.");
     }
+
+    /**
+     * Guru menolak presensi siswa dan mengubah status menjadi alpa.
+     */
+    public function tolakSiswa(Request $request, Absensi $absensi, Siswa $siswa)
+    {
+        $guru = $this->getGuru();
+
+        if ($absensi->guru_id !== $guru->id && ! Auth::user()->hasRole('admin')) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'alasan' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $alasan = $validated['alasan'] ?? 'Ditolak Guru: Siswa tidak berada di kelas / Titip absen';
+
+        $detail = DetailAbsensi::firstOrNew([
+            'absensi_id' => $absensi->id,
+            'siswa_id' => $siswa->id,
+        ]);
+
+        $oldStatus = $detail->status ?? 'belum';
+
+        $detail->fill([
+            'status' => 'alpa',
+            'metode' => 'override',
+            'waktu_absen' => now(),
+            'alasan_override' => $alasan,
+            'lokasi_valid' => false,
+            'keterangan' => 'Presensi ditolak guru: ' . $alasan,
+        ]);
+        $detail->save();
+
+        activity('absensi')
+            ->causedBy(Auth::user())
+            ->performedOn($detail)
+            ->event('rejected')
+            ->withProperties([
+                'old_status' => $oldStatus,
+                'new_status' => 'alpa',
+                'alasan' => $alasan,
+                'siswa' => $siswa->nama_lengkap,
+                'mapel' => $absensi->mataPelajaran->nama,
+            ])
+            ->log("Guru {$guru->nama_lengkap} menolak presensi siswa {$siswa->nama_lengkap}. Alasan: {$alasan}");
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Presensi {$siswa->nama_lengkap} berhasil ditolak (status diubah menjadi Alpa).",
+            ]);
+        }
+
+        return back()->with('success', "Presensi {$siswa->nama_lengkap} berhasil ditolak (status diubah menjadi Alpa).");
+    }
 }

@@ -289,6 +289,7 @@
             if (data.siswa_hadir && data.siswa_hadir.length > 0) {
                 if (listHadirEmpty) listHadirEmpty.classList.add('hidden');
                 data.siswa_hadir.forEach((siswa, idx) => {
+                    const safeName = (siswa.nama || '').replace(/['"\\]/g, ' ');
                     const row = document.createElement('div');
                     row.className = 'flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition text-xs border border-slate-50';
                     row.innerHTML = `
@@ -299,9 +300,14 @@
                                 <p class="text-[10px] text-slate-400 font-mono">NIS: ${siswa.nis}</p>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">${siswa.waktu}</span>
-                            <span class="block text-[9px] text-slate-400 uppercase mt-0.5">${siswa.metode}</span>
+                        <div class="flex items-center gap-2">
+                            <div class="text-right">
+                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">${siswa.waktu}</span>
+                                <span class="block text-[9px] text-slate-400 uppercase mt-0.5">${siswa.metode}</span>
+                            </div>
+                            <button type="button" onclick="tolakPresensi(${siswa.id}, '${safeName}')" class="px-2 py-1 text-[10px] font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg border border-rose-200 transition cursor-pointer" title="Tolak Presensi Siswa">
+                                Tolak
+                            </button>
                         </div>
                     `;
                     listHadirItems.appendChild(row);
@@ -321,6 +327,7 @@
                 data.siswa_belum.forEach((siswa, idx) => {
                     const row = document.createElement('div');
                     row.className = 'flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition text-xs border border-slate-50';
+                    const isAlpa = siswa.status === 'alpa';
                     row.innerHTML = `
                         <div class="flex items-center gap-2.5">
                             <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-500 font-semibold flex items-center justify-center text-[10px]">${idx + 1}</span>
@@ -329,8 +336,8 @@
                                 <p class="text-[10px] text-slate-400 font-mono">NIS: ${siswa.nis}</p>
                             </div>
                         </div>
-                        <span class="text-[10px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                            Belum Scan
+                        <span class="text-[10px] ${isAlpa ? 'text-rose-600 bg-rose-50 border-rose-200 font-bold' : 'text-amber-600 bg-amber-50 border-amber-200'} px-2 py-0.5 rounded border">
+                            ${isAlpa ? 'Ditolak (Alpa)' : 'Belum Scan'}
                         </span>
                     `;
                     listBelumItems.appendChild(row);
@@ -389,6 +396,34 @@
         fetchLiveStatus();
         livePollTimer = setInterval(fetchLiveStatus, 3000);
     }
+
+    // Fungsi Guru Menolak Absen Siswa
+    window.tolakPresensi = function(siswaId, namaSiswa) {
+        const alasan = prompt(`Tolak presensi siswa "${namaSiswa}"?\n\nMasukkan alasan (misal: Siswa tidak berada di kelas / Titip absen):`, 'Siswa tidak berada di kelas / Titip absen');
+        if (alasan === null) return;
+
+        fetch(`{{ url('guru/absensi/qr/' . $sesi->id . '/tolak') }}/${siswaId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ alasan: alasan })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                fetchLiveStatus();
+            } else {
+                alert(data.message || 'Gagal menolak presensi.');
+            }
+        })
+        .catch(err => {
+            console.error('Error tolak presensi:', err);
+            alert('Terjadi kesalahan jaringan.');
+        });
+    };
 })();
 </script>
 @endpush

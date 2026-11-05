@@ -200,12 +200,14 @@ Route::middleware(['auth', 'role:guru,admin'])
         Route::post('/absensi', [AbsensiGuruController::class, 'store'])->name('absensi.store');
         Route::get('/absensi/{absensi}', [AbsensiGuruController::class, 'show'])->name('absensi.show');
         Route::post('/absensi/{absensi}/override/{siswa}', [AbsensiGuruController::class, 'overrideSiswa'])->name('absensi.override');
+        Route::post('/absensi/{absensi}/tolak/{siswa}', [AbsensiGuruController::class, 'tolakSiswa'])->name('absensi.tolak');
 
         // Sesi Absensi QR Dinamis (F1)
         Route::post('/absensi/qr/buka/{jadwal}', [AbsensiQrGuruController::class, 'buka'])->name('absensi.qr.buka');
         Route::get('/absensi/qr/{sesi}', [AbsensiQrGuruController::class, 'show'])->name('absensi.qr.show');
         Route::get('/absensi/qr/{sesi}/token', [AbsensiQrGuruController::class, 'token'])->name('absensi.qr.token');
         Route::get('/absensi/qr/{sesi}/live-status', [AbsensiQrGuruController::class, 'liveStatus'])->name('absensi.qr.status');
+        Route::post('/absensi/qr/{sesi}/tolak/{siswa}', [AbsensiQrGuruController::class, 'tolakSiswa'])->name('absensi.qr.tolak');
         Route::post('/absensi/qr/{sesi}/tutup', [AbsensiQrGuruController::class, 'tutup'])->name('absensi.qr.tutup');
 
         // Nilai
