@@ -51,16 +51,6 @@ jobs:
           npm ci
           npm run build
 
-      - name: 📤 Upload Build Assets (public/build) to cPanel
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
-          source: 'public/build'
-          target: '${{ secrets.DEPLOY_PATH }}'
-
       - name: ⚡ Execute Remote Deployment on cPanel (main branch)
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -73,14 +63,41 @@ jobs:
             echo "📂 Navigating to deployment directory..."
             cd ${{ secrets.DEPLOY_PATH }}
 
-            echo "🔄 Pulling latest changes from origin main..."
-            git pull origin main
+            echo "🧹 Discarding local modifications before updating..."
+            git reset --hard HEAD
+
+            echo "🔄 Fetching and syncing latest changes from origin main..."
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd public/build
 
             echo "📦 Installing PHP dependencies..."
             composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
             echo "🗄️ Running database migrations..."
             php artisan migrate --force
+
+      - name: 📤 Upload Build Assets (public/build) to cPanel
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          source: 'public/build'
+          target: '${{ secrets.DEPLOY_PATH }}'
+
+      - name: ⚡ Optimize Application Cache on cPanel
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            set -e
+            echo "📂 Navigating to deployment directory..."
+            cd ${{ secrets.DEPLOY_PATH }}
 
             echo "⚡ Clearing and creating cache..."
             php artisan optimize:clear
