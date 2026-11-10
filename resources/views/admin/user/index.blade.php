@@ -94,9 +94,9 @@
                             </td>
                             <td>
                                 @if($user->is_active)
-                                    <span class="badge badge-success">Aktif</span>
+                                    <span class="badge badge-status-aktif">Aktif</span>
                                 @else
-                                    <span class="badge badge-danger">Nonaktif</span>
+                                    <span class="badge badge-status-tidak-aktif">Nonaktif</span>
                                 @endif
                             </td>
                             <td class="font-mono text-xs tabular-nums text-slate-500">{{ $user->created_at->format('d/m/Y H:i') }}</td>
@@ -158,11 +158,8 @@
                 </tbody>
             </table>
         </div>
-        <div class="flex flex-col items-center justify-between gap-3 px-6 py-4 sm:flex-row">
-            <p class="text-xs font-medium text-slate-500">Menampilkan {{ $users->firstItem() ?? 0 }} sampai {{ $users->lastItem() ?? 0 }} dari {{ $users->total() }} data</p>
-            <div class="pagination-wrapper">
-                {{ $users->links() }}
-            </div>
+        <div class="pagination-wrapper">
+            {{ $users->links() }}
         </div>
     </div>
 

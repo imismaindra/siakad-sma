@@ -56,6 +56,8 @@ class TahunAjaranController extends Controller
             'semester' => ['required', 'in:1,2'],
             'tanggal_mulai' => ['required', 'date'],
             'tanggal_selesai' => ['required', 'date', 'after:tanggal_mulai'],
+        ], [
+            'nama.regex' => 'Format nama harus YYYY/YYYY, contoh: 2025/2026.',
         ]);
 
         $tahunAjaran->update($validated);

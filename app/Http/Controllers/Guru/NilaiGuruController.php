@@ -64,7 +64,8 @@ class NilaiGuruController extends Controller
         $siswas = Siswa::where('kelas_id', $kelas->id)
             ->aktif()
             ->orderBy('nama_lengkap')
-            ->get();
+            ->paginate(15)
+            ->withQueryString();
 
         $nilais = Nilai::with('mataPelajaran')
             ->where('kelas_id', $kelas->id)

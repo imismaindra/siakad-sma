@@ -95,11 +95,11 @@
                             <td class="font-semibold text-navy-600">{{ $da->absensi->mataPelajaran->nama }}</td>
                             <td class="font-medium text-slate-700">{{ $da->absensi->guru->nama_lengkap }}</td>
                             <td>
-                                <span class="badge absensi-status-{{ $da->status }}">
+                                <span class="badge badge-absen-{{ $da->status }}">
                                     {{ ucfirst($da->status) }}
                                 </span>
                             </td>
-                            <td class="text-xs text-slate-500 italic">{{ $da->keterangan ?? '—' }}</td>
+                            <td class="text-xs text-slate-500 italic">{{ $da->keterangan ?? '-' }}</td>
                         </tr>
                     @empty
                         <tr>
@@ -112,12 +112,9 @@
             </table>
         </div>
 
-        {{-- Pagination --}}
-        @if($detailAbsensis->hasPages())
-            <div class="px-6 py-4 border-t border-slate-100 pagination-wrapper">
-                {{ $detailAbsensis->links() }}
-            </div>
-        @endif
+        <div class="pagination-wrapper">
+            {{ $detailAbsensis->links() }}
+        </div>
     </div>
 
 </div>

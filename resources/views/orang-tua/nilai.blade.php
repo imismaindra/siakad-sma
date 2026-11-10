@@ -106,10 +106,10 @@
                             $tuntas = ($item->nilai_akhir ?? 0) >= $kkm;
                         @endphp
                         <tr>
-                            <td class="text-center font-mono text-xs text-slate-400">{{ $index + 1 }}</td>
+                            <td class="text-center font-mono text-xs text-slate-400">{{ ($nilais->firstItem() ?? 1) + $index }}</td>
                             <td>
-                                <div class="font-bold text-xs text-slate-800">{{ $item->mataPelajaran->nama_pelajaran }}</div>
-                                <div class="text-[11px] text-slate-400 font-mono">{{ $item->mataPelajaran->kode_pelajaran }}</div>
+                                <div class="font-bold text-xs text-slate-800">{{ $item->mataPelajaran->nama_pelajaran ?? $item->mataPelajaran->nama }}</div>
+                                <div class="text-[11px] text-slate-400 font-mono">{{ $item->mataPelajaran->kode_pelajaran ?? $item->mataPelajaran->kode }}</div>
                             </td>
                             <td class="text-xs text-slate-600">
                                 {{ $item->guru->nama_lengkap ?? '-' }}
@@ -128,7 +128,7 @@
                                 <span class="font-bold text-xs text-slate-700">{{ $item->predikat ?? '-' }}</span>
                             </td>
                             <td class="text-center">
-                                <span class="badge {{ $tuntas ? 'badge-green' : 'badge-red' }} text-[10px] font-bold uppercase">
+                                <span class="badge {{ $tuntas ? 'badge-status-aktif' : 'badge-absen-alpa' }} text-[10px] font-bold uppercase">
                                     {{ $tuntas ? 'Tuntas' : 'Remedial' }}
                                 </span>
                             </td>
@@ -142,6 +142,10 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <div class="pagination-wrapper">
+            {{ $nilais->links() }}
         </div>
     </div>
 

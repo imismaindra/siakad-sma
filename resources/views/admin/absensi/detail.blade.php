@@ -40,7 +40,7 @@
             </div>
             <div>
                 <span class="text-xs text-slate-400 block font-semibold uppercase tracking-wider">Ruangan</span>
-                <span class="font-bold text-slate-800 block mt-1">{{ $absensi->jadwalPelajaran->ruangan ?? '—' }}</span>
+                <span class="font-bold text-slate-800 block mt-1">{{ $absensi->jadwalPelajaran->ruangan ?? '-' }}</span>
             </div>
         </div>
     </div>
@@ -71,14 +71,16 @@
                             <tr>
                                 <td class="text-center font-semibold text-slate-400">{{ $idx + 1 }}</td>
                                 <td class="font-mono text-slate-500 text-xs">
-                                    {{ $da->siswa->nis }} / {{ $da->siswa->nisn ?? '—' }}
+                                    {{ $da->siswa->nis }} / {{ $da->siswa->nisn ?? '-' }}
                                     <input type="hidden" name="detail[{{ $idx }}][id]" value="{{ $da->id }}">
                                 </td>
                                 <td class="font-bold text-slate-800">{{ $da->siswa->nama_lengkap }}</td>
                                 <td>
-                                    <span class="badge {{ $da->siswa->jenis_kelamin == 'L' ? 'badge-info' : 'badge-purple' }}">
-                                        {{ $da->siswa->jenis_kelamin }}
-                                    </span>
+                                    @if($da->siswa->jenis_kelamin === 'L')
+                                        <span class="badge badge-gender-l">Laki-Laki</span>
+                                    @else
+                                        <span class="badge badge-gender-p">Perempuan</span>
+                                    @endif
                                 </td>
                                 <td>
                                     <select name="detail[{{ $idx }}][status]" required class="form-select py-1.5 text-xs font-semibold">

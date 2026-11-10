@@ -72,24 +72,24 @@
                         <tr>
                             <td class="font-bold text-slate-800">{{ $nilai->mataPelajaran->nama }}</td>
                             <td class="font-mono text-slate-600 font-semibold">{{ $nilai->mataPelajaran->kkm }}</td>
-                            <td class="font-mono text-slate-600">{{ $nilai->rata_rata_harian ?? '—' }}</td>
-                            <td class="font-mono text-slate-600">{{ $nilai->nilai_uts ?? '—' }}</td>
-                            <td class="font-mono text-slate-600">{{ $nilai->nilai_uas ?? '—' }}</td>
-                            <td class="font-bold font-mono text-navy-600 text-base">{{ $nilai->nilai_akhir ?? '—' }}</td>
+                            <td class="font-mono text-slate-600">{{ $nilai->rata_rata_harian ?? '-' }}</td>
+                            <td class="font-mono text-slate-600">{{ $nilai->nilai_uts ?? '-' }}</td>
+                            <td class="font-mono text-slate-600">{{ $nilai->nilai_uas ?? '-' }}</td>
+                            <td class="font-bold font-mono text-navy-600 text-base">{{ $nilai->nilai_akhir ?? '-' }}</td>
                             <td>
                                 @if($nilai->predikat)
                                     <span class="grade-{{ strtolower($nilai->predikat) }} font-bold text-sm">
                                         {{ $nilai->predikat }}
                                     </span>
                                 @else
-                                    <span class="text-slate-400">—</span>
+                                    <span class="text-slate-400">-</span>
                                 @endif
                             </td>
                             <td>
                                 @if($nilai->is_final)
-                                    <span class="badge badge-success">Selesai (Final)</span>
+                                    <span class="badge badge-status-aktif">Selesai (Final)</span>
                                 @else
-                                    <span class="badge badge-warning">Penilaian Guru</span>
+                                    <span class="badge badge-absen-izin">Penilaian Guru</span>
                                 @endif
                             </td>
                         </tr>
@@ -108,6 +108,10 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <div class="pagination-wrapper">
+            {{ $nilais->links() }}
         </div>
     </div>
 

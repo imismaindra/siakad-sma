@@ -117,8 +117,9 @@
                         </div>
                         <div>
                             <label for="urutan_jam" class="form-label">Jam ke</label>
-                            <input type="number" id="urutan_jam" name="urutan_jam" min="1" value="{{ old('urutan_jam', $jadwal->urutan_jam) }}" required
-                                class="form-input tabular-nums @error('urutan_jam') error @enderror">
+                            <input type="number" id="urutan_jam" name="urutan_jam" min="1" max="20" value="{{ old('urutan_jam', $jadwal->urutan_jam) }}" required
+                                data-numeric-only inputmode="numeric"
+                                class="form-input tabular-nums font-mono @error('urutan_jam') error @enderror">
                             @error('urutan_jam')
                                 <p class="text-rose-700 text-xs mt-1.5 font-semibold">{{ $message }}</p>
                             @enderror

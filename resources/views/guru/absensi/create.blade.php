@@ -89,9 +89,11 @@
                                 </td>
                                 <td class="font-bold text-slate-800">{{ $s->nama_lengkap }}</td>
                                 <td>
-                                    <span class="badge {{ $s->jenis_kelamin == 'L' ? 'badge-info' : 'badge-purple' }}">
-                                        {{ $s->jenis_kelamin }}
-                                    </span>
+                                    @if($s->jenis_kelamin === 'L')
+                                        <span class="badge badge-gender-l">Laki-Laki</span>
+                                    @else
+                                        <span class="badge badge-gender-p">Perempuan</span>
+                                    @endif
                                 </td>
                                 <td>
                                     <div class="flex items-center justify-center gap-4 text-xs font-semibold">

@@ -22,8 +22,14 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                     </span>
                 </a>
-                <a href="{{ route('admin.nilai.rapor.kelas', ['tahun_ajaran_id' => $tahunAjaranId, 'kelas_id' => $kelasId]) }}" class="group inline-flex items-center gap-3 rounded-full bg-white py-1.5 pl-5 pr-1.5 text-sm font-semibold text-navy-900 ring-1 ring-black/5 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:ring-black/10">
-                    Ekspor PDF
+                <a href="{{ route('admin.nilai.peringkat.export', ['tahun_ajaran_id' => $tahunAjaranId, 'kelas_id' => $kelasId]) }}" class="group inline-flex items-center gap-3 rounded-full bg-white py-1.5 pl-5 pr-1.5 text-sm font-semibold text-navy-900 ring-1 ring-black/5 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:ring-black/10" title="Unduh Rekap Peringkat Kelas ke PDF">
+                    Ekspor Peringkat PDF
+                    <span class="flex w-8 h-8 items-center justify-center rounded-full bg-gold-100 text-gold-700 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:bg-gold-500 group-hover:text-navy-900">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                    </span>
+                </a>
+                <a href="{{ route('admin.nilai.rapor.kelas', ['tahun_ajaran_id' => $tahunAjaranId, 'kelas_id' => $kelasId]) }}" class="group inline-flex items-center gap-3 rounded-full bg-white py-1.5 pl-5 pr-1.5 text-sm font-semibold text-navy-900 ring-1 ring-black/5 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:ring-black/10" title="Unduh Rapor Lengkap Kelas ke PDF">
+                    Buku Rapor PDF
                     <span class="flex w-8 h-8 items-center justify-center rounded-full bg-slate-100 text-navy-900 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:bg-slate-200">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 11l5-5 5 5"/></svg>
                     </span>
@@ -149,9 +155,9 @@
                             </td>
                             <td>
                                 @if($n->is_final)
-                                    <span class="badge badge-success">Final</span>
+                                    <span class="badge badge-status-aktif">Final</span>
                                 @else
-                                    <span class="badge badge-warning">Draft</span>
+                                    <span class="badge badge-absen-izin">Draft</span>
                                 @endif
                             </td>
                         </tr>
@@ -177,12 +183,9 @@
                 </tbody>
             </table>
         </div>
-        @if($nilais->hasPages() || $nilais->total() > 0)
-            <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
-                <p class="text-xs font-medium text-slate-500">Menampilkan {{ $nilais->firstItem() ?? 0 }} sampai {{ $nilais->lastItem() ?? 0 }} dari {{ $nilais->total() }} data</p>
-                <div class="pagination-wrapper">{{ $nilais->links() }}</div>
-            </div>
-        @endif
+        <div class="pagination-wrapper">
+            {{ $nilais->links() }}
+        </div>
     </div>
 
 </div>

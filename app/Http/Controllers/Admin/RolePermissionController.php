@@ -137,8 +137,8 @@ class RolePermissionController extends Controller
         $permissions = Permission::with('roles')
             ->when($request->filled('search'), fn ($q) => $q->where('name', 'like', "%{$request->search}%"))
             ->orderBy('name')
-            ->get()
-            ->groupBy(fn($p) => explode('-', $p->name)[0]);
+            ->paginate(15)
+            ->withQueryString();
 
         return view('admin.rbac.permission-index', compact('permissions'));
     }

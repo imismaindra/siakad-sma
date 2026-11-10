@@ -38,9 +38,10 @@
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label for="nis" class="form-label">NIS (Nomor Induk Siswa)</label>
+                                <label for="nis" class="form-label">NIS (Nomor Induk Siswa) <span class="text-rose-500">*</span></label>
                                 <input type="text" id="nis" name="nis" value="{{ old('nis', $siswa->nis) }}" required
-                                    class="form-input @error('nis') error @enderror">
+                                    inputmode="numeric" pattern="[0-9]*" data-numeric-only
+                                    class="form-input font-mono @error('nis') error @enderror">
                                 @error('nis')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
@@ -49,7 +50,8 @@
                             <div>
                                 <label for="nisn" class="form-label">NISN (Nasional)</label>
                                 <input type="text" id="nisn" name="nisn" value="{{ old('nisn', $siswa->nisn) }}"
-                                    class="form-input @error('nisn') error @enderror">
+                                    inputmode="numeric" pattern="[0-9]*" data-numeric-only
+                                    class="form-input font-mono @error('nisn') error @enderror">
                                 @error('nisn')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
@@ -125,8 +127,9 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label for="no_telepon" class="form-label">No. Telepon Siswa</label>
-                                <input type="text" id="no_telepon" name="no_telepon" value="{{ old('no_telepon', $siswa->no_telepon) }}"
-                                    class="form-input @error('no_telepon') error @enderror">
+                                <input type="tel" id="no_telepon" name="no_telepon" value="{{ old('no_telepon', $siswa->no_telepon) }}"
+                                    inputmode="numeric" pattern="[0-9+]*" data-tel-only
+                                    class="form-input font-mono @error('no_telepon') error @enderror">
                                 @error('no_telepon')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
@@ -161,8 +164,9 @@
 
                         <div>
                             <label for="no_telepon_ortu" class="form-label">No. Telepon Orang Tua / Wali</label>
-                            <input type="text" id="no_telepon_ortu" name="no_telepon_ortu" value="{{ old('no_telepon_ortu', $siswa->no_telepon_ortu) }}"
-                                class="form-input @error('no_telepon_ortu') error @enderror">
+                            <input type="tel" id="no_telepon_ortu" name="no_telepon_ortu" value="{{ old('no_telepon_ortu', $siswa->no_telepon_ortu) }}"
+                                inputmode="numeric" pattern="[0-9+]*" data-tel-only
+                                class="form-input font-mono @error('no_telepon_ortu') error @enderror">
                             @error('no_telepon_ortu')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror

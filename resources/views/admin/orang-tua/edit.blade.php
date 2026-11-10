@@ -95,8 +95,9 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">No. WhatsApp / Telepon</label>
-                    <input type="text" name="no_telepon" value="{{ old('no_telepon', $orangTua->no_telepon) }}" placeholder="Contoh: 081234567890"
-                        class="w-full rounded-xl border-slate-200 text-sm focus:border-gold-500 focus:ring-gold-500">
+                    <input type="tel" name="no_telepon" value="{{ old('no_telepon', $orangTua->no_telepon) }}" placeholder="Contoh: 081234567890"
+                        inputmode="numeric" pattern="[0-9+]*" data-tel-only
+                        class="w-full rounded-xl border-slate-200 text-sm focus:border-gold-500 focus:ring-gold-500 font-mono">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Pekerjaan</label>

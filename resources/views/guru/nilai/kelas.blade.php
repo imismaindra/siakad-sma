@@ -59,33 +59,33 @@
                                 $n = $nilais->get($nKey);
                             @endphp
                             <tr>
-                                <td class="text-center font-semibold text-slate-400">{{ $idx + 1 }}</td>
+                                <td class="text-center font-semibold text-slate-400">{{ $siswas->firstItem() + $loop->index }}</td>
                                 <td class="font-mono text-slate-500 text-xs">{{ $siswa->nis }}</td>
                                 <td class="font-bold text-slate-800">{{ $siswa->nama_lengkap }}</td>
                                 <td class="text-center font-mono font-semibold text-slate-600">
-                                    {{ $n?->rata_rata_harian ?? '—' }}
+                                    {{ $n?->rata_rata_harian ?? '-' }}
                                 </td>
                                 <td class="text-center font-mono font-semibold text-slate-600">
-                                    {{ $n?->nilai_uts ?? '—' }}
+                                    {{ $n?->nilai_uts ?? '-' }}
                                 </td>
                                 <td class="text-center font-mono font-semibold text-slate-600">
-                                    {{ $n?->nilai_uas ?? '—' }}
+                                    {{ $n?->nilai_uas ?? '-' }}
                                 </td>
                                 <td class="text-center font-mono font-bold text-navy-600 text-base">
-                                    {{ $n?->nilai_akhir ?? '—' }}
+                                    {{ $n?->nilai_akhir ?? '-' }}
                                 </td>
                                 <td class="text-center font-bold">
                                     @if($n?->predikat)
                                         <span class="grade-{{ strtolower($n->predikat) }}">{{ $n->predikat }}</span>
                                     @else
-                                        <span class="text-slate-400">—</span>
+                                        <span class="text-slate-400">-</span>
                                     @endif
                                 </td>
                                 <td>
                                     @if($n?->is_final)
-                                        <span class="badge badge-success">Dikunci (Final)</span>
+                                        <span class="badge badge-status-aktif">Dikunci (Final)</span>
                                     @else
-                                        <span class="badge badge-warning">Draft</span>
+                                        <span class="badge badge-absen-izin">Draft</span>
                                     @endif
                                 </td>
                                 <td class="text-right">
@@ -102,6 +102,10 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+
+            <div class="pagination-wrapper">
+                {{ $siswas->links() }}
             </div>
         </div>
     @empty

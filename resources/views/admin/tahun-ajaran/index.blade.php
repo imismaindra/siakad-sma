@@ -72,9 +72,9 @@
                             <td class="text-slate-500 tabular-nums">{{ $ta->tanggal_selesai->locale('id')->isoFormat('D MMMM YYYY') }}</td>
                             <td>
                                 @if($ta->is_aktif)
-                                    <span class="badge badge-success">Aktif</span>
+                                    <span class="badge badge-status-aktif">Aktif</span>
                                 @else
-                                    <span class="badge badge-danger">Nonaktif</span>
+                                    <span class="badge badge-status-tidak-aktif">Nonaktif</span>
                                 @endif
                             </td>
                             <td class="text-right whitespace-nowrap">
@@ -115,12 +115,9 @@
                 </tbody>
             </table>
         </div>
-        @if($tahunAjarans->hasPages() || $tahunAjarans->total() > 0)
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-4">
-                <p class="text-xs text-slate-500">Menampilkan {{ $tahunAjarans->firstItem() ?? 0 }} sampai {{ $tahunAjarans->lastItem() ?? 0 }} dari {{ $tahunAjarans->total() }} data</p>
-                <div class="pagination-wrapper">{{ $tahunAjarans->links() }}</div>
-            </div>
-        @endif
+        <div class="pagination-wrapper">
+            {{ $tahunAjarans->links() }}
+        </div>
     </div>
 </div>
 @endsection

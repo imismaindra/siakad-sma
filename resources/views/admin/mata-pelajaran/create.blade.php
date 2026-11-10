@@ -50,8 +50,9 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                         <label for="kkm" class="form-label">KKM (Kriteria Ketuntasan Minimal)</label>
-                        <input type="number" id="kkm" name="kkm" min="0" max="100" value="{{ old('kkm', 75) }}" required
-                            class="form-input @error('kkm') error @enderror">
+                        <input type="number" id="kkm" name="kkm" min="0" max="100" step="any" value="{{ old('kkm', 75) }}" required
+                            data-decimal-only inputmode="decimal"
+                            class="form-input font-mono @error('kkm') error @enderror">
                         @error('kkm')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -59,8 +60,9 @@
 
                     <div>
                         <label for="jumlah_jam_per_minggu" class="form-label">Beban Jam (Per Minggu)</label>
-                        <input type="number" id="jumlah_jam_per_minggu" name="jumlah_jam_per_minggu" min="1" value="{{ old('jumlah_jam_per_minggu', 2) }}" required
-                            class="form-input @error('jumlah_jam_per_minggu') error @enderror" placeholder="Jam pelajaran per minggu">
+                        <input type="number" id="jumlah_jam_per_minggu" name="jumlah_jam_per_minggu" min="1" max="50" value="{{ old('jumlah_jam_per_minggu', 2) }}" required
+                            data-numeric-only inputmode="numeric"
+                            class="form-input font-mono @error('jumlah_jam_per_minggu') error @enderror" placeholder="Jam pelajaran per minggu">
                         @error('jumlah_jam_per_minggu')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror

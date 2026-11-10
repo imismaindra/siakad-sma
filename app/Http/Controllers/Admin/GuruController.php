@@ -47,17 +47,20 @@ class GuruController extends Controller
     {
         $validated = $request->validate([
             'nama_lengkap' => ['required', 'string', 'max:150'],
-            'nip' => ['nullable', 'string', 'max:20', 'unique:gurus,nip'],
+            'nip' => ['nullable', 'regex:/^[0-9]+$/', 'max:25', 'unique:gurus,nip'],
             'jenis_kelamin' => ['required', 'in:L,P'],
             'tempat_lahir' => ['nullable', 'string', 'max:100'],
             'tanggal_lahir' => ['nullable', 'date', 'before:today'],
             'alamat' => ['nullable', 'string'],
-            'no_telepon' => ['nullable', 'string', 'max:20'],
+            'no_telepon' => ['nullable', 'regex:/^[0-9+]+$/', 'max:20'],
             'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8'],
             'foto' => ['nullable', 'image', 'max:2048'],
             'mata_pelajaran_ids' => ['nullable', 'array'],
             'mata_pelajaran_ids.*' => ['exists:mata_pelajarans,id'],
+        ], [
+            'nip.regex' => 'NIP hanya boleh berupa angka tanpa spasi atau karakter huruf.',
+            'no_telepon.regex' => 'Nomor telepon hanya boleh berisi angka dan tanda plus (+).',
         ]);
 
         DB::transaction(function () use ($validated, $request) {
@@ -128,18 +131,21 @@ class GuruController extends Controller
     {
         $validated = $request->validate([
             'nama_lengkap' => ['required', 'string', 'max:150'],
-            'nip' => ['nullable', 'string', 'max:20', 'unique:gurus,nip,' . $guru->id],
+            'nip' => ['nullable', 'regex:/^[0-9]+$/', 'max:25', 'unique:gurus,nip,' . $guru->id],
             'jenis_kelamin' => ['required', 'in:L,P'],
             'tempat_lahir' => ['nullable', 'string', 'max:100'],
             'tanggal_lahir' => ['nullable', 'date', 'before:today'],
             'alamat' => ['nullable', 'string'],
-            'no_telepon' => ['nullable', 'string', 'max:20'],
+            'no_telepon' => ['nullable', 'regex:/^[0-9+]+$/', 'max:20'],
             'email' => ['required', 'email', 'unique:users,email,' . $guru->user_id],
             'status' => ['required', 'in:aktif,tidak_aktif'],
             'foto' => ['nullable', 'image', 'max:2048'],
             'mata_pelajaran_ids' => ['nullable', 'array'],
             'mata_pelajaran_ids.*' => ['exists:mata_pelajarans,id'],
             'password' => ['nullable', 'string', 'min:8'],
+        ], [
+            'nip.regex' => 'NIP hanya boleh berupa angka tanpa spasi atau karakter huruf.',
+            'no_telepon.regex' => 'Nomor telepon hanya boleh berisi angka dan tanda plus (+).',
         ]);
 
         DB::transaction(function () use ($validated, $request, $guru) {

@@ -41,9 +41,9 @@
                     @endif
                     <div class="min-w-0">
                         @if($guru->status == 'aktif')
-                            <span class="badge bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30">Aktif</span>
+                            <span class="badge badge-status-aktif">Aktif</span>
                         @else
-                            <span class="badge bg-rose-500/15 text-rose-300 ring-1 ring-rose-500/30">Tidak aktif</span>
+                            <span class="badge badge-status-tidak-aktif">Tidak Aktif</span>
                         @endif
                         <p class="mt-2 font-mono text-xs text-slate-400 tabular-nums">NIP {{ $guru->nip ?? '-' }}</p>
                     </div>
@@ -54,7 +54,13 @@
                 <dl class="mt-6 divide-y divide-white/10 border-y border-white/10">
                     <div class="py-4">
                         <dt class="text-[11px] font-medium uppercase tracking-[0.2em] text-slate-400">Jenis kelamin</dt>
-                        <dd class="mt-1 font-bold text-white text-sm">{{ $guru->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</dd>
+                        <dd class="mt-1">
+                            @if($guru->jenis_kelamin == 'L')
+                                <span class="badge badge-gender-l">Laki-Laki</span>
+                            @else
+                                <span class="badge badge-gender-p">Perempuan</span>
+                            @endif
+                        </dd>
                     </div>
                     <div class="py-4">
                         <dt class="text-[11px] font-medium uppercase tracking-[0.2em] text-slate-400">Tempat, tanggal lahir</dt>

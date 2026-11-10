@@ -58,7 +58,7 @@
                                 <span class="badge badge-navy font-mono font-bold">{{ $a->kelas->nama_kelas }}</span>
                             </td>
                             <td class="font-semibold text-slate-800">{{ $a->mataPelajaran->nama }}</td>
-                            <td class="text-slate-600 truncate max-w-xs" title="{{ $a->materi }}">{{ $a->materi ?? '—' }}</td>
+                            <td class="text-slate-600 truncate max-w-xs" title="{{ $a->materi }}">{{ $a->materi ?? '-' }}</td>
                             <td>
                                 <div class="flex items-center gap-2">
                                     <span class="font-bold font-mono text-sm {{ $persen >= 90 ? 'text-emerald-600' : ($persen >= 75 ? 'text-amber-500' : 'text-rose-600') }}">
@@ -87,12 +87,9 @@
             </table>
         </div>
 
-        {{-- Pagination --}}
-        @if($absensis->hasPages())
-            <div class="px-6 py-4 border-t border-slate-100 pagination-wrapper">
-                {{ $absensis->links() }}
-            </div>
-        @endif
+        <div class="pagination-wrapper">
+            {{ $absensis->links() }}
+        </div>
     </div>
 
 </div>

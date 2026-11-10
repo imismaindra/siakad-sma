@@ -130,19 +130,19 @@
                                 @endif
                             </td>
                             <td>
-                                <span class="badge {{ $s->jenis_kelamin == 'L' ? 'badge-info' : 'badge-gray' }}">
-                                    {{ $s->jenis_kelamin }}
+                                <span class="badge {{ $s->jenis_kelamin == 'L' ? 'badge-gender-l' : 'badge-gender-p' }}">
+                                    {{ $s->jenis_kelamin == 'L' ? 'Laki-Laki' : 'Perempuan' }}
                                 </span>
                             </td>
                             <td>
                                 @if($s->status == 'aktif')
-                                    <span class="badge badge-success">Aktif</span>
+                                    <span class="badge badge-status-aktif">Aktif</span>
                                 @elseif($s->status == 'lulus')
                                     <span class="badge badge-navy">Lulus</span>
                                 @elseif($s->status == 'pindah')
                                     <span class="badge badge-warning">Pindah</span>
                                 @else
-                                    <span class="badge badge-danger">Keluar</span>
+                                    <span class="badge badge-status-tidak-aktif">{{ ucfirst($s->status) }}</span>
                                 @endif
                             </td>
                             <td>
@@ -208,11 +208,8 @@
                 </tbody>
             </table>
         </div>
-        <div class="flex flex-col items-center justify-between gap-3 px-6 py-4 sm:flex-row">
-            <p class="text-xs font-medium text-slate-500">Menampilkan {{ $siswas->firstItem() ?? 0 }} sampai {{ $siswas->lastItem() ?? 0 }} dari {{ $siswas->total() }} data</p>
-            <div class="pagination-wrapper">
-                {{ $siswas->links() }}
-            </div>
+        <div class="pagination-wrapper">
+            {{ $siswas->links() }}
         </div>
     </div>
 

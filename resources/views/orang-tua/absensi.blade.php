@@ -126,15 +126,7 @@
                                 {{ $row->absensi?->guru?->nama_lengkap ?? ($row->absensi?->jadwalPelajaran?->guru?->nama_lengkap ?? '-') }}
                             </td>
                             <td class="text-center">
-                                @php
-                                    $badgeMap = [
-                                        'hadir' => 'badge-green',
-                                        'sakit' => 'badge-blue',
-                                        'izin'  => 'badge-gold',
-                                        'alpa'  => 'badge-red',
-                                    ];
-                                @endphp
-                                <span class="badge {{ $badgeMap[$row->status] ?? 'badge-slate' }} uppercase text-[10px] font-bold">
+                                <span class="badge badge-absen-{{ $row->status }} uppercase text-[10px] font-bold">
                                     {{ $row->status }}
                                 </span>
                             </td>
@@ -153,11 +145,9 @@
             </table>
         </div>
 
-        @if($riwayatAbsensi->hasPages())
-            <div class="p-4 border-t border-slate-100 bg-slate-50/50">
-                {{ $riwayatAbsensi->links() }}
-            </div>
-        @endif
+        <div class="pagination-wrapper">
+            {{ $riwayatAbsensi->links() }}
+        </div>
     </div>
 
 </div>

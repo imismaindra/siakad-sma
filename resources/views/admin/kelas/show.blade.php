@@ -117,15 +117,17 @@
                                             {{ $siswa->nis ?? '-' }} / {{ $siswa->nisn ?? '-' }}
                                         </td>
                                         <td>
-                                            <span class="badge {{ $siswa->jenis_kelamin == 'L' ? 'badge-info' : 'badge-gray' }}">
-                                                {{ $siswa->jenis_kelamin }}
-                                            </span>
+                                            @if($siswa->jenis_kelamin === 'L')
+                                                <span class="badge badge-gender-l">Laki-Laki</span>
+                                            @else
+                                                <span class="badge badge-gender-p">Perempuan</span>
+                                            @endif
                                         </td>
                                         <td>
                                             @if($siswa->status == 'aktif')
-                                                <span class="badge badge-success">Aktif</span>
+                                                <span class="badge badge-status-aktif">Aktif</span>
                                             @else
-                                                <span class="badge badge-gray capitalize">{{ $siswa->status }}</span>
+                                                <span class="badge badge-status-tidak-aktif capitalize">{{ $siswa->status }}</span>
                                             @endif
                                         </td>
                                         <td class="text-right whitespace-nowrap">

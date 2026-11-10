@@ -37,16 +37,25 @@ class NilaiOrangTuaController extends Controller
         $isRaporPublished = false;
 
         if ($tahunAjaran) {
-            $nilais = Nilai::where('siswa_id', $activeSiswa->id)
+            $allNilais = Nilai::where('siswa_id', $activeSiswa->id)
                 ->where('tahun_ajaran_id', $tahunAjaran->id)
                 ->with(['mataPelajaran', 'guru', 'detailNilais'])
                 ->get();
 
             // Rapor dianggap published jika semua nilai sudah is_final
-            $isRaporPublished = $nilais->isNotEmpty() && $nilais->every(fn($n) => $n->is_final);
-        }
+            $isRaporPublished = $allNilais->isNotEmpty() && $allNilais->every(fn($n) => $n->is_final);
+            $avgScore = $allNilais->count() > 0 ? round($allNilais->avg('nilai_akhir'), 1) : 0;
 
-        $avgScore = $nilais->count() > 0 ? round($nilais->avg('nilai_akhir'), 1) : 0;
+            $nilais = Nilai::where('siswa_id', $activeSiswa->id)
+                ->where('tahun_ajaran_id', $tahunAjaran->id)
+                ->with(['mataPelajaran', 'guru', 'detailNilais'])
+                ->paginate(10)
+                ->withQueryString();
+        } else {
+            $nilais = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
+            $avgScore = 0;
+            $isRaporPublished = false;
+        }
 
         return view('orang-tua.nilai', compact('siswas', 'activeSiswa', 'nilais', 'tahunAjaran', 'isRaporPublished', 'avgScore'));
     }

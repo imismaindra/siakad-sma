@@ -89,8 +89,8 @@
                             <td class="font-mono text-xs tabular-nums text-slate-500">{{ $g->nip ?? '-' }}</td>
                             <td class="text-sm text-slate-500">{{ $g->email }}</td>
                             <td>
-                                <span class="badge {{ $g->jenis_kelamin == 'L' ? 'badge-info' : 'badge-gray' }}">
-                                    {{ $g->jenis_kelamin }}
+                                <span class="badge {{ $g->jenis_kelamin == 'L' ? 'badge-gender-l' : 'badge-gender-p' }}">
+                                    {{ $g->jenis_kelamin == 'L' ? 'Laki-Laki' : 'Perempuan' }}
                                 </span>
                             </td>
                             <td>
@@ -100,9 +100,9 @@
                             </td>
                             <td>
                                 @if($g->status == 'aktif')
-                                    <span class="badge badge-success">Aktif</span>
+                                    <span class="badge badge-status-aktif">Aktif</span>
                                 @else
-                                    <span class="badge badge-danger">Tidak Aktif</span>
+                                    <span class="badge badge-status-tidak-aktif">Tidak Aktif</span>
                                 @endif
                             </td>
                             <td>
@@ -144,11 +144,8 @@
                 </tbody>
             </table>
         </div>
-        <div class="flex flex-col items-center justify-between gap-3 px-6 py-4 sm:flex-row">
-            <p class="text-xs font-medium text-slate-500">Menampilkan {{ $gurus->firstItem() ?? 0 }} sampai {{ $gurus->lastItem() ?? 0 }} dari {{ $gurus->total() }} data</p>
-            <div class="pagination-wrapper">
-                {{ $gurus->links() }}
-            </div>
+        <div class="pagination-wrapper">
+            {{ $gurus->links() }}
         </div>
     </div>
 

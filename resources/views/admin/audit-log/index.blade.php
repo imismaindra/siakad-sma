@@ -298,11 +298,9 @@
             </table>
         </div>
 
-        @if($logs->hasPages())
-            <div class="px-5 py-4 border-t border-slate-100 bg-slate-50/50">
-                {{ $logs->links() }}
-            </div>
-        @endif
+        <div class="pagination-wrapper">
+            {{ $logs->links() }}
+        </div>
     </div>
 
     {{-- Modal Detail & Diff Nilai Lama vs Nilai Baru --}}

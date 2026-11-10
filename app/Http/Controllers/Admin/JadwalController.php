@@ -8,6 +8,7 @@ use App\Models\JadwalPelajaran;
 use App\Models\Kelas;
 use App\Models\MataPelajaran;
 use App\Models\TahunAjaran;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class JadwalController extends Controller
@@ -20,6 +21,21 @@ class JadwalController extends Controller
         $search = $request->get('search');
         $mode = $request->get('mode', 'grid');
 
+        $tahunAjarans = TahunAjaran::orderByDesc('nama')->get();
+        $kelasList = $tahunAjaranId
+            ? Kelas::where('tahun_ajaran_id', $tahunAjaranId)
+                ->with(['jurusan', 'waliKelas.guru'])
+                ->withCount(['jadwalPelajarans' => fn ($q) => $q->where('tahun_ajaran_id', $tahunAjaranId)])
+                ->orderBy('tingkat')
+                ->orderBy('nomor')
+                ->get()
+            : collect();
+
+        // Default ke kelas pertama jika mode grid belum memilih kelas secara spesifik
+        if ($mode === 'grid' && ! $kelasId && $kelasList->isNotEmpty()) {
+            $kelasId = $kelasList->first()->id;
+        }
+
         $base = JadwalPelajaran::with(['kelas.jurusan', 'mataPelajaran', 'guru'])
             ->where('tahun_ajaran_id', $tahunAjaranId)
             ->when($kelasId, fn ($q) => $q->where('kelas_id', $kelasId))
@@ -29,10 +45,6 @@ class JadwalController extends Controller
                     ->orWhereHas('guru', fn ($g) => $g->where('nama_lengkap', 'like', "%{$search}%"));
             }));
 
-        $tahunAjarans = TahunAjaran::orderByDesc('nama')->get();
-        $kelasList = $tahunAjaranId
-            ? Kelas::where('tahun_ajaran_id', $tahunAjaranId)->with('jurusan')->orderBy('tingkat')->get()
-            : collect();
         $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
         if ($mode === 'daftar') {
@@ -47,8 +59,47 @@ class JadwalController extends Controller
         }
 
         $jadwals = (clone $base)->orderBy('jam_mulai')->get()->groupBy('hari');
+        $selectedKelas = $kelasId ? $kelasList->firstWhere('id', $kelasId) : null;
 
-        return view('admin.jadwal.grid', compact('jadwals', 'tahunAjarans', 'kelasList', 'tahunAjaranId', 'kelasId', 'hariList', 'search', 'mode'));
+        return view('admin.jadwal.grid', compact('jadwals', 'tahunAjarans', 'kelasList', 'selectedKelas', 'tahunAjaranId', 'kelasId', 'hariList', 'search', 'mode'));
+    }
+
+    /**
+     * Export jadwal pelajaran kelas ke file PDF (Landscape).
+     */
+    public function exportPdf(Request $request)
+    {
+        $tahunAjaranId = $request->get('tahun_ajaran_id', TahunAjaran::aktif()->value('id'));
+        $kelasId = $request->get('kelas_id');
+
+        $tahunAjaran = TahunAjaran::find($tahunAjaranId) ?? TahunAjaran::aktif()->first();
+
+        $kelas = $kelasId ? Kelas::with(['jurusan', 'waliKelas.guru'])->find($kelasId) : null;
+        if (! $kelas) {
+            $kelas = Kelas::where('tahun_ajaran_id', $tahunAjaran->id)->with(['jurusan', 'waliKelas.guru'])->orderBy('tingkat')->orderBy('nomor')->first();
+        }
+
+        if (! $kelas) {
+            return back()->withErrors(['error' => 'Data kelas tidak ditemukan untuk tahun ajaran ini.']);
+        }
+
+        $jadwals = JadwalPelajaran::with(['mataPelajaran', 'guru'])
+            ->where('tahun_ajaran_id', $tahunAjaran->id)
+            ->where('kelas_id', $kelas->id)
+            ->orderBy('urutan_jam')
+            ->orderBy('jam_mulai')
+            ->get()
+            ->groupBy('hari');
+
+        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+        $pdf = Pdf::loadView('pdf.jadwal-kelas', compact('kelas', 'tahunAjaran', 'jadwals', 'hariList'))
+            ->setPaper('A4', 'landscape');
+
+        $filename = "jadwal_pelajaran_{$kelas->nama_kelas}_{$tahunAjaran->nama}_sem{$tahunAjaran->semester}.pdf";
+        $filename = str_replace(['/', '\\'], '-', $filename);
+
+        return $pdf->download($filename);
     }
 
     public function create()

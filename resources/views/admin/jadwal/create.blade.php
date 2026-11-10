@@ -41,7 +41,7 @@
                                 <select id="kelas_id" name="kelas_id" required class="form-select @error('kelas_id') error @enderror">
                                     <option value="">Pilih kelas</option>
                                     @foreach($kelasList as $k)
-                                        <option value="{{ $k->id }}" {{ old('kelas_id') == $k->id ? 'selected' : '' }}>
+                                        <option value="{{ $k->id }}" {{ old('kelas_id', request('kelas_id')) == $k->id ? 'selected' : '' }}>
                                             Kelas {{ $k->nama_kelas }}
                                         </option>
                                     @endforeach
@@ -91,7 +91,7 @@
                         <div class="mt-3 grid grid-cols-3 sm:grid-cols-6 gap-2" role="radiogroup" aria-label="Hari">
                             @foreach(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'] as $h)
                                 <label class="cursor-pointer">
-                                    <input type="radio" name="hari" value="{{ $h }}" {{ old('hari') == $h ? 'checked' : '' }} required class="peer sr-only">
+                                    <input type="radio" name="hari" value="{{ $h }}" {{ old('hari', request('hari')) == $h ? 'checked' : '' }} required class="peer sr-only">
                                     <span class="block text-center rounded-full px-3 py-2.5 text-[13px] font-bold text-slate-500 bg-slate-100 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] peer-checked:bg-navy-800 peer-checked:text-white peer-checked:shadow-[0_8px_20px_-8px_rgba(23,37,84,0.6)] hover:bg-slate-200 peer-checked:hover:bg-navy-800">{{ $h }}</span>
                                 </label>
                             @endforeach
@@ -123,8 +123,9 @@
                             </div>
                             <div>
                                 <label for="urutan_jam" class="form-label">Jam ke</label>
-                                <input type="number" id="urutan_jam" name="urutan_jam" min="1" value="{{ old('urutan_jam', 1) }}" required
-                                    class="form-input tabular-nums @error('urutan_jam') error @enderror">
+                                <input type="number" id="urutan_jam" name="urutan_jam" min="1" max="20" value="{{ old('urutan_jam', 1) }}" required
+                                    data-numeric-only inputmode="numeric"
+                                    class="form-input tabular-nums font-mono @error('urutan_jam') error @enderror">
                                 @error('urutan_jam')
                                     <p class="text-rose-700 text-xs mt-1.5 font-semibold">{{ $message }}</p>
                                 @enderror

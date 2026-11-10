@@ -47,55 +47,61 @@
         </div>
     </form>
 
-    <div class="space-y-6">
-        @forelse($permissions as $group => $groupPerms)
-            <div class="rounded-[2rem] bg-white p-2 ring-1 ring-black/5 shadow">
-                <div class="flex flex-wrap items-center gap-3 px-5 pt-4 pb-3">
-                    <h2 class="text-sm font-bold uppercase tracking-[0.14em] text-navy-900">{{ $group }}</h2>
-                    <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-[11px] font-bold text-navy-900">{{ $groupPerms->count() }} permission</span>
-                </div>
-                <div class="rounded-[calc(2rem-0.5rem)] overflow-x-auto">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Permission</th>
-                                <th>Digunakan role</th>
-                                <th class="text-right">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($groupPerms as $perm)
-                                <tr>
-                                    <td><code class="text-xs font-mono bg-slate-100 text-navy-900 px-2.5 py-1 rounded-full">{{ $perm->name }}</code></td>
-                                    <td>
-                                        <div class="flex flex-wrap gap-1.5">
-                                            @forelse($perm->roles as $role)
-                                                <span class="badge badge-navy text-[10px]">{{ $role->name }}</span>
-                                            @empty
-                                                <span class="text-xs text-slate-500">-</span>
-                                            @endforelse
-                                        </div>
-                                    </td>
-                                    <td class="text-right">
-                                        <form method="POST" action="{{ route('admin.permissions.destroy', $perm) }}" class="inline" data-confirm="Hapus permission {{ $perm->name }}? Permission ini akan dicabut dari semua role.">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="inline-flex w-9 h-9 items-center justify-center rounded-full bg-rose-50 text-rose-700 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-rose-700 hover:text-white" title="Hapus {{ $perm->name }}">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        @empty
-            <div class="rounded-[2rem] bg-white p-12 ring-1 ring-black/5 shadow text-center">
-                <p class="font-semibold text-navy-900">Belum ada permission.</p>
-                <p class="text-sm text-slate-500 mt-1">Buat permission pertama untuk mulai mengatur akses.</p>
-            </div>
-        @endforelse
+    <div class="rounded-[2rem] bg-white p-2 ring-1 ring-black/5 shadow-[0_24px_60px_-30px_rgba(15,37,87,0.3)]">
+        <div class="rounded-[calc(2rem-0.5rem)] overflow-x-auto">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Modul</th>
+                        <th>Permission</th>
+                        <th>Digunakan Oleh Role</th>
+                        <th class="text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($permissions as $perm)
+                        @php
+                            $module = explode('-', $perm->name)[0] ?? 'general';
+                        @endphp
+                        <tr>
+                            <td>
+                                <span class="badge badge-navy uppercase text-[10px] font-bold">{{ $module }}</span>
+                            </td>
+                            <td>
+                                <code class="text-xs font-mono bg-slate-100 text-navy-900 px-2.5 py-1 rounded-full font-semibold">{{ $perm->name }}</code>
+                            </td>
+                            <td>
+                                <div class="flex flex-wrap gap-1.5">
+                                    @forelse($perm->roles as $role)
+                                        <span class="badge badge-gray text-[10px]">{{ $role->name }}</span>
+                                    @empty
+                                        <span class="text-xs text-slate-400 italic">Belum terpasang</span>
+                                    @endforelse
+                                </div>
+                            </td>
+                            <td class="text-right">
+                                <form method="POST" action="{{ route('admin.permissions.destroy', $perm) }}" class="inline" data-confirm="Hapus permission {{ $perm->name }}? Permission ini akan dicabut dari semua role.">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="inline-flex w-9 h-9 items-center justify-center rounded-full bg-rose-50 text-rose-700 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-rose-700 hover:text-white" title="Hapus {{ $perm->name }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="text-center py-12">
+                                <p class="font-semibold text-navy-900">Belum ada permission.</p>
+                                <p class="text-sm text-slate-500 mt-1">Ubah kata kunci pencarian atau buat permission baru.</p>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination-wrapper">
+            {{ $permissions->links() }}
+        </div>
     </div>
 
 </div>

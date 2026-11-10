@@ -14,12 +14,20 @@
             <h1 class="page-title font-display !text-3xl mt-3">Peringkat {{ $kelas->nama_kelas }}.</h1>
             <p class="page-subtitle mt-1">Tahun ajaran <span class="font-semibold text-navy-900">{{ $tahunAjaran->nama_lengkap }}</span>, rata-rata nilai rapor final.</p>
         </div>
-        <a href="{{ route('admin.nilai.laporan', ['tahun_ajaran_id' => $tahunAjaran->id, 'kelas_id' => $kelas->id]) }}" class="group inline-flex items-center gap-3 rounded-full bg-white py-1.5 pl-5 pr-1.5 text-sm font-semibold text-navy-900 ring-1 ring-black/5 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:ring-black/10">
-            Kembali
-            <span class="flex w-8 h-8 items-center justify-center rounded-full bg-slate-100 text-navy-900 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:bg-slate-200">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-            </span>
-        </a>
+        <div class="flex flex-wrap items-center gap-3">
+            <a href="{{ route('admin.nilai.peringkat.export', ['tahun_ajaran_id' => $tahunAjaran->id, 'kelas_id' => $kelas->id]) }}" class="group inline-flex items-center gap-3 rounded-full bg-navy-800 py-1.5 pl-5 pr-1.5 text-sm font-semibold text-white transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-navy-900 shadow-xs" title="Unduh Peringkat Kelas ke PDF">
+                Ekspor Peringkat PDF
+                <span class="flex w-8 h-8 items-center justify-center rounded-full bg-gold-500 text-navy-900 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                </span>
+            </a>
+            <a href="{{ route('admin.nilai.laporan', ['tahun_ajaran_id' => $tahunAjaran->id, 'kelas_id' => $kelas->id]) }}" class="group inline-flex items-center gap-3 rounded-full bg-white py-1.5 pl-5 pr-1.5 text-sm font-semibold text-navy-900 ring-1 ring-black/5 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:ring-black/10">
+                Kembali
+                <span class="flex w-8 h-8 items-center justify-center rounded-full bg-slate-100 text-navy-900 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:bg-slate-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                </span>
+            </a>
+        </div>
     </div>
 
     <form action="{{ route('admin.nilai.peringkat') }}" method="GET" class="rounded-[2rem] bg-white p-2 ring-1 ring-black/5 shadow">
@@ -49,12 +57,15 @@
                 </thead>
                 <tbody>
                     @forelse($peringkat as $siswa)
+                        @php
+                            $rank = $peringkat->firstItem() + $loop->index;
+                        @endphp
                         <tr>
                             <td class="text-center">
-                                @if($siswa->peringkat <= 3)
-                                    <span class="inline-flex items-center justify-center min-w-9 h-9 px-3 rounded-full bg-gold-500 text-navy-900 text-sm font-bold tabular-nums">{{ $siswa->peringkat }}</span>
+                                @if($rank <= 3)
+                                    <span class="inline-flex items-center justify-center min-w-9 h-9 px-3 rounded-full bg-gold-500 text-navy-900 text-sm font-bold tabular-nums">{{ $rank }}</span>
                                 @else
-                                    <span class="inline-flex items-center justify-center min-w-9 h-9 px-3 rounded-full bg-slate-100 text-navy-900 text-sm font-bold tabular-nums">{{ $siswa->peringkat }}</span>
+                                    <span class="inline-flex items-center justify-center min-w-9 h-9 px-3 rounded-full bg-slate-100 text-navy-900 text-sm font-bold tabular-nums">{{ $rank }}</span>
                                 @endif
                             </td>
                             <td class="font-mono text-xs text-slate-500">{{ $siswa->nis }} / {{ $siswa->nisn ?? '-' }}</td>
@@ -90,8 +101,8 @@
                 </tbody>
             </table>
         </div>
-        <div class="px-5 py-4">
-            <p class="text-xs font-medium text-slate-500">{{ $peringkat->count() }} siswa</p>
+        <div class="pagination-wrapper">
+            {{ $peringkat->links() }}
         </div>
     </div>
 

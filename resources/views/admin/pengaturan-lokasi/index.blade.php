@@ -120,7 +120,9 @@
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1">Radius Toleransi (Meter)</label>
                         <div class="relative">
-                            <input type="number" min="10" max="5000" name="radius_meter" x-model.number="radius" @input="updateMapFromInputs()" required class="w-full text-xs rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 font-mono pr-8">
+                            <input type="number" min="10" max="5000" name="radius_meter" x-model.number="radius" @input="updateMapFromInputs()" required
+                                data-numeric-only inputmode="numeric"
+                                class="w-full text-xs rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 font-mono pr-8">
                             <span class="absolute right-3 top-2 text-xs text-slate-400">m</span>
                         </div>
                         <p class="text-[10px] text-slate-400 mt-1">Rekomendasi area sekolah: 50 - 200m</p>
@@ -128,7 +130,9 @@
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1">Maks. Akurasi GPS (Meter)</label>
                         <div class="relative">
-                            <input type="number" min="10" max="500" name="max_accuracy_meter" value="{{ old('max_accuracy_meter', $settings->max_accuracy_meter) }}" required class="w-full text-xs rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 font-mono pr-8">
+                            <input type="number" min="10" max="500" name="max_accuracy_meter" value="{{ old('max_accuracy_meter', $settings->max_accuracy_meter) }}" required
+                                data-numeric-only inputmode="numeric"
+                                class="w-full text-xs rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 font-mono pr-8">
                             <span class="absolute right-3 top-2 text-xs text-slate-400">m</span>
                         </div>
                         <p class="text-[10px] text-slate-400 mt-1">Tolak jika sinyal GPS > ambang ini</p>

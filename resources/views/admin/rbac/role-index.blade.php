@@ -110,12 +110,9 @@
                 </tbody>
             </table>
         </div>
-        @if($roles->hasPages() || $roles->total() > 0)
-            <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
-                <p class="text-xs font-medium text-slate-500">Menampilkan {{ $roles->firstItem() ?? 0 }} sampai {{ $roles->lastItem() ?? 0 }} dari {{ $roles->total() }} role</p>
-                <div class="pagination-wrapper">{{ $roles->links() }}</div>
-            </div>
-        @endif
+        <div class="pagination-wrapper">
+            {{ $roles->links() }}
+        </div>
     </div>
 
 </div>

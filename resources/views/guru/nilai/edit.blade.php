@@ -1,6 +1,6 @@
 @extends('layouts.guru')
 
-@section('title', 'Input Nilai — ' . $siswa->nama_lengkap)
+@section('title', 'Input Nilai - ' . $siswa->nama_lengkap)
 
 @section('breadcrumb-parent', 'Kelola Nilai')
 @section('breadcrumb-current', 'Input Nilai')
@@ -43,6 +43,7 @@
                             <div>
                                 <label for="nilai_uts" class="form-label">Nilai UTS (Ujian Tengah Semester)</label>
                                 <input type="number" id="nilai_uts" name="nilai_uts" min="0" max="100" step="0.1" 
+                                    data-decimal-only inputmode="decimal"
                                     value="{{ old('nilai_uts', $nilai->nilai_uts) }}" 
                                     class="form-input @error('nilai_uts') error @enderror font-mono font-semibold" placeholder="Belum diisi">
                                 @error('nilai_uts')
@@ -53,6 +54,7 @@
                             <div>
                                 <label for="nilai_uas" class="form-label">Nilai UAS (Ujian Akhir Semester)</label>
                                 <input type="number" id="nilai_uas" name="nilai_uas" min="0" max="100" step="0.1" 
+                                    data-decimal-only inputmode="decimal"
                                     value="{{ old('nilai_uas', $nilai->nilai_uas) }}" 
                                     class="form-input @error('nilai_uas') error @enderror font-mono font-semibold" placeholder="Belum diisi">
                                 @error('nilai_uas')
@@ -111,7 +113,7 @@
                                     </td>
                                     <td class="font-bold text-slate-800">{{ $detail->judul }}</td>
                                     <td class="font-bold font-mono text-navy-600 text-sm">{{ $detail->nilai }}</td>
-                                    <td class="text-xs text-slate-400 max-w-xs truncate" title="{{ $detail->keterangan }}">{{ $detail->keterangan ?? '—' }}</td>
+                                    <td class="text-xs text-slate-400 max-w-xs truncate" title="{{ $detail->keterangan }}">{{ $detail->keterangan ?? '-' }}</td>
                                     <td class="text-right">
                                         <form action="{{ route('guru.nilai.detail.destroy', $detail) }}" method="POST" class="inline" data-confirm="Apakah Anda yakin ingin menghapus nilai harian ini?">
                                             @csrf
@@ -182,6 +184,7 @@
                         <div>
                             <label for="nilai" class="form-label">Nilai (0-100)</label>
                             <input type="number" id="nilai" name="nilai" min="0" max="100" step="0.1" value="{{ old('nilai') }}" required
+                                data-decimal-only inputmode="decimal"
                                 class="form-input @error('nilai') error @enderror font-mono font-semibold" placeholder="Nilai">
                             @error('nilai')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>

@@ -47,7 +47,8 @@
                             <div>
                                 <label for="nip" class="form-label">NIP (Nomor Induk Pegawai)</label>
                                 <input type="text" id="nip" name="nip" value="{{ old('nip') }}"
-                                    class="form-input @error('nip') error @enderror" placeholder="Optional">
+                                    inputmode="numeric" pattern="[0-9]*" data-numeric-only
+                                    class="form-input font-mono @error('nip') error @enderror" placeholder="Angka saja (opsional)">
                                 @error('nip')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
@@ -97,8 +98,9 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label for="no_telepon" class="form-label">No. Telepon / WhatsApp</label>
-                                <input type="text" id="no_telepon" name="no_telepon" value="{{ old('no_telepon') }}"
-                                    class="form-input @error('no_telepon') error @enderror" placeholder="Contoh: 08123456789">
+                                <input type="tel" id="no_telepon" name="no_telepon" value="{{ old('no_telepon') }}"
+                                    inputmode="numeric" pattern="[0-9+]*" data-tel-only
+                                    class="form-input font-mono @error('no_telepon') error @enderror" placeholder="Contoh: 08123456789">
                                 @error('no_telepon')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror

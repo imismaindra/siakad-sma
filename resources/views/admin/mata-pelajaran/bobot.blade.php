@@ -127,6 +127,7 @@
                             <label for="bobot_harian" class="block text-[10px] font-medium uppercase tracking-[0.2em] text-slate-400 mb-2">Harian</label>
                             <div class="relative">
                                 <input type="number" id="bobot_harian" name="bobot_harian" min="0" max="100" value="{{ old('bobot_harian', 40) }}" required
+                                    data-numeric-only inputmode="numeric"
                                     class="bobot-input w-full rounded-2xl bg-white/10 border border-white/15 pl-4 pr-9 py-3 text-center font-mono font-bold text-white tabular-nums outline-none transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus:border-gold-500 focus:ring-4 focus:ring-gold-500/15">
                                 <span class="absolute right-3 inset-y-0 flex items-center text-xs text-slate-400">%</span>
                             </div>
@@ -135,6 +136,7 @@
                             <label for="bobot_uts" class="block text-[10px] font-medium uppercase tracking-[0.2em] text-slate-400 mb-2">UTS</label>
                             <div class="relative">
                                 <input type="number" id="bobot_uts" name="bobot_uts" min="0" max="100" value="{{ old('bobot_uts', 30) }}" required
+                                    data-numeric-only inputmode="numeric"
                                     class="bobot-input w-full rounded-2xl bg-white/10 border border-white/15 pl-4 pr-9 py-3 text-center font-mono font-bold text-white tabular-nums outline-none transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus:border-gold-500 focus:ring-4 focus:ring-gold-500/15">
                                 <span class="absolute right-3 inset-y-0 flex items-center text-xs text-slate-400">%</span>
                             </div>
@@ -143,6 +145,7 @@
                             <label for="bobot_uas" class="block text-[10px] font-medium uppercase tracking-[0.2em] text-slate-400 mb-2">UAS</label>
                             <div class="relative">
                                 <input type="number" id="bobot_uas" name="bobot_uas" min="0" max="100" value="{{ old('bobot_uas', 30) }}" required
+                                    data-numeric-only inputmode="numeric"
                                     class="bobot-input w-full rounded-2xl bg-white/10 border border-white/15 pl-4 pr-9 py-3 text-center font-mono font-bold text-white tabular-nums outline-none transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus:border-gold-500 focus:ring-4 focus:ring-gold-500/15">
                                 <span class="absolute right-3 inset-y-0 flex items-center text-xs text-slate-400">%</span>
                             </div>

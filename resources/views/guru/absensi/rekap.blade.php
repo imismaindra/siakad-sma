@@ -56,13 +56,21 @@
                                 $persen = $total > 0 ? round(($r['hadir'] / $total) * 100, 1) : 100;
                             @endphp
                             <tr>
-                                <td class="text-center font-semibold text-slate-400">{{ $idx + 1 }}</td>
+                                <td class="text-center font-semibold text-slate-400">{{ $siswaRekap->firstItem() + $loop->index }}</td>
                                 <td class="font-mono text-slate-500 text-xs">{{ $siswa->nis }}</td>
                                 <td class="font-bold text-slate-800">{{ $siswa->nama_lengkap }}</td>
-                                <td class="text-center font-semibold font-mono text-emerald-600">{{ $r['hadir'] }}</td>
-                                <td class="text-center font-semibold font-mono text-blue-500">{{ $r['sakit'] }}</td>
-                                <td class="text-center font-semibold font-mono text-amber-500">{{ $r['izin'] }}</td>
-                                <td class="text-center font-semibold font-mono text-rose-500">{{ $r['alpa'] }}</td>
+                                <td class="text-center">
+                                    <span class="badge badge-absen-hadir font-mono">{{ $r['hadir'] }}</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge badge-absen-sakit font-mono">{{ $r['sakit'] }}</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge badge-absen-izin font-mono">{{ $r['izin'] }}</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge badge-absen-alpa font-mono">{{ $r['alpa'] }}</span>
+                                </td>
                                 <td class="text-center font-semibold font-mono text-slate-700">{{ $total }}</td>
                                 <td class="text-right">
                                     <span class="font-bold font-mono text-sm {{ $persen >= 90 ? 'text-emerald-600' : ($persen >= 75 ? 'text-amber-500' : 'text-rose-600') }}">
@@ -73,6 +81,10 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+
+            <div class="pagination-wrapper">
+                {{ $siswaRekap->links() }}
             </div>
         @else
             <div class="p-12 text-center text-slate-400 border border-dashed border-slate-200">

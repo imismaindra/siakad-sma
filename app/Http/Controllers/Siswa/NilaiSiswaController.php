@@ -30,15 +30,20 @@ class NilaiSiswaController extends Controller
 
         $tahunAjaranId = $request->get('tahun_ajaran_id', $tahunAktif?->id);
 
-        $nilais = Nilai::with(['mataPelajaran', 'guru', 'detailNilais'])
-            ->where('siswa_id', $siswa->id)
+        $allNilais = Nilai::where('siswa_id', $siswa->id)
             ->where('tahun_ajaran_id', $tahunAjaranId)
             ->get();
 
-        $tahunAjarans = TahunAjaran::orderByDesc('nama')->get();
-
         // Cek apakah rapor sudah dipublikasikan (semua nilai is_final)
-        $raporPublished = $nilais->isNotEmpty() && $nilais->every(fn ($n) => $n->is_final);
+        $raporPublished = $allNilais->isNotEmpty() && $allNilais->every(fn ($n) => $n->is_final);
+
+        $nilais = Nilai::with(['mataPelajaran', 'guru', 'detailNilais'])
+            ->where('siswa_id', $siswa->id)
+            ->where('tahun_ajaran_id', $tahunAjaranId)
+            ->paginate(10)
+            ->withQueryString();
+
+        $tahunAjarans = TahunAjaran::orderByDesc('nama')->get();
 
         return view('siswa.nilai', compact('siswa', 'nilais', 'tahunAjarans', 'tahunAjaranId', 'raporPublished', 'tahunAktif'));
     }

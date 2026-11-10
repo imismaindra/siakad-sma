@@ -110,10 +110,10 @@
                             </td>
                             <td class="whitespace-nowrap">
                                 <span class="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold">
-                                    <span class="badge badge-success">{{ $hadir }} H</span>
-                                    <span class="badge badge-info">{{ $sakit }} S</span>
-                                    <span class="badge badge-warning">{{ $izin }} I</span>
-                                    <span class="badge badge-danger">{{ $alpa }} A</span>
+                                    <span class="badge badge-absen-hadir">{{ $hadir }} H</span>
+                                    <span class="badge badge-absen-sakit">{{ $sakit }} S</span>
+                                    <span class="badge badge-absen-izin">{{ $izin }} I</span>
+                                    <span class="badge badge-absen-alpa">{{ $alpa }} A</span>
                                 </span>
                             </td>
                             <td class="text-right whitespace-nowrap">
@@ -136,12 +136,9 @@
                 </tbody>
             </table>
         </div>
-        @if($absensis->total() > 0)
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-4">
-                <p class="text-xs font-medium text-slate-500 tabular-nums">Menampilkan {{ $absensis->firstItem() }} sampai {{ $absensis->lastItem() }} dari {{ $absensis->total() }} data</p>
-                <div class="pagination-wrapper">{{ $absensis->links() }}</div>
-            </div>
-        @endif
+        <div class="pagination-wrapper">
+            {{ $absensis->links() }}
+        </div>
     </div>
 
 </div>

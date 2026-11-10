@@ -84,12 +84,9 @@
                         </tbody>
                     </table>
                 </div>
-                @if($jurusans->hasPages() || $jurusans->total() > 0)
-                    <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-4">
-                        <p class="text-xs text-slate-500">Menampilkan {{ $jurusans->firstItem() ?? 0 }} sampai {{ $jurusans->lastItem() ?? 0 }} dari {{ $jurusans->total() }} data</p>
-                        <div class="pagination-wrapper">{{ $jurusans->links() }}</div>
-                    </div>
-                @endif
+                <div class="pagination-wrapper">
+                    {{ $jurusans->links() }}
+                </div>
             </div>
         </div>
 

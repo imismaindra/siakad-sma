@@ -77,9 +77,9 @@
                             </td>
                             <td>
                                 @if($mp->is_aktif ?? true)
-                                    <span class="badge badge-success">Aktif</span>
+                                    <span class="badge badge-status-aktif">Aktif</span>
                                 @else
-                                    <span class="badge badge-danger">Nonaktif</span>
+                                    <span class="badge badge-status-tidak-aktif">Nonaktif</span>
                                 @endif
                             </td>
                             <td class="text-right whitespace-nowrap">
@@ -117,12 +117,9 @@
                 </tbody>
             </table>
         </div>
-        @if($mapels->total() > 0)
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-4">
-                <p class="text-xs font-medium text-slate-500 tabular-nums">Menampilkan {{ $mapels->firstItem() }} sampai {{ $mapels->lastItem() }} dari {{ $mapels->total() }} data</p>
-                <div class="pagination-wrapper">{{ $mapels->links() }}</div>
-            </div>
-        @endif
+        <div class="pagination-wrapper">
+            {{ $mapels->links() }}
+        </div>
     </div>
 
 </div>

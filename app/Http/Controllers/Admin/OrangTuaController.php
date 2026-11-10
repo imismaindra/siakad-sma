@@ -69,12 +69,14 @@ class OrangTuaController extends Controller
             'email'          => ['required', 'email', 'max:150', 'unique:users,email'],
             'password'       => ['required', 'string', 'min:8', 'confirmed'],
             'jenis_kelamin'  => ['required', 'in:L,P'],
-            'no_telepon'     => ['nullable', 'string', 'max:20'],
+            'no_telepon'     => ['nullable', 'regex:/^[0-9+]+$/', 'max:20'],
             'pekerjaan'      => ['nullable', 'string', 'max:100'],
             'alamat'         => ['nullable', 'string'],
             'anak'           => ['nullable', 'array'],
             'anak.*.siswa_id'=> ['required', 'exists:siswas,id'],
             'anak.*.hubungan'=> ['required', 'in:ayah,ibu,wali'],
+        ], [
+            'no_telepon.regex' => 'Nomor telepon hanya boleh berisi angka dan tanda plus (+).',
         ]);
 
         DB::transaction(function () use ($validated, $request) {
@@ -149,12 +151,14 @@ class OrangTuaController extends Controller
             'email'          => ['required', 'email', 'max:150', Rule::unique('users', 'email')->ignore($orangTua->user_id)],
             'password'       => ['nullable', 'string', 'min:8', 'confirmed'],
             'jenis_kelamin'  => ['required', 'in:L,P'],
-            'no_telepon'     => ['nullable', 'string', 'max:20'],
+            'no_telepon'     => ['nullable', 'regex:/^[0-9+]+$/', 'max:20'],
             'pekerjaan'      => ['nullable', 'string', 'max:100'],
             'alamat'         => ['nullable', 'string'],
             'anak'           => ['nullable', 'array'],
             'anak.*.siswa_id'=> ['required', 'exists:siswas,id'],
             'anak.*.hubungan'=> ['required', 'in:ayah,ibu,wali'],
+        ], [
+            'no_telepon.regex' => 'Nomor telepon hanya boleh berisi angka dan tanda plus (+).',
         ]);
 
         DB::transaction(function () use ($validated, $orangTua) {

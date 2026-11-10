@@ -68,7 +68,8 @@
                     <div>
                         <label for="nomor" class="form-label">Nomor Urut Kelas</label>
                         <input type="number" id="nomor" name="nomor" min="1" value="{{ old('nomor', $kelas->nomor) }}" required
-                            class="form-input @error('nomor') error @enderror">
+                            data-numeric-only inputmode="numeric"
+                            class="form-input font-mono @error('nomor') error @enderror">
                         @error('nomor')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -99,7 +100,8 @@
                     <div>
                         <label for="kapasitas" class="form-label">Kapasitas Maksimal</label>
                         <input type="number" id="kapasitas" name="kapasitas" min="1" max="50" value="{{ old('kapasitas', $kelas->kapasitas) }}" required
-                            class="form-input @error('kapasitas') error @enderror">
+                            data-numeric-only inputmode="numeric"
+                            class="form-input font-mono @error('kapasitas') error @enderror">
                         @error('kapasitas')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror

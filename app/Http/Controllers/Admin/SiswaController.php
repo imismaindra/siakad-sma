@@ -82,20 +82,25 @@ class SiswaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nis' => ['required', 'string', 'max:20', 'unique:siswas,nis'],
-            'nisn' => ['nullable', 'string', 'max:20', 'unique:siswas,nisn'],
+            'nis' => ['required', 'regex:/^[0-9]+$/', 'max:20', 'unique:siswas,nis'],
+            'nisn' => ['nullable', 'regex:/^[0-9]+$/', 'max:20', 'unique:siswas,nisn'],
             'nama_lengkap' => ['required', 'string', 'max:150'],
             'jenis_kelamin' => ['required', 'in:L,P'],
             'kelas_id' => ['nullable', 'exists:kelas,id'],
             'tempat_lahir' => ['nullable', 'string', 'max:100'],
             'tanggal_lahir' => ['nullable', 'date', 'before:today'],
             'alamat' => ['nullable', 'string'],
-            'no_telepon' => ['nullable', 'string', 'max:20'],
-            'no_telepon_ortu' => ['nullable', 'string', 'max:20'],
+            'no_telepon' => ['nullable', 'regex:/^[0-9+]+$/', 'max:20'],
+            'no_telepon_ortu' => ['nullable', 'regex:/^[0-9+]+$/', 'max:20'],
             'nama_ortu' => ['nullable', 'string', 'max:150'],
             'email' => ['nullable', 'email', 'unique:users,email'],
             'password' => ['nullable', 'string', 'min:8'],
             'foto' => ['nullable', 'image', 'max:2048'],
+        ], [
+            'nis.regex' => 'NIS hanya boleh berupa angka tanpa karakter atau spasi.',
+            'nisn.regex' => 'NISN hanya boleh berupa angka.',
+            'no_telepon.regex' => 'Nomor telepon hanya boleh berisi angka dan tanda plus (+).',
+            'no_telepon_ortu.regex' => 'Nomor telepon orang tua hanya boleh berisi angka dan tanda plus (+).',
         ]);
 
         DB::transaction(function () use ($validated, $request) {
@@ -166,20 +171,25 @@ class SiswaController extends Controller
     public function update(Request $request, Siswa $siswa)
     {
         $validated = $request->validate([
-            'nis' => ['required', 'string', 'max:20', 'unique:siswas,nis,' . $siswa->id],
-            'nisn' => ['nullable', 'string', 'max:20', 'unique:siswas,nisn,' . $siswa->id],
+            'nis' => ['required', 'regex:/^[0-9]+$/', 'max:20', 'unique:siswas,nis,' . $siswa->id],
+            'nisn' => ['nullable', 'regex:/^[0-9]+$/', 'max:20', 'unique:siswas,nisn,' . $siswa->id],
             'nama_lengkap' => ['required', 'string', 'max:150'],
             'jenis_kelamin' => ['required', 'in:L,P'],
             'kelas_id' => ['nullable', 'exists:kelas,id'],
             'tempat_lahir' => ['nullable', 'string', 'max:100'],
             'tanggal_lahir' => ['nullable', 'date', 'before:today'],
             'alamat' => ['nullable', 'string'],
-            'no_telepon' => ['nullable', 'string', 'max:20'],
-            'no_telepon_ortu' => ['nullable', 'string', 'max:20'],
+            'no_telepon' => ['nullable', 'regex:/^[0-9+]+$/', 'max:20'],
+            'no_telepon_ortu' => ['nullable', 'regex:/^[0-9+]+$/', 'max:20'],
             'nama_ortu' => ['nullable', 'string', 'max:150'],
             'status' => ['required', 'in:aktif,lulus,pindah,dikeluarkan'],
             'foto' => ['nullable', 'image', 'max:2048'],
             'password' => ['nullable', 'string', 'min:8'],
+        ], [
+            'nis.regex' => 'NIS hanya boleh berupa angka tanpa karakter atau spasi.',
+            'nisn.regex' => 'NISN hanya boleh berupa angka.',
+            'no_telepon.regex' => 'Nomor telepon hanya boleh berisi angka dan tanda plus (+).',
+            'no_telepon_ortu.regex' => 'Nomor telepon orang tua hanya boleh berisi angka dan tanda plus (+).',
         ]);
 
         DB::transaction(function () use ($validated, $request, $siswa) {

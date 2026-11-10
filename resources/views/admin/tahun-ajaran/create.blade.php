@@ -29,10 +29,11 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
-                        <label for="nama" class="form-label">Tahun Ajaran</label>
+                        <label for="nama" class="form-label">Tahun Ajaran <span class="text-rose-500">*</span></label>
                         <input type="text" id="nama" name="nama" value="{{ old('nama') }}" required
-                            class="form-input @error('nama') error @enderror" placeholder="Format: YYYY/YYYY (contoh: 2025/2026)">
-                        <p class="text-xs text-slate-400 mt-1">Gunakan format empat digit tahun dipisah garis miring.</p>
+                            pattern="\d{4}/\d{4}" oninput="this.value = this.value.replace(/[^0-9\/]/g, '')"
+                            class="form-input font-mono @error('nama') error @enderror" placeholder="YYYY/YYYY (contoh: 2025/2026)">
+                        <p class="text-xs text-slate-400 mt-1">Gunakan format empat digit tahun dipisah garis miring (hanya angka dan garis miring).</p>
                         @error('nama')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror

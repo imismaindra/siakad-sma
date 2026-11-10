@@ -73,7 +73,11 @@
                 <dl class="mt-6 divide-y divide-white/10 border-y border-white/10">
                     <div class="py-4">
                         <dt class="text-[11px] font-medium uppercase tracking-[0.2em] text-slate-400">Jenis kelamin</dt>
-                        <dd class="mt-1 font-bold text-white text-sm">{{ $siswa->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</dd>
+                        <dd class="mt-1">
+                            <span class="badge {{ $siswa->jenis_kelamin == 'L' ? 'badge-gender-l' : 'badge-gender-p' }}">
+                                {{ $siswa->jenis_kelamin == 'L' ? 'Laki-Laki' : 'Perempuan' }}
+                            </span>
+                        </dd>
                     </div>
                     <div class="py-4">
                         <dt class="text-[11px] font-medium uppercase tracking-[0.2em] text-slate-400">Tempat, tanggal lahir</dt>
@@ -206,7 +210,7 @@
                                             {{ $da->absensi->mataPelajaran?->nama ?? 'Mapel Terhapus' }}
                                         </td>
                                         <td>
-                                            <span class="badge absensi-status-{{ $da->status }}">
+                                            <span class="badge badge-absen-{{ strtolower($da->status) }} uppercase text-[10px] tracking-wider">
                                                 {{ ucfirst($da->status) }}
                                             </span>
                                         </td>

@@ -112,12 +112,9 @@
                 </tbody>
             </table>
         </div>
-        @if($kelas->hasPages() || $kelas->total() > 0)
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-4">
-                <p class="text-xs text-slate-500">Menampilkan {{ $kelas->firstItem() ?? 0 }} sampai {{ $kelas->lastItem() ?? 0 }} dari {{ $kelas->total() }} data</p>
-                <div class="pagination-wrapper">{{ $kelas->links() }}</div>
-            </div>
-        @endif
+        <div class="pagination-wrapper">
+            {{ $kelas->links() }}
+        </div>
     </div>
 </div>
 @endsection

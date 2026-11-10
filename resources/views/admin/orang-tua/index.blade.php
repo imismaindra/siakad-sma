@@ -90,8 +90,12 @@
                         <tr>
                             <td>
                                 <div class="font-bold text-navy-900">{{ $ot->nama_lengkap }}</div>
-                                <div class="text-xs text-slate-400">
-                                    {{ $ot->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}
+                                <div class="mt-1">
+                                    @if($ot->jenis_kelamin === 'L')
+                                        <span class="badge badge-gender-l">Laki-Laki</span>
+                                    @else
+                                        <span class="badge badge-gender-p">Perempuan</span>
+                                    @endif
                                 </div>
                             </td>
                             <td>
@@ -149,11 +153,9 @@
             </table>
         </div>
 
-        @if($orangTuas->hasPages())
-            <div class="p-4 border-t border-slate-100">
-                {{ $orangTuas->links() }}
-            </div>
-        @endif
+        <div class="pagination-wrapper">
+            {{ $orangTuas->links() }}
+        </div>
     </div>
 
 </div>

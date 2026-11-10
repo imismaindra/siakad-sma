@@ -57,7 +57,7 @@
             </div>
             <div>
                 <span class="text-xs text-slate-400 block font-semibold uppercase tracking-wider">Ruangan</span>
-                <span class="font-bold text-slate-800 block mt-1">{{ $absensi->jadwalPelajaran->ruangan ?? '—' }}</span>
+                <span class="font-bold text-slate-800 block mt-1">{{ $absensi->jadwalPelajaran->ruangan ?? '-' }}</span>
             </div>
             <div>
                 <span class="text-xs text-slate-400 block font-semibold uppercase tracking-wider">Total Siswa</span>
@@ -67,11 +67,11 @@
         <div class="p-6 text-sm space-y-3">
             <div>
                 <span class="text-xs text-slate-400 block font-semibold uppercase tracking-wider">Materi Pembahasan</span>
-                <p class="font-medium text-slate-700 mt-1 leading-relaxed">{{ $absensi->materi ?? '—' }}</p>
+                <p class="font-medium text-slate-700 mt-1 leading-relaxed">{{ $absensi->materi ?? '-' }}</p>
             </div>
             <div>
                 <span class="text-xs text-slate-400 block font-semibold uppercase tracking-wider">Catatan Guru</span>
-                <p class="font-medium text-slate-700 mt-1 leading-relaxed italic">{{ $absensi->catatan ?? '—' }}</p>
+                <p class="font-medium text-slate-700 mt-1 leading-relaxed italic">{{ $absensi->catatan ?? '-' }}</p>
             </div>
         </div>
     </div>
@@ -104,12 +104,14 @@
                             <td class="font-mono text-slate-500 text-xs">{{ $da->siswa->nis }}</td>
                             <td class="font-bold text-slate-800">{{ $da->siswa->nama_lengkap }}</td>
                             <td>
-                                <span class="badge {{ $da->siswa->jenis_kelamin == 'L' ? 'badge-info' : 'badge-purple' }}">
-                                    {{ $da->siswa->jenis_kelamin }}
-                                </span>
+                                @if($da->siswa->jenis_kelamin === 'L')
+                                    <span class="badge badge-gender-l">Laki-Laki</span>
+                                @else
+                                    <span class="badge badge-gender-p">Perempuan</span>
+                                @endif
                             </td>
                             <td>
-                                <span class="badge absensi-status-{{ $da->status }}">
+                                <span class="badge badge-absen-{{ $da->status }}">
                                     {{ ucfirst($da->status) }}
                                 </span>
                             </td>
