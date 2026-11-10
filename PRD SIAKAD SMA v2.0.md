@@ -41,8 +41,8 @@ SIAKAD SMA v1.0 sudah mencakup tiga peran (Admin/TU, Guru, Siswa) dengan fitur d
 | F2 | Geofencing absensi (Haversine radius + anti-fake location + GUI admin + override guru) | Wajib | ✅ Selesai (Feature Complete & Tested) |
 | F3 | Audit log (jejak mutasi data append-only) | Wajib | ✅ Selesai (`spatie/laravel-activitylog` + Admin GUI) |
 | F4 | Monitoring orang tua (portal read-only anak) | Wajib | ✅ Selesai (Portal Ortu + Switcher + e-Rapor PDF) |
-| F5 | Pengumuman & kalender akademik | Wajib | 🟡 Pengumuman Multi-Target Selesai; Kalender Tahap 2 |
-| F6 | Notifikasi modular (in-app, Telegram/email, adapter WA) | Wajib | ⏳ Rencana Tahap 3 |
+| F5 | Pengumuman & kalender akademik | Wajib | ✅ Selesai (Feature Complete & Tested - Grid & List View, Target Audiens) |
+| F6 | Notifikasi modular (in-app, Telegram/email, adapter WA) | Wajib | ✅ Selesai (Feature Complete & Tested - In-App, Telegram, WhatsApp Adapter, Auto Triggers) |
 | CI/CD | Pipeline deployment otomatis GitHub Actions ke cPanel | Penunjang | ✅ Selesai (`.github/workflows/deploy.yml` Aktif) |
 
 ## 4. Pengguna dan Peran
@@ -106,21 +106,21 @@ Peran Orang Tua ditambahkan melalui mekanisme role dan permission Spatie (`spati
 
 | ID | Kebutuhan | Prioritas | Status |
 | --- | --- | --- | :---:|
-| F5-01 | Admin membuat, mengubah, dan menghapus pengumuman dengan judul, isi, target audiens, dan status aktif. | Tinggi | ✅ Selesai (v1.0/v2.0) |
-| F5-02 | Pengumuman dapat ditargetkan ke Semua, Guru, Siswa, atau Siswa Kelas tertentu. | Tinggi | ✅ Selesai |
-| F5-03 | Pengumuman muncul di widget dashboard masing-masing pengguna sesuai target. | Tinggi | ✅ Selesai |
-| F5-04 | Admin mengelola event kalender akademik: judul, kategori (libur, ujian, pembagian rapor, kegiatan), tanggal, deskripsi. | Tinggi | ⏳ Tahap 2 |
-| F5-05 | Semua peran dapat melihat kalender dalam tampilan bulanan dan daftar. | Sedang | ⏳ Tahap 2 |
+| F5-01 | Admin membuat, mengubah, dan menghapus pengumuman dengan judul, isi, target audiens, dan status aktif. | Tinggi | ✅ Selesai |
+| F5-02 | Pengumuman dapat ditargetkan ke Semua, Guru, Siswa, Orang Tua, atau Siswa Kelas tertentu. | Tinggi | ✅ Selesai |
+| F5-03 | Pengumuman muncul di widget dashboard masing-masing pengguna sesuai target audiens. | Tinggi | ✅ Selesai |
+| F5-04 | Admin mengelola event kalender akademik: judul, kategori (libur, ujian, pembagian rapor, kegiatan), tanggal, deskripsi, warna, dan toggle libur. | Tinggi | ✅ Selesai |
+| F5-05 | Semua peran (Admin, Guru, Siswa, Orang Tua) dapat melihat kalender akademik dalam visualisasi grid bulanan dan mode daftar agenda. | Sedang | ✅ Selesai |
 
-### 5.6 F6 Notifikasi modular (Tahap 3)
+### 5.6 F6 Notifikasi modular (Selesai)
 
 | ID | Kebutuhan | Prioritas | Status |
 | --- | --- | --- | :---:|
-| F6-01 | Notifikasi dibangun di atas Laravel Notifications dan antrean (`queue`), sehingga pengiriman tidak memperlambat request pengguna. | Tinggi | ⏳ Direncanakan |
-| F6-02 | Channel default: notifikasi di dalam aplikasi (database notification), ditambah Telegram Bot atau email (gratis). | Tinggi | ⏳ Direncanakan |
-| F6-03 | Channel WhatsApp diimplementasikan sebagai adapter terpisah dengan antarmuka yang sama (modular contract). | Sedang | ⏳ Direncanakan |
-| F6-04 | Pemicu notifikasi: siswa alpa pada sesi QR/manual, nilai baru dipublikasikan, e-Rapor terbit, dan pengumuman baru. | Tinggi | ⏳ Direncanakan |
-| F6-05 | Pengguna/orang tua dapat mengonfigurasi kontak channel dan preferensi notifikasi. | Sedang | ⏳ Direncanakan |
+| F6-01 | Notifikasi dibangun di atas Laravel Notifications dan antrean (`queue`), sehingga pengiriman tidak memperlambat request pengguna. | Tinggi | ✅ Selesai |
+| F6-02 | Channel bawaan: notifikasi di dalam aplikasi (database notification dengan bell & unread counter real-time), ditambah Telegram Bot dan Email. | Tinggi | ✅ Selesai |
+| F6-03 | Channel WhatsApp diimplementasikan sebagai adapter terpisah dengan antarmuka yang sama (`WhatsAppAdapterInterface` -> `LogWhatsAppAdapter`, `FonnteWhatsAppAdapter`). | Sedang | ✅ Selesai |
+| F6-04 | Pemicu notifikasi otomatis: siswa alpa pada sesi QR/manual (ke ortu & siswa), nilai/e-Rapor terbit, pembukaan sesi QR kelas, dan pengumuman baru. | Tinggi | ✅ Selesai |
+| F6-05 | Pengguna dapat mengonfigurasi kontak channel (Telegram Chat ID, No WA) dan memilih topik notifikasi yang ingin diterima pada halaman pengaturan. | Sedang | ✅ Selesai |
 
 ### 5.7 CI/CD & Deployment Otomatis (Penunjang Produksi)
 
@@ -198,6 +198,34 @@ Menyimpan profil orang tua dan relasi banyak-ke-banyak dengan anak:
 - `lihat-audit-log`: Diberikan kepada Admin/TU untuk mengakses rekam jejak aktivitas sistem.
 - `lihat-data-anak`: Diberikan kepada Role `orang_tua` untuk otorisasi akses monitoring anak.
 
+### 7.7 Tabel `kalender_akademiks` (Baru - F5)
+Menyimpan agenda dan kalender kegiatan akademik sekolah:
+- `id`: unsigned bigint (PK)
+- `tahun_ajaran_id`: unsigned bigint, nullable (FK -> `tahun_ajarans`, cascade)
+- `judul`: string(255)
+- `deskripsi`: text, nullable
+- `kategori`: enum ('libur', 'ujian', 'rapor', 'kegiatan', 'lainnya')
+- `tanggal_mulai`: date
+- `tanggal_selesai`: date
+- `warna`: string(20) default '#3B82F6'
+- `target`: string(30) default 'semua' ('semua', 'guru', 'siswa', 'orang_tua')
+- `is_libur`: boolean default false
+- `is_aktif`: boolean default true
+- `created_by`: unsigned bigint, nullable (FK -> `users`, set null)
+- `created_at`, `updated_at`: timestamps
+- *Index*: `['tanggal_mulai', 'tanggal_selesai', 'is_aktif']`
+
+### 7.8 Tabel Notifikasi & Preferensi Pengguna (Baru - F6)
+Arsitektur Laravel Notifications & pengaturan kanal modular:
+- `notifications`: `id` (uuid PK), `type` (string), `notifiable_type`, `notifiable_id` (morphs), `data` (text/json payload), `read_at` (timestamp, nullable), `created_at`, `updated_at`.
+- `user_notification_settings`:
+  - `id`: unsigned bigint (PK)
+  - `user_id`: unsigned bigint (FK -> `users`, cascade, unique)
+  - Kanal kontak: `telegram_chat_id` (string nullable), `whatsapp_number` (string nullable)
+  - Toggle kanal: `channel_in_app` (bool true), `channel_mail` (bool false), `channel_telegram` (bool false), `channel_whatsapp` (bool false)
+  - Toggle topik: `notify_alpa` (bool true), `notify_nilai` (bool true), `notify_pengumuman` (bool true), `notify_qr_sesi` (bool true)
+  - `created_at`, `updated_at`: timestamps
+
 ## 8. Arsitektur dan Teknologi
 
 - **Backend**: Laravel 11/13 MVC, PHP ^8.2 (kompatibel hosting produksi cPanel).
@@ -247,9 +275,9 @@ Menyimpan profil orang tua dan relasi banyak-ke-banyak dengan anak:
 | Tahap | Isi | Status | Keluaran |
 | --- | --- | :---:| --- |
 | **1 Inti (Core Evolution)** | F1 QR dinamis, F2 skema geofence, F3 audit log, CI/CD pipeline | **100% Selesai** | Presensi QR aktif dengan live monitoring, audit trail aktif, pipeline deployment cPanel beroperasi |
-| **2 Pendukung** | F4 role orang tua (Selesai), F5 pengumuman & kalender akademik, penyempurnaan UI | **Sedang Berjalan (F4 Selesai)** | Portal wali murid read-only selesai (F4); Kalender akademik dalam pengerjaan (F5) |
-| **3 Notifikasi** | F6 arsitektur channel, Telegram/email, adapter WA opsional | Terjadwal | Notifikasi otomatis pemicu alpa, pengumuman, dan e-Rapor |
-| **4 Penutupan** | Final documentation, test regression, tag v2.0.0 resmi | Terjadwal | Rilis v2.0.0 produksi |
+| **2 Pendukung** | F4 role orang tua, F5 pengumuman multi-target & kalender akademik | **100% Selesai** | Portal wali murid read-only selesai (F4); Kalender akademik bulanan & daftar agenda selesai (F5) |
+| **3 Notifikasi** | F6 arsitektur channel, Telegram/email, adapter WA opsional | **100% Selesai** | Notifikasi in-app bell, Telegram Bot, WhatsApp modular adapter, dan auto-trigger alpa/nilai/QR/pengumuman |
+| **4 Penutupan** | Final documentation, regression test suite, tag v2.0.0 resmi | **Sedang Berjalan** | Verifikasi regression test suite & dokumentasi komprehensif |
 
 ## 12. Kriteria Penerimaan (Acceptance Criteria)
 
@@ -270,19 +298,31 @@ Menyimpan profil orang tua dan relasi banyak-ke-banyak dengan anak:
 - [x] Orang tua dapat mengunduh e-Rapor PDF resmi anak setelah nilai difinalisasi oleh pihak sekolah.
 - [x] Otorisasi ketat (`AnakPolicy`) memblokir akses dan unduh rapor siswa yang tidak tertaut dengan respon HTTP 403 Forbidden.
 - [x] Orang tua dapat melihat pengumuman resmi sekolah dan pengumuman yang ditargetkan untuk kelas anak.
+- [x] Admin dapat mengelola agenda kalender akademik (tambah, edit, hapus, toggle libur, palet warna, target audiens).
+- [x] Seluruh pengguna (Admin, Guru, Siswa, Orang Tua) dapat melihat kalender akademik dalam mode visual grid bulanan dan mode daftar agenda.
+- [x] Kotak masuk notifikasi (`/notifikasi`) dapat diakses seluruh pengguna dengan aksi tandai dibaca, tandai semua dibaca, dan penghapusan notifikasi.
+- [x] Topbar bell icon menampilkan indikator badge belum dibaca dengan dropdown interaktif dan auto-update.
+- [x] Pengguna dapat mengatur kanal kontak (Telegram Chat ID, No WA) dan memilih topik notifikasi aktif pada `/notifikasi/pengaturan`.
+- [x] Notifikasi otomatis terkirim saat siswa alpa presensi (ke orang tua & siswa), nilai e-Rapor difinalisasi, pembukaan sesi presensi QR, dan penerbitan pengumuman baru.
+- [x] Channel WhatsApp modular mendukung pergantian gateway via adapter interface (`WhatsAppAdapterInterface`) dengan adapter default log untuk lokal dan Fonnte untuk produksi.
 - [x] Push ke branch `v2.0-development` otomatis memicu pipeline CI/CD dan men-deploy pembaruan ke cPanel hosting.
 - [x] Alur bawaan v1.0 (absensi manual, perhitungan nilai terbobot, ekspor e-Rapor PDF) tetap berjalan normal.
 
 ## 13. Manajemen Versi & Log Perubahan
 
 - **v1.0.0** (Mei 2026): Rilis fondasi awal SIAKAD SMA (Data Master, Jadwal bebas bentrok, Absensi manual, Nilai Kurikulum Merdeka, e-Rapor PDF, Spatie Dynamic RBAC).
-- **v2.0.0-beta / v2.0-development** (Oktober 2026):
+- **v2.0.0-beta / v2.0-development** (Oktober - November 2026):
   - Penambahan modul Absensi QR Dinamis (F1) dengan rotasi HMAC token 30s & rolling OTP.
   - Penambahan Live Monitoring presensi guru via AJAX polling 3s.
   - Implementasi Geofencing lokasi presensi (F2) dengan formula Haversine & proteksi anti-mock GPS.
   - Implementasi Audit Trail otomatis (F3) via `spatie/laravel-activitylog` beserta GUI admin, ekspor CSV, dan auto-capture IP/User-Agent.
   - Penambahan Modul Monitoring Orang Tua (F4) dengan portal read-only anak, multi-child switcher, dan proteksi isolasi data melalui `AnakPolicy`.
+  - Penambahan Manajemen Kalender Akademik (F5) dengan navigasi grid bulanan, mode tabel agenda, badge kategori acara, dan widget kalender di dashboard seluruh peran.
+  - Penambahan Pengumuman Multi-Target (F5) mencakup target Semua, Guru, Siswa, Orang Tua, dan Kelas tertentu.
+  - Implementasi Notifikasi Modular (F6) berbasis Laravel Notifications, In-App Bell counter, Telegram Bot Channel, dan WhatsApp Adapter Interface (`Log` & `Fonnte`).
+  - Penambahan pemicu notifikasi bisnis otomatis: Alpa Siswa (ke ortu & siswa), Rapor Final, Sesi QR Dibuka, dan Pengumuman Terbit.
+  - Penambahan Pusat Notifikasi & Preferensi Kanal Pengguna (`/notifikasi` dan `/notifikasi/pengaturan`).
   - Penambahan permission baru (`buka-sesi-qr`, `override-absensi`, `lihat-audit-log`, `lihat-data-anak`) dan penambahan role `orang_tua`.
-  - Migrasi pengubahan kolom `users.role` menjadi `VARCHAR(30)` di MySQL dan auto-seed akun demo Orang Tua (`ortu@siakad.sch.id` / `password`) saat CI/CD deploy.
+  - Migrasi pengubahan kolom `users.role` dan `pengumumans.target` menjadi `VARCHAR(30)` untuk kompatibilitas penuh MySQL cPanel.
   - Pembuatan automated CI/CD pipeline GitHub Actions untuk deployment ke cPanel Shared Hosting.
   - Pembaruan dependensi PHP ^8.2 pada `composer.json` untuk kompatibilitas shared hosting.

@@ -9,6 +9,7 @@ use App\Models\DetailNilai;
 use App\Models\Guru;
 use App\Models\JadwalPelajaran;
 use App\Models\Jurusan;
+use App\Models\KalenderAkademik;
 use App\Models\Kelas;
 use App\Models\MataPelajaran;
 use App\Models\Nilai;
@@ -471,6 +472,89 @@ class DatabaseSeeder extends Seeder
             'kelas_id' => $kelas3->id,
             'is_aktif' => true,
             'published_at' => Carbon::now(),
+        ]);
+
+        Pengumuman::create([
+            'user_id' => $admin->id,
+            'judul' => 'Undangan Pertemuan Wali Murid & Peluncuran Portal e-Rapor',
+            'konten' => 'Kepada Yth. Bapak/Ibu Orang Tua dan Wali Murid, kami mengundang kehadiran Bapak/Ibu pada rapat koordinasi akhir semester serta pengenalan fitur pemantauan e-Rapor dan absensi mandiri.',
+            'target' => 'orang_tua',
+            'is_aktif' => true,
+            'published_at' => Carbon::now(),
+        ]);
+
+        // ============================================================
+        // 13. Kalender Akademik (F5)
+        // ============================================================
+        KalenderAkademik::create([
+            'tahun_ajaran_id' => $tahunAjaran->id,
+            'judul' => 'Penilaian Akhir Semester (PAS) Ganjil',
+            'kategori' => 'ujian',
+            'tanggal_mulai' => '2025-12-01',
+            'tanggal_selesai' => '2025-12-08',
+            'warna' => 'amber',
+            'target' => 'semua',
+            'is_libur' => false,
+            'is_aktif' => true,
+            'deskripsi' => 'Ujian akhir semester ganjil berbasis komputer dan naskah resmi.',
+            'created_by' => $admin->id,
+        ]);
+
+        KalenderAkademik::create([
+            'tahun_ajaran_id' => $tahunAjaran->id,
+            'judul' => 'Pembagian e-Rapor Semester Ganjil',
+            'kategori' => 'rapor',
+            'tanggal_mulai' => '2025-12-19',
+            'tanggal_selesai' => '2025-12-19',
+            'warna' => 'purple',
+            'target' => 'semua',
+            'is_libur' => false,
+            'is_aktif' => true,
+            'deskripsi' => 'Penerimaan dokumen e-Rapor dan evaluasi capaian kompetensi oleh wali murid.',
+            'created_by' => $admin->id,
+        ]);
+
+        KalenderAkademik::create([
+            'tahun_ajaran_id' => $tahunAjaran->id,
+            'judul' => 'Libur Semester Ganjil TA 2025/2026',
+            'kategori' => 'libur',
+            'tanggal_mulai' => '2025-12-22',
+            'tanggal_selesai' => '2026-01-03',
+            'warna' => 'rose',
+            'target' => 'semua',
+            'is_libur' => true,
+            'is_aktif' => true,
+            'deskripsi' => 'Libur sekolah akhir semester ganjil seluruh jenjang kelas.',
+            'created_by' => $admin->id,
+        ]);
+
+        KalenderAkademik::create([
+            'tahun_ajaran_id' => $tahunAjaran->id,
+            'judul' => 'Rapat Pleno Dewan Guru Awal Semester Genap',
+            'kategori' => 'kegiatan',
+            'tanggal_mulai' => '2026-01-05',
+            'tanggal_selesai' => '2026-01-05',
+            'warna' => 'blue',
+            'target' => 'guru',
+            'is_libur' => false,
+            'is_aktif' => true,
+            'deskripsi' => 'Penyusunan jadwal modul ajar dan perangkat kurikulum semester genap.',
+            'created_by' => $admin->id,
+        ]);
+
+        // Agenda bulan berjalan agar langsung tampil di kalender live
+        KalenderAkademik::create([
+            'tahun_ajaran_id' => $tahunAjaran->id,
+            'judul' => 'Simulasi & Uji Coba Presensi QR Dinamis',
+            'kategori' => 'kegiatan',
+            'tanggal_mulai' => now()->toDateString(),
+            'tanggal_selesai' => now()->toDateString(),
+            'warna' => 'blue',
+            'target' => 'semua',
+            'is_libur' => false,
+            'is_aktif' => true,
+            'deskripsi' => 'Simulasi penerapan presensi digital mandiri siswa via scan QR code kelas.',
+            'created_by' => $admin->id,
         ]);
 
         // ============================================================

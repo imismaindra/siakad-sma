@@ -5,11 +5,11 @@
 
 | Field | Detail |
 |---|---|
-| **Versi Dokumen** | 2.1 (Post-MVP, Dynamic QR Attendance, Spatie Audit Trail, & CI/CD Pipeline) |
-| **Tanggal** | 16 Oktober 2026 |
-| **Status** | Produksi & Stabil (Feature Complete - v2.1) |
+| **Versi Dokumen** | 2.2 (Parent Portal F4, Academic Calendar F5, & Modular Notification Multi-Channel F6) |
+| **Tanggal** | 10 November 2026 |
+| **Status** | Produksi & Stabil (Feature Complete - v2.2) |
 | **Platform** | Web Application (Responsive Desktop, Tablet, & Mobile) |
-| **Target Rilis** | Q4 2026 (Rilis Stabil v1.0, v2.0, & v2.1) |
+| **Target Rilis** | Q4 2026 (Rilis Stabil v1.0, v2.0, v2.1, & v2.2) |
 
 ---
 
@@ -111,18 +111,19 @@ Cakupan fungsional mencakup pengelolaan data master sekolah dengan validasi inte
   - Pencatatan kegiatan Ekstrakurikuler dan Prestasi Siswa.
   - Lembar e-Rapor PDF resmi standar Kurikulum Merdeka (ekspor mandiri siswa, per siswa oleh guru/admin, dan ekspor kolektif per kelas).
 - ✅ **Peringkat Siswa**: Penentuan ranking otomatis kelas berdasarkan rerata nilai akhir.
-- ✅ **Modul Pengumuman Terarah**: Publikasi pengumuman dengan target audiens spesifik (Semua, Guru, Siswa, atau Kelas tertentu).
+- ✅ **Modul Pengumuman Multi-Target (F5)**: Publikasi pengumuman dengan target audiens spesifik (Semua, Guru, Siswa, Orang Tua, atau Kelas tertentu) dan tayang otomatis di widget dashboard pengguna.
+- ✅ **Kalender Akademik Interaktif (F5)**: Manajemen agenda dan kegiatan sekolah oleh Admin TU (judul, deskripsi, tanggal mulai/selesai, palet warna, kategori libur/ujian/rapor/kegiatan), visualisasi Grid Kalender Bulanan dengan navigasi bulan berjalan serta Mode Tabel Daftar Agenda untuk Admin, Guru, Siswa, dan Orang Tua.
+- ✅ **Portal Monitoring Orang Tua / Wali Murid (F4)**: Antarmuka read-only pemantauan anak oleh wali murid, multi-child switcher instan, riwayat kehadiran, progres nilai akademik, unduh e-Rapor PDF resmi, dan isolasi data ketat berbasis `AnakPolicy` (HTTP 403 Forbidden).
+- ✅ **Notifikasi Modular Multi-Channel (F6)**: Arsitektur Laravel Notifications terintegrasi dengan In-App Bell counter real-time (polling live update), Telegram Bot Channel gratis, WhatsApp Gateway Adapter Interface (`WhatsAppAdapterInterface` -> `LogWhatsAppAdapter`, `FonnteWhatsAppAdapter`), pemicu otomatis (alpa presensi ke ortu & siswa, e-Rapor terbit, sesi QR dibuka, pengumuman baru), dan pusat preferensi kanal/topik pengguna (`/notifikasi` & `/notifikasi/pengaturan`).
 - ✅ **Continuous Integration & Continuous Deployment (CI/CD)**:
   - Workflow GitHub Actions (`.github/workflows/deploy.yml`) untuk rilis otomatis ke cPanel Shared Hosting (subdomain) saat push ke branch `v2.0-development` atau `main`.
   - Kompatibilitas runtime PHP ^8.2 di composer.json dan optimasi build aset Vite frontend.
-- ✅ **Automated Testing Suite**: Pengujian logika bisnis, integritas data, alur QR code, dan audit trail menggunakan feature test PHPUnit.
+- ✅ **Automated Testing Suite**: Pengujian logika bisnis, integritas data, alur QR code, audit trail, pengumuman & kalender akademik, serta notifikasi modular menggunakan feature test PHPUnit.
 
-### 5.2 Out-of-Scope (Rencana Pengembangan Masa Depan / Fase 3)
-- ⏳ Portal akses khusus Orang Tua / Wali Murid (Tahap 2 Evolusi - F4).
-- ⏳ Notifikasi Multi-Channel modular (Telegram Bot, Email, Adapter WhatsApp - F6).
-- ⏳ Kalender Akademik interaktif terpadu (F5).
+### 5.2 Out-of-Scope (Rencana Pengembangan Masa Depan / Fase 4)
 - ⏳ Integrasi sinkronisasi langsung dua arah dengan API Dapodik Kemdikbud.
 - ⏳ Modul Pembayaran SPP & Keuangan Sekolah (dipisahkan ke sistem microservice terpisah).
+- ⏳ Multi-Tenancy (pengelolaan multi-sekolah dalam satu yayasan).
 
 ---
 
@@ -245,6 +246,49 @@ Cakupan fungsional mencakup pengelolaan data master sekolah dengan validasi inte
 | DEVOPS-02 | Automated Asset Compilation | Setup runtime Node.js 20 & Vite build untuk Tailwind CSS v4 dan tracking bundle manifest di repository | 🔴 Must Have | ✅ Selesai |
 | DEVOPS-03 | Deployment Terisolasi via SSH/Rsync | Transfer berkas produksi terisolasi dengan proteksi direktori `storage` dan file `.env` di hosting | 🔴 Must Have | ✅ Selesai |
 | DEVOPS-04 | Post-Deployment Automation | Eksekusi otomatis `php artisan migrate --force`, caching route & view, serta storage link di server | 🔴 Must Have | ✅ Selesai |
+
+---
+
+### 6.10 Modul Monitoring Orang Tua / Wali Murid (F4)
+
+| ID | Fitur | Keterangan & Aturan Bisnis | Prioritas | Status |
+|---|---|---|---|:---:|
+| ORTU-01 | Manajemen Akun Orang Tua | Admin TU membuat akun orang tua dan menautkannya dengan satu atau banyak siswa (relasi ayah/ibu/wali) | 🔴 Must Have | ✅ Selesai (F4) |
+| ORTU-02 | Dashboard Pemantauan Anak | Orang tua login dan melihat ringkasan anak aktif: jadwal hari ini, absensi terakhir, nilai berjalan, dan pengumuman | 🔴 Must Have | ✅ Selesai (F4) |
+| ORTU-03 | Multi-Child Switcher | Orang tua dengan > 1 anak dapat berpindah profil anak yang dipantau dengan satu klik tanpa logout | 🔴 Must Have | ✅ Selesai (F4) |
+| ORTU-04 | Pemantauan Kehadiran & Nilai | Riwayat absensi per semester dan rekap nilai per mata pelajaran anak secara transparan | 🔴 Must Have | ✅ Selesai (F4) |
+| ORTU-05 | Unduh e-Rapor PDF Resmi | Orang tua dapat mengunduh dokumen e-Rapor resmi Kurikulum Merdeka anak yang sudah difinalisasi sekolah | 🔴 Must Have | ✅ Selesai (F4) |
+| ORTU-06 | Isolasi Otorisasi Ketat | Akses atau unduh rapor siswa yang bukan anak tertaut diblokir via `AnakPolicy` (HTTP 403 Forbidden) | 🔴 Must Have | ✅ Selesai (F4) |
+
+---
+
+### 6.11 Modul Kalender Akademik (F5)
+
+| ID | Fitur | Keterangan & Aturan Bisnis | Prioritas | Status |
+|---|---|---|---|:---:|
+| CAL-01 | CRUD Agenda Kalender Admin | Admin membuat, memperbarui, dan menghapus agenda: judul, tanggal mulai & selesai, deskripsi, warna badge, kategori, dan toggle libur | 🔴 Must Have | ✅ Selesai (F5) |
+| CAL-02 | Visualisasi Grid Kalender Bulanan | Tampilan kalender grid bulanan responsif dengan navigasi bulan (sebelum/sesudah/hari ini) dan penanda visual kategori kegiatan | 🔴 Must Have | ✅ Selesai (F5) |
+| CAL-03 | Mode Tabel Daftar Agenda | Opsi tampilan list tabular terstruktur dengan filter kategori dan pencarian teks acara | 🟡 Should Have | ✅ Selesai (F5) |
+| CAL-04 | Portal Kalender Siswa & Guru | Guru dan Siswa dapat mengakses kalender akademik yang relevan dengan jadwal kegiatan belajar mengajar | 🔴 Must Have | ✅ Selesai (F5) |
+| CAL-05 | Kalender Orang Tua Murid | Orang tua dapat melihat agenda penting sekolah (ujian, libur, pembagian rapor) untuk menyelaraskan jadwal keluarga | 🟡 Should Have | ✅ Selesai (F5) |
+| CAL-06 | Widget Agenda Terdekat | Menampilkan ringkasan agenda sekolah terdekat pada dashboard seluruh peran pengguna | 🟡 Should Have | ✅ Selesai (F5) |
+
+---
+
+### 6.12 Modul Notifikasi Modular Multi-Channel (F6)
+
+| ID | Fitur | Keterangan & Aturan Bisnis | Prioritas | Status |
+|---|---|---|---|:---:|
+| NOTIF-01 | Arsitektur Laravel Notifications | Sistem notifikasi asynchronous modular dengan antrean `ShouldQueue` tanpa membebani performa request HTTP pengguna | 🔴 Must Have | ✅ Selesai (F6) |
+| NOTIF-02 | In-App Bell & Unread Counter | Ikon lonceng di topbar dengan badge jumlah notifikasi baru, dropdown notifikasi interaktif, dan polling otomatis | 🔴 Must Have | ✅ Selesai (F6) |
+| NOTIF-03 | Kotak Masuk Notifikasi (`/notifikasi`) | Halaman daftar notifikasi lengkap dengan filter kategori, aksi tandai satu/semua dibaca, dan direct redirection ke URL target | 🔴 Must Have | ✅ Selesai (F6) |
+| NOTIF-04 | Telegram Bot Channel | Saluran pengiriman pesan notifikasi via Telegram Bot API resmi secara instan dan tanpa biaya API berbayar | 🟡 Should Have | ✅ Selesai (F6) |
+| NOTIF-05 | WhatsApp Gateway Adapter | Pola adapter modular (`WhatsAppAdapterInterface`) yang mendukung adapter 'log' untuk pengujian dan gateway riil (seperti Fonnte) untuk produksi | 🟡 Should Have | ✅ Selesai (F6) |
+| NOTIF-06 | Pemicu Otomatis Alpa Presensi | Notifikasi darurat dikirim otomatis kepada orang tua dan siswa saat siswa dinyatakan Alpa oleh guru mata pelajaran | 🔴 Must Have | ✅ Selesai (F6) |
+| NOTIF-07 | Pemicu Otomatis Penerbitan Nilai | Notifikasi dikirim ke siswa dan wali murid saat nilai semester dan e-Rapor kelas telah difinalisasi oleh Admin | 🔴 Must Have | ✅ Selesai (F6) |
+| NOTIF-08 | Pemicu Pembukaan Sesi Presensi QR | Notifikasi real-time dikirim ke siswa kelas terkait saat guru membuka sesi presensi QR | 🟡 Should Have | ✅ Selesai (F6) |
+| NOTIF-09 | Pemicu Pengumuman Sekolah Baru | Notifikasi siaran dikirim kepada pengguna yang termasuk dalam target audiens pengumuman terbit | 🟡 Should Have | ✅ Selesai (F6) |
+| NOTIF-10 | Pusat Pengaturan Preferensi Notifikasi | Pengguna dapat mendaftarkan ID Telegram, No WhatsApp, serta menyalakan/mematikan topik notifikasi tertentu (`/notifikasi/pengaturan`) | 🟡 Should Have | ✅ Selesai (F6) |
 
 ---
 
@@ -506,12 +550,15 @@ Hak akses dikelola secara terstruktur melalui permission dinamis Spatie dan terb
   - Setup otomatis PHP 8.2, kompilasi aset Vite, rsync SSH, dan post-deployment migration database.
   - Penyesuaian constraint PHP `^8.2` pada `composer.json` untuk kompatibilitas hosting produksi.
 
-### 🌟 Fase 3 — Skalabilitas & Komunikasi Eksternal (Masa Depan)
-- [ ] **Portal Akses Orang Tua / Wali (F4)**: Tampilan khusus untuk orang tua murid guna memantau perkembangan nilai dan kehadiran anak secara langsung.
-- [ ] **Notifikasi Multi-Channel Modular (F6)**: Integrasi pengiriman notifikasi pengumuman atau rekap kehadiran via Telegram Bot, Email, atau WhatsApp API adapter.
-- [ ] **Kalender Akademik Terpadu (F5)**: Manajemen event sekolah (libur, ujian, kegiatan) dengan tampilan kalender visual.
+### 🌟 Fase 3 — Keterlibatan Wali Murid, Kalender & Notifikasi Modular (Bulan 11) — [SELESAI 100%]
+- [x] **Portal Akses Orang Tua / Wali (F4)**: Tampilan khusus untuk orang tua murid guna memantau perkembangan nilai, absensi, jadwal, dan unduh e-Rapor resmi anak secara langsung, dilengkapi multi-child switcher dan otorisasi `AnakPolicy`.
+- [x] **Kalender Akademik Terpadu (F5)**: Manajemen event sekolah (libur, ujian, kegiatan, pembagian rapor) oleh Admin dengan tampilan kalender visual grid bulanan dan mode daftar agenda untuk seluruh aktor (Admin, Guru, Siswa, Orang Tua).
+- [x] **Notifikasi Multi-Channel Modular (F6)**: Integrasi pengiriman notifikasi pengumuman, alpa presensi, penerbitan e-rapor, dan pembukaan sesi QR via In-App Topbar Bell, Telegram Bot API, dan WhatsApp Gateway adapter interface (`Log` & `Fonnte`) beserta pusat pengaturan preferensi pengguna.
+
+### 🔮 Fase 4 — Integrasi Eksternal & Skalabilitas Lembaga (Masa Depan)
 - [ ] **Integrasi Dua Arah Dapodik**: Fasilitas impor/ekspor data format resmi Dapodik Kemdikbud secara berkala.
 - [ ] **Multi-Tenancy**: Arsitektur multi-sekolah untuk mendukung pengelolaan banyak SMA dalam satu instansi yayasan.
+- [ ] **Modul Pembayaran SPP**: Pengelolaan keuangan komprehensif dengan payment gateway terpisah.
 
 ---
 
@@ -567,6 +614,7 @@ Hak akses dikelola secara terstruktur melalui permission dinamis Spatie dan terb
 | **v1.1** | 14 Juni 2026 | Penyelesaian MVP, penyesuaian dependensi Laravel, penambahan arsitektur data | Tim Pengembang |
 | **v2.0** | 15 Oktober 2026 | Pembaruan spesifikasi produksi: integrasi Dynamic RBAC Spatie, validasi integritas wali kelas & kelas, jadwal anti-bentrok dengan grid kalender, konfigurasi bobot nilai interaktif, e-Rapor lengkap Kurikulum Merdeka (Ekskul, Prestasi, Catatan Wali Kelas, Batch Print), modul pengumuman multi-target, serta dokumentasi automated feature testing | Tim Pengembang |
 | **v2.1** | 16 Oktober 2026 | **Evolusi Keamanan, Absensi QR & DevOps**: Penambahan spesifikasi Absensi QR Dinamis (F1) berotasi 30s + OTP cadangan, scanner kamera lokal `html5-qrcode`, live monitoring presensi guru (polling 3s), integrasi Jejak Audit append-only `spatie/laravel-activitylog` (F3) beserta GUI filter admin, penambahan permission RBAC (`buka-sesi-qr`, `override-absensi`, `lihat-audit-log`), otomatisasi deployment CI/CD GitHub Actions ke cPanel Shared Hosting, dan pembaruan constraint runtime PHP ^8.2 | Tim Pengembang |
+| **v2.2** | 10 November 2026 | **Parent Portal, Academic Calendar, & Modular Notification Multi-Channel**: Penyelesaian Portal Monitoring Orang Tua (F4) dengan isolasi `AnakPolicy`, Manajemen Kalender Akademik interaktif (F5) dengan grid visual bulanan dan daftar agenda, Pengumuman Multi-Target terarah, Arsitektur Notifikasi Modular Multi-Channel (F6) berbasis Laravel Notifications, In-App Bell topbar dengan auto-polling, Telegram Bot API, WhatsApp Adapter Interface (`Log` & `Fonnte`), auto-trigger alpa/nilai/QR/pengumuman, dan pusat preferensi notifikasi pengguna. | Tim Pengembang |
 
 ---
 *Dokumen ini merupakan spesifikasi kebutuhan produk resmi SIAKAD SMA.*
