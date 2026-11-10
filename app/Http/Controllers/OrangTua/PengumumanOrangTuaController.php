@@ -30,7 +30,7 @@ class PengumumanOrangTuaController extends Controller
 
         $pengumumans = Pengumuman::aktif()
             ->where(function ($q) use ($activeSiswa) {
-                $q->where('target', 'semua');
+                $q->whereIn('target', ['semua', 'orang_tua']);
                 if ($activeSiswa && $activeSiswa->kelas_id) {
                     $q->orWhere(function ($sub) use ($activeSiswa) {
                         $sub->where('target', 'kelas')->where('kelas_id', $activeSiswa->kelas_id);
@@ -60,7 +60,7 @@ class PengumumanOrangTuaController extends Controller
 
         // Verifikasi apakah pengumuman ini dapat diakses oleh orang tua / kelas anak
         $isAccessible = $pengumuman->is_aktif && $pengumuman->published_at !== null && (
-            $pengumuman->target === 'semua' ||
+            in_array($pengumuman->target, ['semua', 'orang_tua']) ||
             ($activeSiswa && $pengumuman->target === 'kelas' && $pengumuman->kelas_id === $activeSiswa->kelas_id)
         );
 
