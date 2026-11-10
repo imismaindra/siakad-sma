@@ -7,6 +7,7 @@ use App\Models\Absensi;
 use App\Models\Kelas;
 use App\Models\MataPelajaran;
 use App\Models\TahunAjaran;
+use App\Services\Notification\NotificationDispatcherService;
 use Illuminate\Http\Request;
 
 class AbsensiAdminController extends Controller
@@ -73,6 +74,10 @@ class AbsensiAdminController extends Controller
                     'status' => $item['status'],
                     'keterangan' => $item['keterangan'] ?? null,
                 ]);
+
+                if ($item['status'] === 'alpa') {
+                    app(NotificationDispatcherService::class)->dispatchAlpa($detail);
+                }
 
                 activity('absensi')
                     ->causedBy(auth()->user())

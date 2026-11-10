@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Siswa;
 use App\Policies\AnakPolicy;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Activitylog\Models\Activity;
@@ -23,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Paginator::defaultView('vendor.pagination.tailwind');
+
         // F4: Daftarkan Policy otoritas pemantauan data anak oleh Orang Tua
         Gate::policy(Siswa::class, AnakPolicy::class);
 

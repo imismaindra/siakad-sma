@@ -168,4 +168,53 @@ document.addEventListener('DOMContentLoaded', function () {
         el.style.opacity = '0';
         scrollObserver.observe(el);
     });
+
+    // Numeric & Phone Input Enforcer (strictly prevent string input)
+    document.addEventListener('input', function (e) {
+        const target = e.target;
+        if (!target || target.tagName !== 'INPUT') return;
+
+        const name = target.getAttribute('name') || '';
+        const isNumeric = target.matches('input[data-numeric-only], input[inputmode="numeric"]') ||
+            ['nis', 'nisn', 'nip', 'nomor', 'kapasitas', 'urutan_jam', 'bobot_harian', 'bobot_uts', 'bobot_uas', 'radius_meter', 'max_accuracy_meter'].includes(name);
+
+        const isTel = target.matches('input[data-tel-only], input[type="tel"]') ||
+            ['no_telepon', 'no_telepon_ortu', 'telepon', 'hp'].includes(name);
+
+        const isDecimal = target.matches('input[data-decimal-only]') ||
+            ['kkm', 'nilai_uts', 'nilai_uas', 'nilai'].includes(name);
+
+        if (isNumeric) {
+            target.value = target.value.replace(/[^0-9]/g, '');
+        } else if (isTel) {
+            target.value = target.value.replace(/[^0-9+]/g, '');
+        } else if (isDecimal) {
+            let val = target.value.replace(/[^0-9.]/g, '');
+            const parts = val.split('.');
+            if (parts.length > 2) {
+                val = parts[0] + '.' + parts.slice(1).join('');
+            }
+            target.value = val;
+        }
+    });
+
+    // Prevent non-numeric keydown on strict numeric fields
+    document.addEventListener('keydown', function (e) {
+        const target = e.target;
+        if (!target || target.tagName !== 'INPUT') return;
+
+        const name = target.getAttribute('name') || '';
+        const isStrictDigits = target.matches('input[data-numeric-only], input[inputmode="numeric"]') ||
+            ['nis', 'nisn', 'nip', 'nomor', 'kapasitas', 'urutan_jam', 'bobot_harian', 'bobot_uts', 'bobot_uas', 'radius_meter', 'max_accuracy_meter'].includes(name);
+
+        if (isStrictDigits) {
+            if (['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter', 'Home', 'End'].includes(e.key) ||
+                (e.ctrlKey || e.metaKey)) {
+                return;
+            }
+            if (!/^[0-9]$/.test(e.key)) {
+                e.preventDefault();
+            }
+        }
+    });
 });

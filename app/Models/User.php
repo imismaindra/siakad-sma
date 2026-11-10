@@ -126,6 +126,54 @@ class User extends Authenticatable
         return $this->hasOne(Kelas::class, 'wali_kelas_id');
     }
 
+    public function notificationSetting(): HasOne
+    {
+        return $this->hasOne(UserNotificationSetting::class);
+    }
+
+    public function getOrCreateNotificationSetting(): UserNotificationSetting
+    {
+        return $this->notificationSetting()->firstOrCreate(
+            ['user_id' => $this->id],
+            [
+                'channel_in_app' => true,
+                'channel_mail' => true,
+                'channel_telegram' => false,
+                'channel_whatsapp' => false,
+                'notify_alpa' => true,
+                'notify_nilai' => true,
+                'notify_pengumuman' => true,
+                'notify_qr_sesi' => true,
+            ]
+        );
+    }
+
+    public function routeNotificationForTelegram(): ?string
+    {
+        return $this->notificationSetting?->telegram_chat_id;
+    }
+
+    public function routeNotificationForWhatsApp(): ?string
+    {
+        if ($this->notificationSetting?->whatsapp_number) {
+            return $this->notificationSetting->whatsapp_number;
+        }
+
+        if ($this->isSiswa() && $this->siswa?->no_telepon) {
+            return $this->siswa->no_telepon;
+        }
+
+        if ($this->isGuru() && $this->guru?->no_telepon) {
+            return $this->guru->no_telepon;
+        }
+
+        if ($this->isOrangTua() && $this->orangTua?->no_telepon) {
+            return $this->orangTua->no_telepon;
+        }
+
+        return null;
+    }
+
     public function getFotoUrl(): ?string
     {
         if ($this->foto) {

@@ -8,6 +8,7 @@ use App\Models\MataPelajaran;
 use App\Models\Nilai;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
+use App\Services\Notification\NotificationDispatcherService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
@@ -61,6 +62,12 @@ class NilaiAdminController extends Controller
             ->where('is_final', false)
             ->update(['is_final' => true]);
 
+        $kelas = Kelas::find($validated['kelas_id']);
+        $tahunAjaran = TahunAjaran::find($validated['tahun_ajaran_id']);
+        if ($kelas) {
+            app(NotificationDispatcherService::class)->dispatchNilaiTerbit($kelas, $tahunAjaran);
+        }
+
         return back()->with('success', "{$count} data nilai berhasil dikunci (finalisasi).");
     }
 
@@ -87,7 +94,7 @@ class NilaiAdminController extends Controller
             return redirect()->back()->withErrors(['kelas_id' => 'Pilih kelas terlebih dahulu.']);
         }
 
-        // Hitung rata-rata nilai akhir per siswa
+        // Hitung rata-rata nilai akhir per siswa dengan pagination
         $peringkat = Siswa::with(['kelas'])
             ->where('kelas_id', $kelasId)
             ->when($request->filled('search'), fn ($q) => $q->where(function ($qq) use ($request) {
@@ -99,11 +106,8 @@ class NilaiAdminController extends Controller
                 'nilai_akhir'
             )
             ->orderByDesc('nilais_avg_nilai_akhir')
-            ->get()
-            ->map(function ($siswa, $index) {
-                $siswa->peringkat = $index + 1;
-                return $siswa;
-            });
+            ->paginate(15)
+            ->withQueryString();
 
         $kelas = Kelas::with('jurusan')->find($kelasId);
         $tahunAjaran = TahunAjaran::find($tahunAjaranId);
@@ -178,6 +182,46 @@ class NilaiAdminController extends Controller
             ->setPaper('A4', 'portrait');
 
         $filename = "rapor_kelas_{$kelas->nama_kelas}_{$tahunAjaran->nama}_sem{$tahunAjaran->semester}.pdf";
+        $filename = str_replace(['/', '\\'], '-', $filename);
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Export peringkat kelas ke file PDF resmi.
+     */
+    public function exportPeringkatKelas(Request $request)
+    {
+        $tahunAjaranId = $request->get('tahun_ajaran_id', TahunAjaran::aktif()->value('id'));
+        $kelasId = $request->get('kelas_id');
+
+        if (! $kelasId) {
+            return redirect()->back()->withErrors(['kelas_id' => 'Pilih kelas terlebih dahulu untuk mengekspor peringkat.']);
+        }
+
+        $kelas = Kelas::with(['jurusan', 'waliKelas.guru'])->findOrFail($kelasId);
+        $tahunAjaran = TahunAjaran::findOrFail($tahunAjaranId);
+
+        $peringkat = Siswa::with(['kelas'])
+            ->where('kelas_id', $kelasId)
+            ->withAvg(
+                ['nilais' => fn ($q) => $q->where('tahun_ajaran_id', $tahunAjaranId)->where('is_final', true)],
+                'nilai_akhir'
+            )
+            ->withCount(
+                ['nilais' => fn ($q) => $q->where('tahun_ajaran_id', $tahunAjaranId)->where('is_final', true)]
+            )
+            ->orderByDesc('nilais_avg_nilai_akhir')
+            ->get()
+            ->map(function ($siswa, $index) {
+                $siswa->peringkat = $index + 1;
+                return $siswa;
+            });
+
+        $pdf = Pdf::loadView('pdf.peringkat-kelas', compact('peringkat', 'kelas', 'tahunAjaran'))
+            ->setPaper('A4', 'portrait');
+
+        $filename = "peringkat_kelas_{$kelas->nama_kelas}_{$tahunAjaran->nama}_sem{$tahunAjaran->semester}.pdf";
         $filename = str_replace(['/', '\\'], '-', $filename);
 
         return $pdf->download($filename);

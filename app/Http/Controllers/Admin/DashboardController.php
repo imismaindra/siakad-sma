@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Guru;
+use App\Models\KalenderAkademik;
 use App\Models\Kelas;
+use App\Models\Pengumuman;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
 use App\Models\Absensi;
@@ -38,6 +40,14 @@ class DashboardController extends Controller
             ? Nilai::where('tahun_ajaran_id', $tahunAktif->id)->where('is_final', false)->count()
             : 0;
 
-        return view('admin.dashboard', compact('stats', 'totalHadir', 'totalAlpa', 'nilaiMenunggu', 'tahunAktif'));
+        // F5: Pengumuman & Kalender di Dashboard Admin
+        $pengumumans = Pengumuman::latest('published_at')->take(4)->get();
+        $upcomingEvents = KalenderAkademik::aktif()
+            ->where('tanggal_mulai', '>=', today()->startOfDay())
+            ->orderBy('tanggal_mulai')
+            ->take(4)
+            ->get();
+
+        return view('admin.dashboard', compact('stats', 'totalHadir', 'totalAlpa', 'nilaiMenunggu', 'tahunAktif', 'pengumumans', 'upcomingEvents'));
     }
 }

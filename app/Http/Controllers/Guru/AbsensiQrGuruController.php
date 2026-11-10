@@ -8,6 +8,7 @@ use App\Models\DetailAbsensi;
 use App\Models\JadwalPelajaran;
 use App\Models\SesiAbsensiQr;
 use App\Models\Siswa;
+use App\Services\Notification\NotificationDispatcherService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -80,6 +81,8 @@ class AbsensiQrGuruController extends Controller
             ->event('created')
             ->withProperties(['jadwal_id' => $jadwal->id, 'kelas' => $jadwal->kelas->nama_lengkap])
             ->log("Membuka sesi absensi QR #{$sesi->id} untuk kelas {$jadwal->kelas->nama_lengkap}");
+
+        app(NotificationDispatcherService::class)->dispatchSesiQr($sesi);
 
         return redirect()->route('guru.absensi.qr.show', $sesi)
             ->with('success', 'Sesi absensi QR berhasil dibuka. Tampilkan QR code kepada siswa.');
@@ -251,6 +254,8 @@ class AbsensiQrGuruController extends Controller
             'keterangan' => 'Presensi ditolak guru: ' . $alasan,
         ]);
         $detail->save();
+
+        app(NotificationDispatcherService::class)->dispatchAlpa($detail);
 
         activity('absensi')
             ->causedBy(Auth::user())

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\OrangTua;
 use App\Http\Controllers\Controller;
 use App\Models\DetailAbsensi;
 use App\Models\JadwalPelajaran;
+use App\Models\KalenderAkademik;
 use App\Models\Nilai;
 use App\Models\Pengumuman;
 use App\Models\Siswa;
@@ -93,15 +94,23 @@ class DashboardOrangTuaController extends Controller
         }
         $avgScore = $grades->count() > 0 ? round($grades->avg('nilai_akhir'), 1) : 0;
 
-        // 5. Pengumuman Sekolah (F4-05)
+        // 5. Pengumuman Sekolah (F4-05) & Kalender
         $pengumumans = Pengumuman::aktif()
             ->where(function ($q) use ($activeSiswa) {
-                $q->where('target', 'semua')
-                  ->orWhere(function ($sub) use ($activeSiswa) {
-                      $sub->where('target', 'kelas')->where('kelas_id', $activeSiswa->kelas_id);
-                  });
+                $q->whereIn('target', ['semua', 'orang_tua']);
+                if ($activeSiswa && $activeSiswa->kelas_id) {
+                    $q->orWhere(function ($sub) use ($activeSiswa) {
+                        $sub->where('target', 'kelas')->where('kelas_id', $activeSiswa->kelas_id);
+                    });
+                }
             })
             ->latest('published_at')
+            ->take(4)
+            ->get();
+
+        $upcomingEvents = KalenderAkademik::forUser($user)
+            ->where('tanggal_mulai', '>=', today()->startOfDay())
+            ->orderBy('tanggal_mulai')
             ->take(4)
             ->get();
 
@@ -116,7 +125,8 @@ class DashboardOrangTuaController extends Controller
             'todayIndo',
             'grades',
             'avgScore',
-            'pengumumans'
+            'pengumumans',
+            'upcomingEvents'
         ));
     }
 

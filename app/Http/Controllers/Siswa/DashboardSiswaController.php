@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Siswa;
 
 use App\Http\Controllers\Controller;
 use App\Models\JadwalPelajaran;
+use App\Models\KalenderAkademik;
 use App\Models\Nilai;
+use App\Models\Pengumuman;
 use App\Models\TahunAjaran;
 use Illuminate\Support\Facades\Auth;
 
@@ -57,12 +59,34 @@ class DashboardSiswaController extends Controller
 
         $siswa->load('kelas.jurusan');
 
+        // F5: Pengumuman & Agenda Siswa
+        $pengumumans = Pengumuman::aktif()
+            ->where(function ($q) use ($siswa) {
+                $q->whereIn('target', ['semua', 'siswa']);
+                if ($siswa->kelas_id) {
+                    $q->orWhere(function ($sub) use ($siswa) {
+                        $sub->where('target', 'kelas')->where('kelas_id', $siswa->kelas_id);
+                    });
+                }
+            })
+            ->latest('published_at')
+            ->take(4)
+            ->get();
+
+        $upcomingEvents = KalenderAkademik::forUser($user)
+            ->where('tanggal_mulai', '>=', today()->startOfDay())
+            ->orderBy('tanggal_mulai')
+            ->take(4)
+            ->get();
+
         return view('siswa.dashboard', compact(
             'siswa',
             'tahunAktif',
             'jadwalHariIni',
             'nilaiTerbaru',
-            'rekapAbsensi'
+            'rekapAbsensi',
+            'pengumumans',
+            'upcomingEvents'
         ));
     }
 }

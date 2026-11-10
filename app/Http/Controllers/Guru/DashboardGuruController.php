@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Guru;
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\JadwalPelajaran;
+use App\Models\KalenderAkademik;
+use App\Models\Pengumuman;
 use App\Models\TahunAjaran;
 use Illuminate\Support\Facades\Auth;
 
@@ -56,12 +58,27 @@ class DashboardGuruController extends Controller
             ->whereMonth('tanggal', now()->month)
             ->count();
 
+        // F5: Pengumuman & Agenda Guru
+        $pengumumans = Pengumuman::aktif()
+            ->whereIn('target', ['semua', 'guru'])
+            ->latest('published_at')
+            ->take(4)
+            ->get();
+
+        $upcomingEvents = KalenderAkademik::forUser($user)
+            ->where('tanggal_mulai', '>=', today()->startOfDay())
+            ->orderBy('tanggal_mulai')
+            ->take(4)
+            ->get();
+
         return view('guru.dashboard', compact(
             'guru',
             'tahunAktif',
             'jadwalHariIni',
             'belumAbsen',
-            'totalSesiMengajar'
+            'totalSesiMengajar',
+            'pengumumans',
+            'upcomingEvents'
         ));
     }
 

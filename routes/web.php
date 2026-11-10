@@ -14,11 +14,14 @@ use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\PengaturanLokasiController;
 use App\Http\Controllers\Admin\OrangTuaController;
+use App\Http\Controllers\Admin\PengumumanController as AdminPengumumanController;
+use App\Http\Controllers\Admin\KalenderAkademikController as AdminKalenderController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Guru\AbsensiGuruController;
 use App\Http\Controllers\Guru\AbsensiQrGuruController;
 use App\Http\Controllers\Guru\DashboardGuruController;
 use App\Http\Controllers\Guru\NilaiGuruController;
+use App\Http\Controllers\Guru\PengumumanGuruController;
 use App\Http\Controllers\OrangTua\AbsensiOrangTuaController;
 use App\Http\Controllers\OrangTua\DashboardOrangTuaController;
 use App\Http\Controllers\OrangTua\JadwalOrangTuaController;
@@ -29,6 +32,9 @@ use App\Http\Controllers\Siswa\AbsensiSiswaController;
 use App\Http\Controllers\Siswa\AbsensiQrSiswaController;
 use App\Http\Controllers\Siswa\DashboardSiswaController;
 use App\Http\Controllers\Siswa\NilaiSiswaController;
+use App\Http\Controllers\Siswa\PengumumanSiswaController;
+use App\Http\Controllers\KalenderAkademikSharedController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 // ============================================================
@@ -131,6 +137,7 @@ Route::middleware(['auth', 'role:admin'])
         // Jadwal Pelajaran
         Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal.index');
         Route::get('/jadwal/grid', [JadwalController::class, 'grid'])->name('jadwal.grid');
+        Route::get('/jadwal/export-pdf', [JadwalController::class, 'exportPdf'])->name('jadwal.export-pdf');
         Route::get('/jadwal/create', [JadwalController::class, 'create'])->name('jadwal.create');
         Route::post('/jadwal', [JadwalController::class, 'store'])->name('jadwal.store');
         Route::get('/jadwal/{jadwal}/edit', [JadwalController::class, 'edit'])->name('jadwal.edit');
@@ -146,6 +153,7 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/nilai/laporan', [NilaiAdminController::class, 'laporan'])->name('nilai.laporan');
         Route::post('/nilai/finalisasi', [NilaiAdminController::class, 'finalisasi'])->name('nilai.finalisasi');
         Route::get('/nilai/peringkat', [NilaiAdminController::class, 'peringkat'])->name('nilai.peringkat');
+        Route::get('/nilai/peringkat/export', [NilaiAdminController::class, 'exportPeringkatKelas'])->name('nilai.peringkat.export');
         Route::get('/nilai/rapor/siswa/{siswa}', [NilaiAdminController::class, 'exportRaporSiswa'])->name('nilai.rapor.siswa');
         Route::get('/nilai/rapor/kelas', [NilaiAdminController::class, 'exportRaporKelas'])->name('nilai.rapor.kelas');
 
@@ -178,6 +186,21 @@ Route::middleware(['auth', 'role:admin'])
 
         // ── F4-01: Data Orang Tua ──────────────────────────────────
         Route::resource('orang-tua', OrangTuaController::class);
+
+        // ── F5: Pengumuman Sekolah ─────────────────────────────────
+        Route::get('/pengumuman', [AdminPengumumanController::class, 'index'])->name('pengumuman.index');
+        Route::get('/pengumuman/create', [AdminPengumumanController::class, 'create'])->name('pengumuman.create');
+        Route::post('/pengumuman', [AdminPengumumanController::class, 'store'])->name('pengumuman.store');
+        Route::get('/pengumuman/{pengumuman}/edit', [AdminPengumumanController::class, 'edit'])->name('pengumuman.edit');
+        Route::put('/pengumuman/{pengumuman}', [AdminPengumumanController::class, 'update'])->name('pengumuman.update');
+        Route::delete('/pengumuman/{pengumuman}', [AdminPengumumanController::class, 'destroy'])->name('pengumuman.destroy');
+        Route::patch('/pengumuman/{pengumuman}/toggle-aktif', [AdminPengumumanController::class, 'toggleAktif'])->name('pengumuman.toggle-aktif');
+
+        // ── F5: Kalender Akademik ──────────────────────────────────
+        Route::get('/kalender', [AdminKalenderController::class, 'index'])->name('kalender.index');
+        Route::post('/kalender', [AdminKalenderController::class, 'store'])->name('kalender.store');
+        Route::put('/kalender/{kalender}', [AdminKalenderController::class, 'update'])->name('kalender.update');
+        Route::delete('/kalender/{kalender}', [AdminKalenderController::class, 'destroy'])->name('kalender.destroy');
     });
 
 // ============================================================
@@ -218,6 +241,11 @@ Route::middleware(['auth', 'role:guru,admin'])
         Route::post('/nilai/detail', [NilaiGuruController::class, 'storeDetailNilai'])->name('nilai.detail.store');
         Route::delete('/nilai/detail/{detailNilai}', [NilaiGuruController::class, 'destroyDetailNilai'])->name('nilai.detail.destroy');
         Route::get('/nilai/rapor/kelas/{kelas}', [NilaiGuruController::class, 'exportRapor'])->name('nilai.rapor.kelas');
+
+        // Pengumuman & Kalender Akademik (F5)
+        Route::get('/pengumuman', [PengumumanGuruController::class, 'index'])->name('pengumuman.index');
+        Route::get('/pengumuman/{pengumuman}', [PengumumanGuruController::class, 'show'])->name('pengumuman.show');
+        Route::get('/kalender', [KalenderAkademikSharedController::class, 'index'])->name('kalender');
     });
 
 // ============================================================
@@ -241,10 +269,15 @@ Route::middleware(['auth', 'role:siswa'])
         // Nilai & Rapor
         Route::get('/nilai', [NilaiSiswaController::class, 'index'])->name('nilai');
         Route::get('/nilai/rapor/download', [NilaiSiswaController::class, 'downloadRapor'])->name('rapor.download');
+
+        // Pengumuman & Kalender Akademik (F5)
+        Route::get('/pengumuman', [PengumumanSiswaController::class, 'index'])->name('pengumuman.index');
+        Route::get('/pengumuman/{pengumuman}', [PengumumanSiswaController::class, 'show'])->name('pengumuman.show');
+        Route::get('/kalender', [KalenderAkademikSharedController::class, 'index'])->name('kalender');
     });
 
 // ============================================================
-// Orang Tua Routes (F4)
+// Orang Tua Routes (F4 & F5)
 // ============================================================
 Route::middleware(['auth', 'role:orang_tua', 'can:lihat-data-anak'])
     ->prefix('orang-tua')
@@ -260,5 +293,19 @@ Route::middleware(['auth', 'role:orang_tua', 'can:lihat-data-anak'])
 
         Route::get('/pengumuman', [PengumumanOrangTuaController::class, 'index'])->name('pengumuman');
         Route::get('/pengumuman/{pengumuman}', [PengumumanOrangTuaController::class, 'show'])->name('pengumuman.show');
+        Route::get('/kalender', [KalenderAkademikSharedController::class, 'index'])->name('kalender');
     });
+
+// ============================================================
+// Pusat Notifikasi (F6 - Semua Pengguna Terotentikasi)
+// ============================================================
+Route::middleware('auth')->group(function () {
+    Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifikasi/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
+    Route::get('/notifikasi/pengaturan', [NotificationController::class, 'settings'])->name('notifications.settings');
+    Route::put('/notifikasi/pengaturan', [NotificationController::class, 'updateSettings'])->name('notifications.settings.update');
+    Route::post('/notifikasi/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+    Route::get('/notifikasi/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::delete('/notifikasi/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+});
 

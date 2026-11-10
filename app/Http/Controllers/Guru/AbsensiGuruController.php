@@ -9,6 +9,7 @@ use App\Models\JadwalPelajaran;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
+use App\Services\Notification\NotificationDispatcherService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -109,13 +110,22 @@ class AbsensiGuruController extends Controller
                 'catatan' => $validated['catatan'] ?? null,
             ]);
 
+            $alpaList = [];
             foreach ($validated['siswa'] as $siswaData) {
-                DetailAbsensi::create([
+                $detail = DetailAbsensi::create([
                     'absensi_id' => $absensi->id,
                     'siswa_id' => $siswaData['id'],
                     'status' => $siswaData['status'],
                     'keterangan' => $siswaData['keterangan'] ?? null,
                 ]);
+
+                if ($siswaData['status'] === 'alpa') {
+                    $alpaList[] = $detail;
+                }
+            }
+
+            foreach ($alpaList as $alpaDetail) {
+                app(NotificationDispatcherService::class)->dispatchAlpa($alpaDetail);
             }
         });
 
@@ -163,22 +173,24 @@ class AbsensiGuruController extends Controller
             $siswaRekap = Siswa::where('kelas_id', $kelasId)
                 ->aktif()
                 ->orderBy('nama_lengkap')
-                ->get()
-                ->map(function ($siswa) use ($guru, $tahunAktif) {
-                    $counts = DetailAbsensi::where('siswa_id', $siswa->id)
-                        ->whereHas('absensi', fn ($q) => $q->where('guru_id', $guru->id))
-                        ->selectRaw('status, count(*) as total')
-                        ->groupBy('status')
-                        ->pluck('total', 'status');
+                ->paginate(15)
+                ->withQueryString();
 
-                    $siswa->rekap = [
-                        'hadir' => $counts->get('hadir', 0),
-                        'sakit' => $counts->get('sakit', 0),
-                        'izin'  => $counts->get('izin', 0),
-                        'alpa'  => $counts->get('alpa', 0),
-                    ];
-                    return $siswa;
-                });
+            $siswaRekap->getCollection()->transform(function ($siswa) use ($guru, $tahunAktif) {
+                $counts = DetailAbsensi::where('siswa_id', $siswa->id)
+                    ->whereHas('absensi', fn ($q) => $q->where('guru_id', $guru->id))
+                    ->selectRaw('status, count(*) as total')
+                    ->groupBy('status')
+                    ->pluck('total', 'status');
+
+                $siswa->rekap = [
+                    'hadir' => $counts->get('hadir', 0),
+                    'sakit' => $counts->get('sakit', 0),
+                    'izin'  => $counts->get('izin', 0),
+                    'alpa'  => $counts->get('alpa', 0),
+                ];
+                return $siswa;
+            });
         }
 
         return view('guru.absensi.rekap', compact('guru', 'kelasList', 'kelasId', 'siswaRekap', 'tahunAktif'));
@@ -216,6 +228,10 @@ class AbsensiGuruController extends Controller
             'keterangan' => 'Override Guru: ' . $validated['alasan_override'],
         ]);
         $detail->save();
+
+        if ($validated['status'] === 'alpa') {
+            app(NotificationDispatcherService::class)->dispatchAlpa($detail);
+        }
 
         activity('absensi')
             ->causedBy(Auth::user())
@@ -266,6 +282,8 @@ class AbsensiGuruController extends Controller
             'keterangan' => 'Presensi ditolak guru: ' . $alasan,
         ]);
         $detail->save();
+
+        app(NotificationDispatcherService::class)->dispatchAlpa($detail);
 
         activity('absensi')
             ->causedBy(Auth::user())
