@@ -8,6 +8,7 @@ use App\Models\TahunAjaran;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class KalenderAkademikController extends Controller
 {
@@ -83,28 +84,46 @@ class KalenderAkademikController extends Controller
             'kategori' => ['required', 'in:libur,ujian,rapor,kegiatan,lainnya'],
             'tanggal_mulai' => ['required', 'date'],
             'tanggal_selesai' => ['nullable', 'date', 'after_or_equal:tanggal_mulai'],
+            'jam_mulai' => ['nullable', 'string', 'max:10'],
+            'jam_selesai' => ['nullable', 'string', 'max:10'],
             'deskripsi' => ['nullable', 'string'],
             'warna' => ['nullable', 'string', 'max:20'],
             'target' => ['required', 'in:semua,guru,siswa,orang_tua'],
             'is_libur' => ['boolean'],
             'is_aktif' => ['boolean'],
+            'lewati_akhir_pekan' => ['boolean'],
             'tahun_ajaran_id' => ['nullable', 'exists:tahun_ajarans,id'],
+            'dokumen' => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,webp,zip', 'max:10240'],
         ]);
 
         $isLibur = $request->boolean('is_libur', $validated['kategori'] === 'libur');
         $isAktif = $request->boolean('is_aktif', true);
+        $lewatiAkhirPekan = $request->boolean('lewati_akhir_pekan', false);
+
+        $dokumenPath = null;
+        $dokumenNama = null;
+        if ($request->hasFile('dokumen')) {
+            $file = $request->file('dokumen');
+            $dokumenNama = $file->getClientOriginalName();
+            $dokumenPath = $file->store('kalender_dokumen', 'public');
+        }
 
         $agenda = KalenderAkademik::create([
             'tahun_ajaran_id' => $validated['tahun_ajaran_id'] ?? TahunAjaran::aktif()->value('id'),
             'judul' => $validated['judul'],
             'deskripsi' => $validated['deskripsi'] ?? null,
+            'dokumen' => $dokumenPath,
+            'dokumen_nama' => $dokumenNama,
             'kategori' => $validated['kategori'],
             'tanggal_mulai' => $validated['tanggal_mulai'],
             'tanggal_selesai' => $validated['tanggal_selesai'] ?? $validated['tanggal_mulai'],
+            'jam_mulai' => ! empty($validated['jam_mulai']) ? $validated['jam_mulai'] : null,
+            'jam_selesai' => ! empty($validated['jam_selesai']) ? $validated['jam_selesai'] : null,
             'warna' => $validated['warna'] ?? $this->defaultColorForCategory($validated['kategori']),
             'target' => $validated['target'],
             'is_libur' => $isLibur,
             'is_aktif' => $isAktif,
+            'lewati_akhir_pekan' => $lewatiAkhirPekan,
             'created_by' => Auth::id(),
         ]);
 
@@ -121,35 +140,66 @@ class KalenderAkademikController extends Controller
             'kategori' => ['required', 'in:libur,ujian,rapor,kegiatan,lainnya'],
             'tanggal_mulai' => ['required', 'date'],
             'tanggal_selesai' => ['nullable', 'date', 'after_or_equal:tanggal_mulai'],
+            'jam_mulai' => ['nullable', 'string', 'max:10'],
+            'jam_selesai' => ['nullable', 'string', 'max:10'],
             'deskripsi' => ['nullable', 'string'],
             'warna' => ['nullable', 'string', 'max:20'],
             'target' => ['required', 'in:semua,guru,siswa,orang_tua'],
             'is_libur' => ['boolean'],
             'is_aktif' => ['boolean'],
+            'lewati_akhir_pekan' => ['boolean'],
             'tahun_ajaran_id' => ['nullable', 'exists:tahun_ajarans,id'],
+            'dokumen' => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,webp,zip', 'max:10240'],
+            'hapus_dokumen' => ['boolean'],
         ]);
 
         $isLibur = $request->boolean('is_libur', $validated['kategori'] === 'libur');
         $isAktif = $request->boolean('is_aktif', true);
+        $lewatiAkhirPekan = $request->boolean('lewati_akhir_pekan', false);
+
+        $dokumenPath = $kalender->dokumen;
+        $dokumenNama = $kalender->dokumen_nama;
+
+        if ($request->boolean('hapus_dokumen')) {
+            if ($dokumenPath && Storage::disk('public')->exists($dokumenPath)) {
+                Storage::disk('public')->delete($dokumenPath);
+            }
+            $dokumenPath = null;
+            $dokumenNama = null;
+        }
+
+        if ($request->hasFile('dokumen')) {
+            if ($kalender->dokumen && Storage::disk('public')->exists($kalender->dokumen)) {
+                Storage::disk('public')->delete($kalender->dokumen);
+            }
+            $file = $request->file('dokumen');
+            $dokumenNama = $file->getClientOriginalName();
+            $dokumenPath = $file->store('kalender_dokumen', 'public');
+        }
 
         $kalender->update([
             'tahun_ajaran_id' => $validated['tahun_ajaran_id'] ?? $kalender->tahun_ajaran_id,
             'judul' => $validated['judul'],
             'deskripsi' => $validated['deskripsi'] ?? null,
+            'dokumen' => $dokumenPath,
+            'dokumen_nama' => $dokumenNama,
             'kategori' => $validated['kategori'],
             'tanggal_mulai' => $validated['tanggal_mulai'],
             'tanggal_selesai' => $validated['tanggal_selesai'] ?? $validated['tanggal_mulai'],
+            'jam_mulai' => ! empty($validated['jam_mulai']) ? $validated['jam_mulai'] : null,
+            'jam_selesai' => ! empty($validated['jam_selesai']) ? $validated['jam_selesai'] : null,
             'warna' => $validated['warna'] ?? $this->defaultColorForCategory($validated['kategori']),
             'target' => $validated['target'],
             'is_libur' => $isLibur,
             'is_aktif' => $isAktif,
+            'lewati_akhir_pekan' => $lewatiAkhirPekan,
         ]);
 
         return back()->with('success', "Agenda '{$kalender->judul}' berhasil diperbarui.");
     }
 
     /**
-     * Hapus agenda kalender.
+     * Hapus agenda kalender (Soft Delete).
      */
     public function destroy(KalenderAkademik $kalender)
     {
@@ -176,10 +226,20 @@ class KalenderAkademikController extends Controller
             for ($i = 0; $i < 7; $i++) {
                 $dateStr = $current->toDateString();
                 
-                $matchingEvents = $events->filter(function ($ev) use ($dateStr) {
-                    $start = $ev->tanggal_mulai->toDateString();
-                    $end = ($ev->tanggal_selesai ?? $ev->tanggal_mulai)->toDateString();
-                    return $dateStr >= $start && $dateStr <= $end;
+                $matchingEvents = $events->filter(function ($ev) use ($dateStr, $current) {
+                    $start = Carbon::parse($ev->tanggal_mulai)->toDateString();
+                    $end = Carbon::parse($ev->tanggal_selesai ?? $ev->tanggal_mulai)->toDateString();
+                    
+                    if ($dateStr < $start || $dateStr > $end) {
+                        return false;
+                    }
+
+                    // Optimasi akhir pekan: jika lewati_akhir_pekan dicentang dan hari ini Sabtu/Minggu
+                    if ($ev->lewati_akhir_pekan && ($current->isSaturday() || $current->isSunday())) {
+                        return false;
+                    }
+
+                    return true;
                 });
 
                 $week[] = [
@@ -188,6 +248,7 @@ class KalenderAkademikController extends Controller
                     'isCurrentMonth' => $current->month === $bulan,
                     'isToday' => $current->isToday(),
                     'isSunday' => $current->isSunday(),
+                    'isSaturday' => $current->isSaturday(),
                     'events' => $matchingEvents,
                 ];
 

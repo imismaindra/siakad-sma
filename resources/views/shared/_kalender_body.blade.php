@@ -91,7 +91,8 @@
                     <div class="min-h-[105px] sm:min-h-[125px] p-2 rounded-xl border transition-all flex flex-col justify-between
                         {{ $day['isCurrentMonth'] ? 'bg-white border-slate-100' : 'bg-slate-50/50 border-transparent text-slate-400' }}
                         {{ $day['isToday'] ? 'ring-2 ring-gold-500 bg-gold-50/20' : '' }}
-                        {{ $day['isSunday'] ? 'bg-rose-50/20' : '' }}">
+                        {{ $day['isSunday'] ? 'bg-rose-50/20' : '' }}
+                        {{ $day['isSaturday'] ? 'bg-slate-50/50' : '' }}">
                         
                         {{-- Day Top Header --}}
                         <div class="flex items-center justify-between">
@@ -108,9 +109,12 @@
                             @foreach($day['events'] as $ev)
                                 <button type="button" @click='showDetail(@json($ev))'
                                     class="w-full text-left px-2 py-1 rounded text-[11px] font-medium truncate block cursor-pointer transition-transform hover:scale-[1.02] border {{ $ev->badge_class }}"
-                                    title="{{ $ev->judul }}">
+                                    title="{{ $ev->judul }} ({{ $ev->waktu_formatted }})">
                                     <span class="inline-block w-1.5 h-1.5 rounded-full mr-1 {{ $ev->dot_color_class }}"></span>
                                     {{ $ev->judul }}
+                                    @if($ev->dokumen)
+                                        <span class="ml-1 text-[10px]">📎</span>
+                                    @endif
                                 </button>
                             @endforeach
                         </div>
@@ -132,9 +136,10 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Tanggal Pelaksanaan</th>
+                        <th>Pelaksanaan & Waktu</th>
                         <th>Agenda Kegiatan</th>
                         <th>Kategori</th>
+                        <th>Dokumen</th>
                         <th>Catatan</th>
                     </tr>
                 </thead>
@@ -142,13 +147,11 @@
                     @forelse($events as $ev)
                         <tr class="hover:bg-slate-50/80 transition-colors">
                             <td class="whitespace-nowrap font-medium text-xs text-navy-900">
-                                @if($ev->tanggal_selesai && $ev->tanggal_mulai != $ev->tanggal_selesai)
-                                    <p class="font-bold">{{ $ev->tanggal_mulai->locale('id')->isoFormat('D MMM') }} - {{ $ev->tanggal_selesai->locale('id')->isoFormat('D MMM YYYY') }}</p>
-                                    <p class="text-[10px] text-slate-400">{{ $ev->tanggal_mulai->diffInDays($ev->tanggal_selesai) + 1 }} hari</p>
-                                @else
-                                    <p class="font-bold">{{ $ev->tanggal_mulai->locale('id')->isoFormat('D MMMM YYYY') }}</p>
-                                    <p class="text-[10px] text-slate-400">{{ $ev->tanggal_mulai->locale('id')->isoFormat('dddd') }}</p>
-                                @endif
+                                <p class="font-bold text-navy-900">{{ $ev->periode_formatted }}</p>
+                                <p class="text-[11px] text-slate-500 font-semibold mt-0.5 flex items-center gap-1">
+                                    <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {{ $ev->waktu_formatted }}
+                                </p>
                             </td>
                             <td class="max-w-md">
                                 <p class="text-sm font-bold text-navy-900">{{ $ev->judul }}</p>
@@ -163,6 +166,16 @@
                                 </span>
                             </td>
                             <td>
+                                @if($ev->dokumen_url)
+                                    <a href="{{ $ev->dokumen_url }}" target="_blank" download class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-navy-50 text-navy-800 hover:bg-navy-100 border border-navy-200 transition-colors" title="{{ $ev->dokumen_nama ?? 'Unduh Dokumen' }}">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                                        <span class="max-w-[100px] truncate">{{ $ev->dokumen_nama ?? 'Lampiran' }}</span>
+                                    </a>
+                                @else
+                                    <span class="text-xs text-slate-400 italic">-</span>
+                                @endif
+                            </td>
+                            <td>
                                 @if($ev->is_libur)
                                     <span class="text-xs font-medium text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">Libur Sekolah</span>
                                 @else
@@ -172,7 +185,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-center py-12 text-slate-400">
+                            <td colspan="5" class="text-center py-12 text-slate-400">
                                 Belum ada agenda kegiatan yang terdaftar untuk periode ini.
                             </td>
                         </tr>
@@ -210,18 +223,35 @@
 
                 <div>
                     <h3 class="text-xl font-bold font-display text-navy-900 leading-snug" x-text="selectedEvent.judul"></h3>
-                    <p class="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
-                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
-                        <span x-text="selectedEvent.tanggal_mulai"></span>
-                        <template x-if="selectedEvent.tanggal_selesai && selectedEvent.tanggal_selesai !== selectedEvent.tanggal_mulai">
-                            <span>s/d <span x-text="selectedEvent.tanggal_selesai"></span></span>
-                        </template>
-                    </p>
+                    <div class="mt-2 space-y-1">
+                        <p class="text-xs text-slate-600 flex items-center gap-1.5 font-medium">
+                            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+                            <span x-text="selectedEvent.periode_formatted"></span>
+                        </p>
+                        <p class="text-xs text-slate-600 flex items-center gap-1.5 font-medium">
+                            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span x-text="selectedEvent.waktu_formatted"></span>
+                        </p>
+                    </div>
                 </div>
 
                 <div class="rounded-xl bg-slate-50 p-3.5 text-xs text-slate-600 leading-relaxed border border-slate-100"
                     x-show="selectedEvent.deskripsi" x-text="selectedEvent.deskripsi">
                 </div>
+
+                {{-- Dokumen Lampiran --}}
+                <template x-if="selectedEvent.dokumen_url">
+                    <div class="rounded-xl border border-slate-200 bg-slate-50/80 p-3 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2 overflow-hidden">
+                            <svg class="w-5 h-5 text-navy-800 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                            <span class="text-xs font-semibold text-navy-900 truncate" x-text="selectedEvent.dokumen_nama || 'Dokumen Lampiran'"></span>
+                        </div>
+                        <a :href="selectedEvent.dokumen_url" target="_blank" download class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-navy-800 text-white text-[11px] font-semibold hover:bg-navy-900 shrink-0 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                            Unduh
+                        </a>
+                    </div>
+                </template>
 
                 <div class="text-[11px] text-slate-400 flex items-center justify-between border-t border-slate-100 pt-3">
                     <span x-text="selectedEvent.is_libur ? '⛔ Hari Libur Resmi Sekolah' : 'Kegiatan Belajar Mengajar Aktif'"></span>

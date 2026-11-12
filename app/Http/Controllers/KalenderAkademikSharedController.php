@@ -102,10 +102,20 @@ class KalenderAkademikSharedController extends Controller
             for ($i = 0; $i < 7; $i++) {
                 $dateStr = $current->toDateString();
                 
-                $matchingEvents = $events->filter(function ($ev) use ($dateStr) {
-                    $start = $ev->tanggal_mulai->toDateString();
-                    $end = ($ev->tanggal_selesai ?? $ev->tanggal_mulai)->toDateString();
-                    return $dateStr >= $start && $dateStr <= $end;
+                $matchingEvents = $events->filter(function ($ev) use ($dateStr, $current) {
+                    $start = Carbon::parse($ev->tanggal_mulai)->toDateString();
+                    $end = Carbon::parse($ev->tanggal_selesai ?? $ev->tanggal_mulai)->toDateString();
+                    
+                    if ($dateStr < $start || $dateStr > $end) {
+                        return false;
+                    }
+
+                    // Optimasi akhir pekan: jika lewati_akhir_pekan dicentang dan hari ini Sabtu/Minggu
+                    if ($ev->lewati_akhir_pekan && ($current->isSaturday() || $current->isSunday())) {
+                        return false;
+                    }
+
+                    return true;
                 });
 
                 $week[] = [
@@ -114,6 +124,7 @@ class KalenderAkademikSharedController extends Controller
                     'isCurrentMonth' => $current->month === $bulan,
                     'isToday' => $current->isToday(),
                     'isSunday' => $current->isSunday(),
+                    'isSaturday' => $current->isSaturday(),
                     'events' => $matchingEvents,
                 ];
 

@@ -5,12 +5,13 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class KalenderAkademik extends Model
 {
-    use LogsActivity;
+    use LogsActivity, SoftDeletes;
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -28,23 +29,43 @@ class KalenderAkademik extends Model
         'tahun_ajaran_id',
         'judul',
         'deskripsi',
+        'dokumen',
+        'dokumen_nama',
         'kategori',
         'tanggal_mulai',
         'tanggal_selesai',
+        'jam_mulai',
+        'jam_selesai',
         'warna',
         'target',
         'is_libur',
         'is_aktif',
+        'lewati_akhir_pekan',
         'created_by',
+    ];
+
+    protected $appends = [
+        'label_kategori',
+        'badge_class',
+        'dot_color_class',
+        'tanggal_mulai_input',
+        'tanggal_selesai_input',
+        'tanggal_mulai_formatted',
+        'tanggal_selesai_formatted',
+        'periode_formatted',
+        'waktu_formatted',
+        'rentang_lengkap_formatted',
+        'dokumen_url',
     ];
 
     protected function casts(): array
     {
         return [
-            'tanggal_mulai' => 'date',
-            'tanggal_selesai' => 'date',
+            'tanggal_mulai' => 'date:Y-m-d',
+            'tanggal_selesai' => 'date:Y-m-d',
             'is_libur' => 'boolean',
             'is_aktif' => 'boolean',
+            'lewati_akhir_pekan' => 'boolean',
         ];
     }
 
@@ -84,7 +105,7 @@ class KalenderAkademik extends Model
         });
     }
 
-    // Helpers
+    // Accessors
     public function getLabelKategoriAttribute(): string
     {
         return match ($this->kategori) {
@@ -116,6 +137,75 @@ class KalenderAkademik extends Model
             'kegiatan' => 'bg-blue-500',
             default => 'bg-slate-500',
         };
+    }
+
+    public function getTanggalMulaiInputAttribute(): ?string
+    {
+        return $this->tanggal_mulai ? Carbon::parse($this->tanggal_mulai)->format('Y-m-d') : null;
+    }
+
+    public function getTanggalSelesaiInputAttribute(): ?string
+    {
+        return $this->tanggal_selesai ? Carbon::parse($this->tanggal_selesai)->format('Y-m-d') : null;
+    }
+
+    public function getTanggalMulaiFormattedAttribute(): ?string
+    {
+        return $this->tanggal_mulai ? Carbon::parse($this->tanggal_mulai)->locale('id')->isoFormat('D MMMM YYYY') : null;
+    }
+
+    public function getTanggalSelesaiFormattedAttribute(): ?string
+    {
+        return $this->tanggal_selesai ? Carbon::parse($this->tanggal_selesai)->locale('id')->isoFormat('D MMMM YYYY') : null;
+    }
+
+    public function getWaktuFormattedAttribute(): string
+    {
+        if ($this->jam_mulai && $this->jam_selesai) {
+            return substr($this->jam_mulai, 0, 5) . ' - ' . substr($this->jam_selesai, 0, 5) . ' WIB';
+        }
+
+        if ($this->jam_mulai) {
+            return substr($this->jam_mulai, 0, 5) . ' WIB';
+        }
+
+        return 'Seharian Penuh';
+    }
+
+    public function getPeriodeFormattedAttribute(): string
+    {
+        if (! $this->tanggal_mulai) {
+            return '-';
+        }
+
+        $mulai = Carbon::parse($this->tanggal_mulai);
+        $selesai = $this->tanggal_selesai ? Carbon::parse($this->tanggal_selesai) : null;
+
+        if ($selesai && $mulai->toDateString() !== $selesai->toDateString()) {
+            if ($mulai->year === $selesai->year) {
+                return $mulai->locale('id')->isoFormat('D MMM') . ' - ' . $selesai->locale('id')->isoFormat('D MMM YYYY');
+            }
+            return $mulai->locale('id')->isoFormat('D MMM YYYY') . ' - ' . $selesai->locale('id')->isoFormat('D MMM YYYY');
+        }
+
+        return $mulai->locale('id')->isoFormat('dddd, D MMMM YYYY');
+    }
+
+    public function getRentangLengkapFormattedAttribute(): string
+    {
+        $periode = $this->periode_formatted;
+        $waktu = $this->waktu_formatted;
+
+        if ($this->jam_mulai) {
+            return "{$periode} ({$waktu})";
+        }
+
+        return $periode;
+    }
+
+    public function getDokumenUrlAttribute(): ?string
+    {
+        return $this->dokumen ? asset('storage/' . $this->dokumen) : null;
     }
 
     // Relationships

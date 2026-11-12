@@ -12,55 +12,74 @@
     detailModal: false,
     selectedEvent: null,
     formAction: '{{ route('admin.kalender.store') }}',
-    formMethod: 'POST',
     formData: {
         id: '',
         judul: '',
         kategori: 'kegiatan',
         tanggal_mulai: '',
         tanggal_selesai: '',
+        jam_mulai: '',
+        jam_selesai: '',
         target: 'semua',
         warna: 'blue',
         deskripsi: '',
         is_libur: false,
         is_aktif: true,
-        tahun_ajaran_id: '{{ $tahunAjaranAktif?->id }}'
+        lewati_akhir_pekan: false,
+        tahun_ajaran_id: '{{ $tahunAjaranAktif?->id }}',
+        dokumen_nama: null,
+        dokumen_url: null
+    },
+    parseDate(val) {
+        if (!val) return '';
+        if (typeof val === 'string') {
+            return val.substring(0, 10);
+        }
+        return val;
     },
     openCreate() {
         this.isEdit = false;
         this.formAction = '{{ route('admin.kalender.store') }}';
-        this.formMethod = 'POST';
         this.formData = {
             id: '',
             judul: '',
             kategori: 'kegiatan',
             tanggal_mulai: '{{ $currentDate->format('Y-m-d') }}',
             tanggal_selesai: '{{ $currentDate->format('Y-m-d') }}',
+            jam_mulai: '',
+            jam_selesai: '',
             target: 'semua',
             warna: 'blue',
             deskripsi: '',
             is_libur: false,
             is_aktif: true,
-            tahun_ajaran_id: '{{ $tahunAjaranAktif?->id }}'
+            lewati_akhir_pekan: false,
+            tahun_ajaran_id: '{{ $tahunAjaranAktif?->id }}',
+            dokumen_nama: null,
+            dokumen_url: null
         };
         this.showModal = true;
     },
     openEdit(ev) {
         this.isEdit = true;
         this.formAction = '/admin/kalender/' + ev.id;
-        this.formMethod = 'POST';
         this.formData = {
             id: ev.id,
             judul: ev.judul,
             kategori: ev.kategori,
-            tanggal_mulai: ev.tanggal_mulai,
-            tanggal_selesai: ev.tanggal_selesai,
+            tanggal_mulai: ev.tanggal_mulai_input || this.parseDate(ev.tanggal_mulai),
+            tanggal_selesai: ev.tanggal_selesai_input || this.parseDate(ev.tanggal_selesai) || this.parseDate(ev.tanggal_mulai),
+            jam_mulai: ev.jam_mulai ? ev.jam_mulai.substring(0, 5) : '',
+            jam_selesai: ev.jam_selesai ? ev.jam_selesai.substring(0, 5) : '',
             target: ev.target,
             warna: ev.warna || 'blue',
             deskripsi: ev.deskripsi || '',
             is_libur: Boolean(ev.is_libur),
             is_aktif: Boolean(ev.is_aktif),
-            tahun_ajaran_id: ev.tahun_ajaran_id
+            lewati_akhir_pekan: Boolean(ev.lewati_akhir_pekan),
+            tahun_ajaran_id: ev.tahun_ajaran_id,
+            dokumen_nama: ev.dokumen_nama || null,
+            dokumen_url: ev.dokumen_url || null
         };
         this.detailModal = false;
         this.showModal = true;
@@ -195,7 +214,8 @@
                     <div class="min-h-[105px] sm:min-h-[125px] p-2 rounded-xl border transition-all flex flex-col justify-between
                         {{ $day['isCurrentMonth'] ? 'bg-white border-slate-100' : 'bg-slate-50/50 border-transparent text-slate-400' }}
                         {{ $day['isToday'] ? 'ring-2 ring-gold-500 bg-gold-50/20' : '' }}
-                        {{ $day['isSunday'] ? 'bg-rose-50/20' : '' }}">
+                        {{ $day['isSunday'] ? 'bg-rose-50/20' : '' }}
+                        {{ $day['isSaturday'] ? 'bg-slate-50/50' : '' }}">
                         
                         {{-- Day Top Header --}}
                         <div class="flex items-center justify-between">
@@ -212,9 +232,12 @@
                             @foreach($day['events'] as $ev)
                                 <button type="button" @click='showDetail(@json($ev))'
                                     class="w-full text-left px-2 py-1 rounded text-[11px] font-medium truncate block cursor-pointer transition-transform hover:scale-[1.02] border {{ $ev->badge_class }}"
-                                    title="{{ $ev->judul }}">
+                                    title="{{ $ev->judul }} ({{ $ev->waktu_formatted }})">
                                     <span class="inline-block w-1.5 h-1.5 rounded-full mr-1 {{ $ev->dot_color_class }}"></span>
                                     {{ $ev->judul }}
+                                    @if($ev->dokumen)
+                                        <span class="ml-1 text-[10px]">📎</span>
+                                    @endif
                                 </button>
                             @endforeach
                         </div>
@@ -237,10 +260,11 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Tanggal Pelaksanaan</th>
+                        <th>Pelaksanaan & Waktu</th>
                         <th>Agenda & Deskripsi</th>
                         <th>Kategori</th>
-                        <th>Sasaran Audiens</th>
+                        <th>Sasaran</th>
+                        <th>Dokumen</th>
                         <th>Status</th>
                         <th class="text-right">Aksi</th>
                     </tr>
@@ -249,18 +273,21 @@
                     @forelse($events as $ev)
                         <tr class="hover:bg-slate-50/80 transition-colors">
                             <td class="whitespace-nowrap font-medium text-xs text-navy-900">
-                                @if($ev->tanggal_selesai && $ev->tanggal_mulai != $ev->tanggal_selesai)
-                                    <p class="font-bold">{{ $ev->tanggal_mulai->locale('id')->isoFormat('D MMM') }} - {{ $ev->tanggal_selesai->locale('id')->isoFormat('D MMM YYYY') }}</p>
-                                    <p class="text-[10px] text-slate-400">{{ $ev->tanggal_mulai->diffInDays($ev->tanggal_selesai) + 1 }} hari</p>
-                                @else
-                                    <p class="font-bold">{{ $ev->tanggal_mulai->locale('id')->isoFormat('D MMMM YYYY') }}</p>
-                                    <p class="text-[10px] text-slate-400">{{ $ev->tanggal_mulai->locale('id')->isoFormat('dddd') }}</p>
-                                @endif
+                                <p class="font-bold text-navy-900">{{ $ev->periode_formatted }}</p>
+                                <p class="text-[11px] text-slate-500 font-semibold mt-0.5 flex items-center gap-1">
+                                    <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {{ $ev->waktu_formatted }}
+                                </p>
                             </td>
                             <td class="max-w-md">
                                 <p class="text-sm font-bold text-navy-900">{{ $ev->judul }}</p>
                                 @if($ev->deskripsi)
                                     <p class="text-xs text-slate-500 line-clamp-2 mt-0.5">{{ $ev->deskripsi }}</p>
+                                @endif
+                                @if($ev->lewati_akhir_pekan)
+                                    <span class="inline-block mt-1 text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                                        Libur akhir pekan dilewati
+                                    </span>
                                 @endif
                             </td>
                             <td>
@@ -273,6 +300,16 @@
                                 <span class="text-xs font-semibold capitalize text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-full">
                                     {{ $ev->target }}
                                 </span>
+                            </td>
+                            <td>
+                                @if($ev->dokumen_url)
+                                    <a href="{{ $ev->dokumen_url }}" target="_blank" download class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-navy-50 text-navy-800 hover:bg-navy-100 border border-navy-200 transition-colors" title="{{ $ev->dokumen_nama ?? 'Unduh Dokumen' }}">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                                        <span class="max-w-[100px] truncate">{{ $ev->dokumen_nama ?? 'Lampiran' }}</span>
+                                    </a>
+                                @else
+                                    <span class="text-xs text-slate-400 italic">-</span>
+                                @endif
                             </td>
                             <td>
                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium {{ $ev->is_aktif ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">
@@ -296,7 +333,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center py-12 text-slate-400">
+                            <td colspan="7" class="text-center py-12 text-slate-400">
                                 Belum ada agenda kalender terdaftar pada periode ini.
                             </td>
                         </tr>
@@ -313,11 +350,11 @@
     @endif
 
     {{-- ================= MODAL TAMBAH / EDIT AGENDA ================= --}}
-    <div x-show="showModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/60 backdrop-blur-sm"
+    <div x-show="showModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/60 backdrop-blur-sm overflow-y-auto"
         x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
         x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
         
-        <div class="w-full max-w-xl rounded-[2rem] bg-white p-6 sm:p-8 shadow-2xl ring-1 ring-black/5 space-y-5"
+        <div class="w-full max-w-xl rounded-[2rem] bg-white p-6 sm:p-8 shadow-2xl ring-1 ring-black/5 space-y-5 my-8"
             @click.outside="showModal = false">
             
             <div class="flex items-center justify-between border-b border-slate-100 pb-4">
@@ -327,7 +364,7 @@
                 </button>
             </div>
 
-            <form :action="formAction" method="POST" class="space-y-4">
+            <form :action="formAction" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
                 <template x-if="isEdit">
                     <input type="hidden" name="_method" value="PUT">
@@ -363,6 +400,7 @@
                     </div>
                 </div>
 
+                {{-- Tanggal Mulai & Selesai --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-semibold text-navy-900 uppercase tracking-wider mb-1.5">Tanggal Mulai <span class="text-rose-500">*</span></label>
@@ -376,21 +414,65 @@
                     </div>
                 </div>
 
+                {{-- Waktu / Jam Mulai & Selesai --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-navy-900 uppercase tracking-wider mb-1.5">Jam Mulai (Opsional)</label>
+                        <input type="time" name="jam_mulai" x-model="formData.jam_mulai"
+                            class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-navy-900 focus:border-gold-500 focus:ring-gold-500" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-navy-900 uppercase tracking-wider mb-1.5">Jam Selesai (Opsional)</label>
+                        <input type="time" name="jam_selesai" x-model="formData.jam_selesai"
+                            class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-navy-900 focus:border-gold-500 focus:ring-gold-500" />
+                    </div>
+                </div>
+
+                {{-- Upload Dokumen --}}
+                <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-2">
+                    <label class="block text-xs font-semibold text-navy-900 uppercase tracking-wider">Lampiran Dokumen (Opsional)</label>
+                    <input type="file" name="dokumen" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.webp,.zip"
+                        class="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-navy-800 file:text-white hover:file:bg-navy-900 cursor-pointer" />
+                    <p class="text-[11px] text-slate-400">Format: PDF, Word, Excel, Gambar, ZIP (Maks. 10 MB)</p>
+                    
+                    <template x-if="isEdit && formData.dokumen_nama">
+                        <div class="flex items-center justify-between pt-1 text-xs border-t border-slate-200">
+                            <span class="text-navy-900 font-medium truncate flex items-center gap-1.5">
+                                📎 <span x-text="formData.dokumen_nama"></span>
+                            </span>
+                            <label class="flex items-center gap-1.5 text-rose-600 cursor-pointer hover:underline text-[11px]">
+                                <input type="checkbox" name="hapus_dokumen" value="1" class="rounded text-rose-600">
+                                Hapus file
+                            </label>
+                        </div>
+                    </template>
+                </div>
+
+                {{-- Keterangan / Deskripsi --}}
                 <div>
                     <label class="block text-xs font-semibold text-navy-900 uppercase tracking-wider mb-1.5">Keterangan / Deskripsi (Opsional)</label>
-                    <textarea name="deskripsi" x-model="formData.deskripsi" rows="3" placeholder="Informasi tambahan mengenai teknis kegiatan atau catatan libur..."
+                    <textarea name="deskripsi" x-model="formData.deskripsi" rows="3" placeholder="Informasi tambahan mengenai teknis kegiatan atau catatan agenda..."
                         class="w-full rounded-xl border-slate-200 bg-slate-50 p-3 text-xs font-medium text-navy-900 focus:border-gold-500 focus:ring-gold-500"></textarea>
                 </div>
 
-                <div class="flex items-center gap-4 py-2">
-                    <label class="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
-                        <input type="checkbox" name="is_libur" value="1" x-model="formData.is_libur" class="rounded text-navy-900 focus:ring-gold-500">
-                        <span>Ditandai Sebagai Hari Libur Sekolah</span>
-                    </label>
-                    <label class="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
-                        <input type="checkbox" name="is_aktif" value="1" x-model="formData.is_aktif" class="rounded text-navy-900 focus:ring-gold-500">
-                        <span>Aktif Ditampilkan</span>
-                    </label>
+                {{-- Pengaturan Status & Hari Libur --}}
+                <div class="space-y-2 py-1">
+                    <div class="flex items-center gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+                            <input type="checkbox" name="is_libur" value="1" x-model="formData.is_libur" class="rounded text-navy-900 focus:ring-gold-500">
+                            <span>Hari Libur Resmi Sekolah</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+                            <input type="checkbox" name="is_aktif" value="1" x-model="formData.is_aktif" class="rounded text-navy-900 focus:ring-gold-500">
+                            <span>Aktif Ditampilkan</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+                            <input type="checkbox" name="lewati_akhir_pekan" value="1" x-model="formData.lewati_akhir_pekan" class="rounded text-navy-900 focus:ring-gold-500">
+                            <span>Lewati hari libur akhir pekan (Jangan muncul di hari Sabtu & Minggu)</span>
+                        </label>
+                    </div>
                 </div>
 
                 <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
@@ -427,18 +509,35 @@
 
                 <div>
                     <h3 class="text-xl font-bold font-display text-navy-900 leading-snug" x-text="selectedEvent.judul"></h3>
-                    <p class="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
-                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
-                        <span x-text="selectedEvent.tanggal_mulai"></span>
-                        <template x-if="selectedEvent.tanggal_selesai && selectedEvent.tanggal_selesai !== selectedEvent.tanggal_mulai">
-                            <span>s/d <span x-text="selectedEvent.tanggal_selesai"></span></span>
-                        </template>
-                    </p>
+                    <div class="mt-2 space-y-1">
+                        <p class="text-xs text-slate-600 flex items-center gap-1.5 font-medium">
+                            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+                            <span x-text="selectedEvent.periode_formatted"></span>
+                        </p>
+                        <p class="text-xs text-slate-600 flex items-center gap-1.5 font-medium">
+                            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span x-text="selectedEvent.waktu_formatted"></span>
+                        </p>
+                    </div>
                 </div>
 
                 <div class="rounded-xl bg-slate-50 p-3.5 text-xs text-slate-600 leading-relaxed border border-slate-100"
                     x-show="selectedEvent.deskripsi" x-text="selectedEvent.deskripsi">
                 </div>
+
+                {{-- Dokumen Lampiran Button --}}
+                <template x-if="selectedEvent.dokumen_url">
+                    <div class="rounded-xl border border-slate-200 bg-slate-50/80 p-3 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2 overflow-hidden">
+                            <svg class="w-5 h-5 text-navy-800 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                            <span class="text-xs font-semibold text-navy-900 truncate" x-text="selectedEvent.dokumen_nama || 'Dokumen Lampiran'"></span>
+                        </div>
+                        <a :href="selectedEvent.dokumen_url" target="_blank" download class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-navy-800 text-white text-[11px] font-semibold hover:bg-navy-900 shrink-0 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                            Unduh
+                        </a>
+                    </div>
+                </template>
 
                 <div class="text-[11px] text-slate-400 flex items-center justify-between border-t border-slate-100 pt-3">
                     <span>Target: <strong class="text-slate-700 capitalize" x-text="selectedEvent.target"></strong></span>

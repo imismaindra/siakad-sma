@@ -311,11 +311,16 @@
                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold {{ $ev->badge_class }}">
                                 {{ $ev->label_kategori }}
                             </span>
-                            <p class="text-xs font-bold text-slate-900 mt-1 line-clamp-1">{{ $ev->judul }}</p>
+                            <p class="text-xs font-bold text-slate-900 mt-1 line-clamp-1">
+                                {{ $ev->judul }}
+                                @if($ev->dokumen)
+                                    <span class="text-[10px] text-navy-700 ml-1" title="Ada Dokumen">📎</span>
+                                @endif
+                            </p>
                             <p class="text-[10px] text-slate-400 mt-0.5">
-                                {{ $ev->tanggal_mulai->locale('id')->isoFormat('D MMMM YYYY') }}
-                                @if($ev->tanggal_selesai && $ev->tanggal_selesai != $ev->tanggal_mulai)
-                                    - {{ $ev->tanggal_selesai->locale('id')->isoFormat('D MMMM YYYY') }}
+                                {{ $ev->periode_formatted }}
+                                @if($ev->jam_mulai)
+                                    · {{ $ev->waktu_formatted }}
                                 @endif
                             </p>
                         </div>
