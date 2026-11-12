@@ -41,9 +41,15 @@
     {{-- Grid of Announcements --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         @forelse($pengumumans as $p)
-            <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+            <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between overflow-hidden">
                 <div class="space-y-3">
-                    <div class="flex items-center justify-between gap-2">
+                    @if($p->gambar_url)
+                        <div class="rounded-xl overflow-hidden h-36 w-full -mt-1 mb-2 bg-slate-100">
+                            <img src="{{ $p->gambar_url }}" alt="{{ $p->judul }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                        </div>
+                    @endif
+
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold {{ $p->target === 'guru' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-blue-50 text-blue-700 border border-blue-200' }}">
                             {{ $p->target === 'guru' ? 'Khusus Dewan Guru' : 'Semua Komunitas' }}
                         </span>
@@ -59,6 +65,14 @@
                     <p class="text-xs text-slate-600 line-clamp-3 leading-relaxed">
                         {{ Str::limit(strip_tags($p->konten), 160) }}
                     </p>
+
+                    @if($p->dokumen_url)
+                        <div class="pt-1">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-navy-50 text-navy-800 border border-navy-200">
+                                📎 Dokumen Terlampir
+                            </span>
+                        </div>
+                    @endif
                 </div>
 
                 <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">

@@ -15,7 +15,7 @@
             <h1 class="page-title font-display !text-3xl mt-3">Pengumuman Sekolah.</h1>
             <p class="page-subtitle">Terbitkan maklumat, edaran dinas, dan pengumuman terarah bagi Guru, Siswa, dan Wali Murid.</p>
         </div>
-        <a href="{{ route('admin.pengumuman.create') }}" class="group inline-flex items-center gap-3 rounded-full bg-navy-800 py-1.5 pl-5 pr-1.5 text-sm font-semibold text-white transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-navy-900">
+        <a href="{{ route('admin.pengumuman.create') }}" class="group inline-flex items-center gap-3 rounded-full bg-navy-800 py-1.5 pl-5 pr-1.5 text-sm font-semibold text-white transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-navy-900 shadow-sm cursor-pointer">
             Buat Pengumuman Baru
             <span class="flex h-8 w-8 items-center justify-center rounded-full bg-gold-500 text-navy-900 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:bg-gold-400">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -83,7 +83,7 @@
             </select>
 
             <div class="flex items-center gap-2">
-                <button type="submit" class="rounded-full bg-navy-800 px-6 py-2.5 text-sm font-semibold text-white transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-navy-900">
+                <button type="submit" class="rounded-full bg-navy-800 px-6 py-2.5 text-sm font-semibold text-white transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-navy-900 cursor-pointer">
                     Filter
                 </button>
                 @if(request()->filled('search') || request()->filled('target') || request()->filled('status'))
@@ -101,11 +101,11 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Judul & Ringkasan</th>
+                        <th>Judul & Media</th>
                         <th>Target Audiens</th>
                         <th>Pembuat</th>
                         <th>Tanggal Terbit</th>
-                        <th>Status</th>
+                        <th>Status Tayang</th>
                         <th class="text-right">Aksi</th>
                     </tr>
                 </thead>
@@ -113,8 +113,29 @@
                     @forelse($pengumumans as $p)
                         <tr class="hover:bg-slate-50/80 transition-colors">
                             <td class="max-w-md">
-                                <p class="font-semibold text-navy-900 text-sm line-clamp-1">{{ $p->judul }}</p>
-                                <p class="text-xs text-slate-500 line-clamp-2 mt-0.5">{{ Str::limit(strip_tags($p->konten), 95) }}</p>
+                                <div class="flex items-start gap-3">
+                                    @if($p->gambar_url)
+                                        <img src="{{ $p->gambar_url }}" alt="{{ $p->judul }}" class="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0 shadow-xs" />
+                                    @endif
+                                    <div class="space-y-1">
+                                        <p class="font-semibold text-navy-900 text-sm line-clamp-1">{{ $p->judul }}</p>
+                                        <p class="text-xs text-slate-500 line-clamp-2">{{ Str::limit(strip_tags($p->konten), 95) }}</p>
+                                        
+                                        <div class="flex items-center gap-2 pt-1 flex-wrap">
+                                            @if($p->dokumen_url)
+                                                <a href="{{ $p->dokumen_url }}" target="_blank" download class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-navy-50 text-navy-800 hover:bg-navy-100 border border-navy-200 transition-colors" title="{{ $p->dokumen_nama ?? 'Dokumen' }}">
+                                                    <svg class="w-3 h-3 text-navy-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                                                    <span class="max-w-[120px] truncate">{{ $p->dokumen_nama ?? 'Dokumen' }}</span>
+                                                </a>
+                                            @endif
+                                            @if($p->kirim_email)
+                                                <span class="inline-flex items-center gap-0.5 text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                                    ✉️ Email Terkirim
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
                             <td>
                                 @if($p->target === 'semua')
@@ -152,14 +173,48 @@
                                 @endif
                             </td>
                             <td>
-                                <form action="{{ route('admin.pengumuman.toggle-aktif', $p) }}" method="POST" class="inline-block">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer transition-colors {{ $p->is_aktif ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300' }}" title="Klik untuk beralih status tayang">
-                                        <span class="w-1.5 h-1.5 rounded-full {{ $p->is_aktif ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
-                                        {{ $p->is_aktif ? 'Aktif Tayang' : 'Non-Aktif' }}
+                                {{-- Interactive Button Switch untuk Status Aktif --}}
+                                <div x-data="{
+                                    active: {{ $p->is_aktif ? 'true' : 'false' }},
+                                    loading: false,
+                                    async toggle() {
+                                        if (this.loading) return;
+                                        this.loading = true;
+                                        const prev = this.active;
+                                        this.active = !this.active;
+                                        try {
+                                            const response = await fetch('{{ route('admin.pengumuman.toggle-aktif', $p) }}', {
+                                                method: 'PATCH',
+                                                headers: {
+                                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                    'Accept': 'application/json',
+                                                    'Content-Type': 'application/json'
+                                                }
+                                            });
+                                            const data = await response.json();
+                                            if (!response.ok || !data.success) {
+                                                this.active = prev;
+                                            }
+                                        } catch (e) {
+                                            this.active = prev;
+                                        } finally {
+                                            this.loading = false;
+                                        }
+                                    }
+                                }" class="flex items-center gap-2">
+                                    <button type="button" @click="toggle()" :disabled="loading"
+                                        class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-navy-600 focus:ring-offset-2"
+                                        :class="active ? 'bg-emerald-600' : 'bg-slate-300'"
+                                        :title="active ? 'Klik untuk nonaktifkan status tayang' : 'Klik untuk aktifkan tayang'">
+                                        <span class="sr-only">Beralih status aktif</span>
+                                        <span aria-hidden="true" 
+                                            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out"
+                                            :class="active ? 'translate-x-5' : 'translate-x-0'"></span>
                                     </button>
-                                </form>
+                                    <span class="text-xs font-semibold select-none min-w-[55px]" 
+                                        :class="active ? 'text-emerald-700' : 'text-slate-400'" 
+                                        x-text="active ? 'Aktif' : 'Draf'"></span>
+                                </div>
                             </td>
                             <td class="text-right">
                                 <div class="inline-flex items-center gap-1.5">
@@ -179,13 +234,7 @@
                     @empty
                         <tr>
                             <td colspan="6" class="text-center py-12 text-slate-400">
-                                <div class="max-w-xs mx-auto text-center space-y-2">
-                                    <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
-                                    </div>
-                                    <p class="text-sm font-semibold text-slate-700">Belum Ada Pengumuman</p>
-                                    <p class="text-xs text-slate-500">Tidak ada data pengumuman yang sesuai dengan kriteria penyaringan yang Anda pilih.</p>
-                                </div>
+                                Belum ada pengumuman yang diterbitkan saat ini.
                             </td>
                         </tr>
                     @endforelse
@@ -194,7 +243,6 @@
         </div>
     </div>
 
-    {{-- Pagination --}}
     @if($pengumumans->hasPages())
         <div class="mt-4">
             {{ $pengumumans->links() }}

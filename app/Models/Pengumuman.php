@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Activitylog\LogOptions;
@@ -27,16 +28,27 @@ class Pengumuman extends Model
         'user_id',
         'judul',
         'konten',
+        'gambar',
+        'dokumen',
+        'dokumen_nama',
         'target',
         'kelas_id',
         'is_aktif',
+        'kirim_email',
         'published_at',
+    ];
+
+    protected $appends = [
+        'gambar_url',
+        'dokumen_url',
+        'published_at_formatted',
     ];
 
     protected function casts(): array
     {
         return [
             'is_aktif' => 'boolean',
+            'kirim_email' => 'boolean',
             'published_at' => 'datetime',
         ];
     }
@@ -71,6 +83,22 @@ class Pengumuman extends Model
                 }
             }
         });
+    }
+
+    // Accessors
+    public function getGambarUrlAttribute(): ?string
+    {
+        return $this->gambar ? asset('storage/' . $this->gambar) : null;
+    }
+
+    public function getDokumenUrlAttribute(): ?string
+    {
+        return $this->dokumen ? asset('storage/' . $this->dokumen) : null;
+    }
+
+    public function getPublishedAtFormattedAttribute(): ?string
+    {
+        return $this->published_at ? $this->published_at->locale('id')->isoFormat('D MMMM YYYY · HH:mm') . ' WIB' : null;
     }
 
     // Relationships

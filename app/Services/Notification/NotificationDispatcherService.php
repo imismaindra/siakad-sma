@@ -103,7 +103,11 @@ class NotificationDispatcherService
         $recipients = $query->where('id', '!=', $pengumuman->user_id)->get();
 
         if ($recipients->isNotEmpty()) {
-            Notification::send($recipients, new PengumumanBaruNotification($pengumuman));
+            try {
+                Notification::send($recipients, new PengumumanBaruNotification($pengumuman));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("Gagal mengirim notifikasi pengumuman: " . $e->getMessage());
+            }
         }
     }
 

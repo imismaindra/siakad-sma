@@ -6,13 +6,22 @@
 @section('breadcrumb-current', 'Edit Pengumuman')
 
 @section('admin-content')
-<div class="max-w-4xl mx-auto space-y-6 animate-fade-in-up" x-data="{ targetAudiens: '{{ old('target', $pengumuman->target) }}' }">
+<div class="max-w-4xl mx-auto space-y-6 animate-fade-in-up" x-data="{ 
+    targetAudiens: '{{ old('target', $pengumuman->target) }}',
+    imagePreview: '{{ $pengumuman->gambar_url }}',
+    previewImage(e) {
+        const file = e.target.files[0];
+        if (file) {
+            this.imagePreview = URL.createObjectURL(file);
+        }
+    }
+}">
 
     {{-- Header --}}
     <div class="flex items-center justify-between">
         <div>
             <h1 class="page-title font-display !text-2xl">Perbarui Pengumuman.</h1>
-            <p class="page-subtitle">Ubah materi, sasaran audiens, atau status publikasi pengumuman ini.</p>
+            <p class="page-subtitle">Ubah materi, berkas lampiran, sasaran audiens, atau status publikasi pengumuman ini.</p>
         </div>
         <a href="{{ route('admin.pengumuman.index') }}" class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
@@ -22,7 +31,7 @@
 
     {{-- Form Island --}}
     <div class="rounded-[2rem] bg-white p-6 sm:p-8 shadow-[0_24px_60px_-30px_rgba(15,37,87,0.3)] ring-1 ring-black/5">
-        <form action="{{ route('admin.pengumuman.update', $pengumuman) }}" method="POST" class="space-y-6">
+        <form action="{{ route('admin.pengumuman.update', $pengumuman) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
             @method('PUT')
 
@@ -78,22 +87,95 @@
                 @enderror
             </div>
 
-            {{-- Pengaturan Status & Tanggal --}}
-            <div class="rounded-xl border border-slate-100 bg-slate-50/50 p-4 grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-                <div class="flex items-center gap-3">
-                    <input type="checkbox" id="is_aktif" name="is_aktif" value="1" {{ old('is_aktif', $pengumuman->is_aktif) ? 'checked' : '' }}
-                        class="h-4 w-4 rounded border-slate-300 text-navy-900 focus:ring-gold-500" />
-                    <label for="is_aktif" class="text-xs font-medium text-slate-700 cursor-pointer select-none">
-                        <span class="font-semibold text-navy-900 block">Status Tayang Aktif</span>
-                        Pengumuman dapat dilihat oleh pengguna yang menjadi target sasaran.
+            {{-- Upload Media: Gambar & Dokumen --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {{-- Upload Gambar / Foto Banner --}}
+                <div class="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 space-y-3">
+                    <label class="block text-xs font-semibold text-navy-900 uppercase tracking-wider">
+                        Foto / Banner Pengumuman
                     </label>
+                    <input type="file" name="gambar" accept="image/jpeg,image/png,image/jpg,image/webp" @change="previewImage($event)"
+                        class="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-navy-800 file:text-white hover:file:bg-navy-900 cursor-pointer" />
+                    <p class="text-[11px] text-slate-400">Pilih gambar baru untuk mengganti gambar sebelumnya.</p>
+
+                    <template x-if="imagePreview">
+                        <div class="mt-2 space-y-2">
+                            <div class="rounded-xl overflow-hidden border border-slate-200 bg-white p-1">
+                                <img :src="imagePreview" alt="Pratinjau Gambar" class="w-full max-h-48 object-cover rounded-lg" />
+                            </div>
+                            @if($pengumuman->gambar)
+                                <label class="inline-flex items-center gap-1.5 text-xs text-rose-600 cursor-pointer hover:underline">
+                                    <input type="checkbox" name="hapus_gambar" value="1" class="rounded text-rose-600">
+                                    Hapus gambar yang saat ini tersimpan
+                                </label>
+                            @endif
+                        </div>
+                    </template>
+                    @error('gambar')
+                        <p class="text-xs text-rose-500 mt-1 font-medium">{{ $message }}</p>
+                    @enderror
                 </div>
 
-                <div>
-                    <label for="published_at" class="block text-[11px] font-semibold text-slate-600 mb-1">Tanggal & Jam Terbit</label>
-                    <input type="datetime-local" id="published_at" name="published_at"
-                        value="{{ old('published_at', $pengumuman->published_at ? $pengumuman->published_at->format('Y-m-d\TH:i') : '') }}"
-                        class="w-full rounded-lg border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-800 focus:border-gold-500 focus:ring-gold-500" />
+                {{-- Upload Dokumen Lampiran --}}
+                <div class="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 space-y-3">
+                    <label class="block text-xs font-semibold text-navy-900 uppercase tracking-wider">
+                        Lampiran Dokumen / Surat Edaran
+                    </label>
+                    <input type="file" name="dokumen" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip"
+                        class="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-navy-800 file:text-white hover:file:bg-navy-900 cursor-pointer" />
+                    <p class="text-[11px] text-slate-400">Pilih dokumen baru untuk memperbarui lampiran.</p>
+
+                    @if($pengumuman->dokumen)
+                        <div class="mt-2 rounded-xl border border-slate-200 bg-white p-3 space-y-2">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="font-medium text-navy-900 truncate flex items-center gap-1.5">
+                                    📎 {{ $pengumuman->dokumen_nama ?? 'Dokumen Terlampir' }}
+                                </span>
+                                <a href="{{ $pengumuman->dokumen_url }}" target="_blank" download class="text-[11px] font-semibold text-navy-800 hover:underline">
+                                    Unduh
+                                </a>
+                            </div>
+                            <label class="flex items-center gap-1.5 text-xs text-rose-600 cursor-pointer hover:underline pt-1 border-t border-slate-100">
+                                <input type="checkbox" name="hapus_dokumen" value="1" class="rounded text-rose-600">
+                                Hapus lampiran dokumen ini
+                            </label>
+                        </div>
+                    @endif
+                    @error('dokumen')
+                        <p class="text-xs text-rose-500 mt-1 font-medium">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+            {{-- Pengaturan Status & Notifikasi Email --}}
+            <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-5 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-3">
+                        <div class="flex items-start gap-3">
+                            <input type="checkbox" id="is_aktif" name="is_aktif" value="1" {{ old('is_aktif', $pengumuman->is_aktif) ? 'checked' : '' }}
+                                class="mt-1 h-4 w-4 rounded border-slate-300 text-navy-900 focus:ring-gold-500" />
+                            <label for="is_aktif" class="text-xs text-slate-700 cursor-pointer select-none">
+                                <span class="font-semibold text-navy-900 block">Status Tayang Aktif</span>
+                                Pengumuman dapat dilihat oleh pengguna yang menjadi target sasaran.
+                            </label>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <input type="checkbox" id="kirim_email" name="kirim_email" value="1" {{ old('kirim_email', $pengumuman->kirim_email) ? 'checked' : '' }}
+                                class="mt-1 h-4 w-4 rounded border-slate-300 text-navy-900 focus:ring-gold-500" />
+                            <label for="kirim_email" class="text-xs text-slate-700 cursor-pointer select-none">
+                                <span class="font-semibold text-navy-900 block">Kirimkan Notifikasi ke Email Penerima</span>
+                                Kirimkan ringkasan warta dan lampiran berkas langsung ke email pengguna jika diaktifkan.
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="published_at" class="block text-xs font-semibold text-navy-900 uppercase tracking-wider mb-1.5">Tanggal & Jam Terbit</label>
+                        <input type="datetime-local" id="published_at" name="published_at"
+                            value="{{ old('published_at', $pengumuman->published_at ? $pengumuman->published_at->format('Y-m-d\TH:i') : '') }}"
+                            class="w-full rounded-xl border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 focus:border-gold-500 focus:ring-gold-500" />
+                    </div>
                 </div>
             </div>
 

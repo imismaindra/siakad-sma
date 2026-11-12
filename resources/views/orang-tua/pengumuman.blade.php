@@ -27,6 +27,12 @@
     <div class="space-y-4">
         @forelse($pengumumans as $info)
             <div class="card p-6 border border-slate-200/80 shadow-xs rounded-2xl bg-white hover:border-sky-300 hover:shadow-md transition-all">
+                @if($info->gambar_url)
+                    <div class="rounded-xl overflow-hidden h-44 w-full mb-4 bg-slate-100">
+                        <img src="{{ $info->gambar_url }}" alt="{{ $info->judul }}" class="w-full h-full object-cover" />
+                    </div>
+                @endif
+
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                     <div class="flex items-center gap-2">
                         <span class="badge {{ $info->target === 'semua' ? 'badge-blue' : 'badge-gold' }} text-[10px] font-bold uppercase">
@@ -51,7 +57,14 @@
                     {{ strip_tags($info->konten) }}
                 </p>
 
-                <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+                <div class="flex items-center justify-between pt-3 border-t border-slate-100 flex-wrap gap-2">
+                    <div>
+                        @if($info->dokumen_url)
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-navy-50 text-navy-800 border border-navy-200">
+                                📎 Dokumen Terlampir
+                            </span>
+                        @endif
+                    </div>
                     <a href="{{ route('orang-tua.pengumuman.show', $info) }}" class="text-xs font-semibold text-sky-600 hover:text-sky-700 flex items-center gap-1">
                         Baca Selengkapnya
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>

@@ -6,12 +6,12 @@ use App\Models\Pengumuman;
 use App\Services\Notification\Channels\TelegramChannel;
 use App\Services\Notification\Channels\WhatsAppChannel;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-class PengumumanBaruNotification extends Notification implements ShouldQueue
+class PengumumanBaruNotification extends Notification
 {
     use Queueable;
 
@@ -34,10 +34,14 @@ class PengumumanBaruNotification extends Notification implements ShouldQueue
 
         $channels = ['database'];
 
-        if ($settings) {
-            if ($settings->channel_mail && ! empty($notifiable->email)) {
+        // Kirim email minimal jika pengumuman diset kirim_email dan user memiliki alamat email
+        if ($this->pengumuman->kirim_email && ! empty($notifiable->email)) {
+            if (! $settings || $settings->channel_mail) {
                 $channels[] = 'mail';
             }
+        }
+
+        if ($settings) {
             if ($settings->channel_telegram && ! empty($notifiable->routeNotificationForTelegram())) {
                 $channels[] = TelegramChannel::class;
             }
@@ -81,14 +85,23 @@ class PengumumanBaruNotification extends Notification implements ShouldQueue
             default => url('/'),
         };
 
-        return (new MailMessage)
+        $mail = (new MailMessage)
             ->subject("[SIAKAD SMA] Pengumuman Baru: {$this->pengumuman->judul}")
             ->greeting("Halo, {$notifiable->name}")
             ->line("Terdapat pengumuman resmi terbaru dari sekolah:")
             ->line("**{$this->pengumuman->judul}**")
-            ->line(Str::limit(strip_tags($this->pengumuman->konten), 250))
-            ->action('Baca Selengkapnya', $url)
-            ->salutation("Salam Hangat,\nSIAKAD SMA");
+            ->line(Str::limit(strip_tags($this->pengumuman->konten), 300))
+            ->action('Baca Selengkapnya di SIAKAD', $url)
+            ->salutation("Salam Hangat,\nTim SIAKAD SMA");
+
+        // Lampirkan dokumen ke email jika ada
+        if ($this->pengumuman->dokumen && Storage::disk('public')->exists($this->pengumuman->dokumen)) {
+            $mail->attach(Storage::disk('public')->path($this->pengumuman->dokumen), [
+                'as' => $this->pengumuman->dokumen_nama ?? basename($this->pengumuman->dokumen),
+            ]);
+        }
+
+        return $mail;
     }
 
     public function toTelegram(object $notifiable): string

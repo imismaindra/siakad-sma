@@ -8,6 +8,7 @@ use App\Models\Pengumuman;
 use App\Services\Notification\NotificationDispatcherService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PengumumanController extends Controller
 {
@@ -69,19 +70,40 @@ class PengumumanController extends Controller
             'target' => ['required', 'in:semua,guru,siswa,kelas,orang_tua'],
             'kelas_id' => ['nullable', 'required_if:target,kelas', 'exists:kelas,id'],
             'is_aktif' => ['boolean'],
+            'kirim_email' => ['boolean'],
             'published_at' => ['nullable', 'date'],
+            'gambar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,gif', 'max:5120'],
+            'dokumen' => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip', 'max:10240'],
         ]);
 
         $isAktif = $request->boolean('is_aktif', true);
+        $kirimEmail = $request->boolean('kirim_email', true);
         $publishedAt = $validated['published_at'] ?? ($isAktif ? now() : null);
+
+        $gambarPath = null;
+        if ($request->hasFile('gambar')) {
+            $gambarPath = $request->file('gambar')->store('pengumuman_gambar', 'public');
+        }
+
+        $dokumenPath = null;
+        $dokumenNama = null;
+        if ($request->hasFile('dokumen')) {
+            $file = $request->file('dokumen');
+            $dokumenNama = $file->getClientOriginalName();
+            $dokumenPath = $file->store('pengumuman_dokumen', 'public');
+        }
 
         $pengumuman = Pengumuman::create([
             'user_id' => Auth::id(),
             'judul' => $validated['judul'],
             'konten' => $validated['konten'],
+            'gambar' => $gambarPath,
+            'dokumen' => $dokumenPath,
+            'dokumen_nama' => $dokumenNama,
             'target' => $validated['target'],
             'kelas_id' => $validated['target'] === 'kelas' ? $validated['kelas_id'] : null,
             'is_aktif' => $isAktif,
+            'kirim_email' => $kirimEmail,
             'published_at' => $publishedAt,
         ]);
 
@@ -115,19 +137,61 @@ class PengumumanController extends Controller
             'target' => ['required', 'in:semua,guru,siswa,kelas,orang_tua'],
             'kelas_id' => ['nullable', 'required_if:target,kelas', 'exists:kelas,id'],
             'is_aktif' => ['boolean'],
+            'kirim_email' => ['boolean'],
             'published_at' => ['nullable', 'date'],
+            'gambar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,gif', 'max:5120'],
+            'dokumen' => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip', 'max:10240'],
+            'hapus_gambar' => ['boolean'],
+            'hapus_dokumen' => ['boolean'],
         ]);
+
+        $gambarPath = $pengumuman->gambar;
+        if ($request->boolean('hapus_gambar')) {
+            if ($gambarPath && Storage::disk('public')->exists($gambarPath)) {
+                Storage::disk('public')->delete($gambarPath);
+            }
+            $gambarPath = null;
+        }
+        if ($request->hasFile('gambar')) {
+            if ($pengumuman->gambar && Storage::disk('public')->exists($pengumuman->gambar)) {
+                Storage::disk('public')->delete($pengumuman->gambar);
+            }
+            $gambarPath = $request->file('gambar')->store('pengumuman_gambar', 'public');
+        }
+
+        $dokumenPath = $pengumuman->dokumen;
+        $dokumenNama = $pengumuman->dokumen_nama;
+        if ($request->boolean('hapus_dokumen')) {
+            if ($dokumenPath && Storage::disk('public')->exists($dokumenPath)) {
+                Storage::disk('public')->delete($dokumenPath);
+            }
+            $dokumenPath = null;
+            $dokumenNama = null;
+        }
+        if ($request->hasFile('dokumen')) {
+            if ($pengumuman->dokumen && Storage::disk('public')->exists($pengumuman->dokumen)) {
+                Storage::disk('public')->delete($pengumuman->dokumen);
+            }
+            $file = $request->file('dokumen');
+            $dokumenNama = $file->getClientOriginalName();
+            $dokumenPath = $file->store('pengumuman_dokumen', 'public');
+        }
 
         $wasAktif = $pengumuman->is_aktif;
         $isAktif = $request->boolean('is_aktif', true);
+        $kirimEmail = $request->boolean('kirim_email', true);
         $publishedAt = $validated['published_at'] ?? ($isAktif ? ($pengumuman->published_at ?? now()) : null);
 
         $pengumuman->update([
             'judul' => $validated['judul'],
             'konten' => $validated['konten'],
+            'gambar' => $gambarPath,
+            'dokumen' => $dokumenPath,
+            'dokumen_nama' => $dokumenNama,
             'target' => $validated['target'],
             'kelas_id' => $validated['target'] === 'kelas' ? $validated['kelas_id'] : null,
             'is_aktif' => $isAktif,
+            'kirim_email' => $kirimEmail,
             'published_at' => $publishedAt,
         ]);
 
@@ -146,6 +210,14 @@ class PengumumanController extends Controller
     public function destroy(Pengumuman $pengumuman)
     {
         $judul = $pengumuman->judul;
+
+        if ($pengumuman->gambar && Storage::disk('public')->exists($pengumuman->gambar)) {
+            Storage::disk('public')->delete($pengumuman->gambar);
+        }
+        if ($pengumuman->dokumen && Storage::disk('public')->exists($pengumuman->dokumen)) {
+            Storage::disk('public')->delete($pengumuman->dokumen);
+        }
+
         $pengumuman->delete();
 
         return redirect()->route('admin.pengumuman.index')
@@ -155,7 +227,7 @@ class PengumumanController extends Controller
     /**
      * Toggle status aktif.
      */
-    public function toggleAktif(Pengumuman $pengumuman)
+    public function toggleAktif(Request $request, Pengumuman $pengumuman)
     {
         $newStatus = ! $pengumuman->is_aktif;
         $publishedAt = $newStatus ? ($pengumuman->published_at ?? now()) : $pengumuman->published_at;
@@ -165,10 +237,18 @@ class PengumumanController extends Controller
             'published_at' => $publishedAt,
         ]);
 
-        $msg = $newStatus ? "Pengumuman diaktifkan." : "Pengumuman dinonaktifkan.";
+        $msg = $newStatus ? "Pengumuman '{$pengumuman->judul}' berhasil diaktifkan." : "Pengumuman '{$pengumuman->judul}' dinonaktifkan.";
 
         if ($newStatus) {
             app(NotificationDispatcherService::class)->dispatchPengumuman($pengumuman);
+        }
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'is_aktif' => $newStatus,
+                'message' => $msg,
+            ]);
         }
 
         return back()->with('success', $msg);
