@@ -31,8 +31,8 @@
         <div class="lg:col-span-4 rounded-[2rem] bg-navy-800 p-2 ring-1 ring-black/5 shadow-[0_32px_80px_-40px_rgba(15,37,87,0.6)]">
             <div class="rounded-[calc(2rem-0.5rem)] p-7 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]">
                 <div class="flex items-center gap-4">
-                    @if($guru->foto)
-                        <img src="{{ asset('storage/' . $guru->foto) }}" alt="Foto {{ $guru->nama_lengkap }}"
+                    @if($guru->foto_url)
+                        <img src="{{ $guru->foto_url }}" alt="Foto {{ $guru->nama_lengkap }}"
                             class="w-20 h-20 rounded-full object-cover ring-2 ring-white/20 shrink-0">
                     @else
                         <div class="w-20 h-20 rounded-full ring-2 ring-gold-500/50 bg-gold-500 text-navy-900 text-2xl font-extrabold font-display flex items-center justify-center shrink-0">

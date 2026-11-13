@@ -24,6 +24,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Paksa skema HTTPS pada production atau saat domain menggunakan HTTPS (mencegah Mixed Content pada image/asset)
+        if ($this->app->environment('production') || str_starts_with(config('app.url'), 'https://')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         Paginator::defaultView('vendor.pagination.tailwind');
 
         // F4: Daftarkan Policy otoritas pemantauan data anak oleh Orang Tua

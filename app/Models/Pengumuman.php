@@ -88,12 +88,38 @@ class Pengumuman extends Model
     // Accessors
     public function getGambarUrlAttribute(): ?string
     {
-        return $this->gambar ? asset('storage/' . $this->gambar) : null;
+        if (! $this->gambar) {
+            return null;
+        }
+
+        if (str_starts_with($this->gambar, 'http://') || str_starts_with($this->gambar, 'https://')) {
+            return $this->gambar;
+        }
+
+        $cleanPath = ltrim($this->gambar, '/');
+        if (str_starts_with($cleanPath, 'storage/')) {
+            return asset($cleanPath);
+        }
+
+        return asset('storage/' . $cleanPath);
     }
 
     public function getDokumenUrlAttribute(): ?string
     {
-        return $this->dokumen ? asset('storage/' . $this->dokumen) : null;
+        if (! $this->dokumen) {
+            return null;
+        }
+
+        if (str_starts_with($this->dokumen, 'http://') || str_starts_with($this->dokumen, 'https://')) {
+            return $this->dokumen;
+        }
+
+        $cleanPath = ltrim($this->dokumen, '/');
+        if (str_starts_with($cleanPath, 'storage/')) {
+            return asset($cleanPath);
+        }
+
+        return asset('storage/' . $cleanPath);
     }
 
     public function getPublishedAtFormattedAttribute(): ?string

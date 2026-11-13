@@ -176,19 +176,28 @@ class User extends Authenticatable
 
     public function getFotoUrl(): ?string
     {
-        if ($this->foto) {
-            return asset('storage/' . $this->foto);
+        $path = $this->foto;
+        if (! $path && $this->isGuru() && $this->guru) {
+            $path = $this->guru->foto;
         }
-        
-        if ($this->isGuru() && $this->guru && $this->guru->foto) {
-            return asset('storage/' . $this->guru->foto);
+        if (! $path && $this->isSiswa() && $this->siswa) {
+            $path = $this->siswa->foto;
         }
-        
-        if ($this->isSiswa() && $this->siswa && $this->siswa->foto) {
-            return asset('storage/' . $this->siswa->foto);
+
+        if (! $path) {
+            return null;
         }
-        
-        return null;
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        $cleanPath = ltrim($path, '/');
+        if (str_starts_with($cleanPath, 'storage/')) {
+            return asset($cleanPath);
+        }
+
+        return asset('storage/' . $cleanPath);
     }
 }
 

@@ -73,8 +73,8 @@
                     @forelse($gurus as $g)
                         <tr>
                             <td>
-                                @if($g->foto)
-                                    <img src="{{ asset('storage/' . $g->foto) }}" alt="Foto Guru" class="h-9 w-9 rounded-full object-cover" />
+                                @if($g->foto_url)
+                                    <img src="{{ $g->foto_url }}" alt="Foto Guru" class="h-9 w-9 rounded-full object-cover" />
                                 @else
                                     <div class="avatar-placeholder h-9 w-9 rounded-full text-xs">
                                         {{ strtoupper(substr($g->nama_lengkap, 0, 2)) }}

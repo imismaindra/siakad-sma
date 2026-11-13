@@ -24,6 +24,11 @@ class ImageHelper
         int $maxHeight = 300,
         int $quality = 80
     ): ?string {
+        // Fallback jika ekstensi GD atau WebP belum terpasang di server production
+        if (!extension_loaded('gd') || !function_exists('imagewebp')) {
+            return $file->store($directory, 'public');
+        }
+
         // Get temporary path of the uploaded file
         $tempPath = $file->getRealPath();
         
@@ -107,6 +112,9 @@ class ImageHelper
         
         // Save as WebP
         $success = imagewebp($destinationImage, $outputPath, $quality);
+        if ($success) {
+            @chmod($outputPath, 0644);
+        }
         
         // Free memory
         imagedestroy($sourceImage);

@@ -99,8 +99,8 @@
                                 <input type="checkbox" value="{{ $s->id }}" class="siswa-checkbox h-4 w-4 rounded border-slate-300 text-gold-600 focus:ring-gold-500 cursor-pointer" />
                             </td>
                             <td>
-                                @if($s->foto)
-                                    <img src="{{ asset('storage/' . $s->foto) }}" alt="Foto Siswa" class="h-9 w-9 rounded-full object-cover" />
+                                @if($s->foto_url)
+                                    <img src="{{ $s->foto_url }}" alt="Foto Siswa" class="h-9 w-9 rounded-full object-cover" />
                                 @else
                                     <div class="avatar-placeholder h-9 w-9 rounded-full text-xs">
                                         {{ strtoupper(substr($s->nama_lengkap, 0, 2)) }}

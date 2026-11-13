@@ -35,6 +35,7 @@ use App\Http\Controllers\Siswa\NilaiSiswaController;
 use App\Http\Controllers\Siswa\PengumumanSiswaController;
 use App\Http\Controllers\KalenderAkademikSharedController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\StorageFileController;
 use Illuminate\Support\Facades\Route;
 
 // ============================================================
@@ -308,4 +309,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifikasi/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::delete('/notifikasi/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 });
+
+// ============================================================
+// Fallback Layanan File Publik (Production Image & File Delivery)
+// ============================================================
+Route::get('/storage/{path}', [StorageFileController::class, 'show'])
+    ->where('path', '.*')
+    ->name('storage.file');
+
 

@@ -205,7 +205,20 @@ class KalenderAkademik extends Model
 
     public function getDokumenUrlAttribute(): ?string
     {
-        return $this->dokumen ? asset('storage/' . $this->dokumen) : null;
+        if (! $this->dokumen) {
+            return null;
+        }
+
+        if (str_starts_with($this->dokumen, 'http://') || str_starts_with($this->dokumen, 'https://')) {
+            return $this->dokumen;
+        }
+
+        $cleanPath = ltrim($this->dokumen, '/');
+        if (str_starts_with($cleanPath, 'storage/')) {
+            return asset($cleanPath);
+        }
+
+        return asset('storage/' . $cleanPath);
     }
 
     // Relationships

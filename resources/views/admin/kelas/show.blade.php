@@ -103,8 +103,8 @@
                                     <tr>
                                         <td>
                                             <div class="flex items-center gap-3">
-                                                @if($siswa->foto)
-                                                    <img src="{{ asset('storage/' . $siswa->foto) }}" alt="Foto {{ $siswa->nama_lengkap }}" class="w-9 h-9 rounded-full object-cover shrink-0">
+                                                @if($siswa->foto_url)
+                                                    <img src="{{ $siswa->foto_url }}" alt="Foto {{ $siswa->nama_lengkap }}" class="w-9 h-9 rounded-full object-cover shrink-0">
                                                 @else
                                                     <div class="avatar-placeholder w-9 h-9 text-[10px] shrink-0">
                                                         {{ strtoupper(substr($siswa->nama_lengkap, 0, 2)) }}

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Kelas;
 use App\Models\Pengumuman;
@@ -82,7 +83,7 @@ class PengumumanController extends Controller
 
         $gambarPath = null;
         if ($request->hasFile('gambar')) {
-            $gambarPath = $request->file('gambar')->store('pengumuman_gambar', 'public');
+            $gambarPath = ImageHelper::uploadAndOptimize($request->file('gambar'), 'pengumuman_gambar', 1600, 1200, 85);
         }
 
         $dokumenPath = null;
@@ -156,7 +157,7 @@ class PengumumanController extends Controller
             if ($pengumuman->gambar && Storage::disk('public')->exists($pengumuman->gambar)) {
                 Storage::disk('public')->delete($pengumuman->gambar);
             }
-            $gambarPath = $request->file('gambar')->store('pengumuman_gambar', 'public');
+            $gambarPath = ImageHelper::uploadAndOptimize($request->file('gambar'), 'pengumuman_gambar', 1600, 1200, 85);
         }
 
         $dokumenPath = $pengumuman->dokumen;
